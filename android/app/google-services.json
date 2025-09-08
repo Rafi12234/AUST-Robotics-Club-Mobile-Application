@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "618860756313",
+    "project_id": "aust-robotics-club-app",
+    "storage_bucket": "aust-robotics-club-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618860756313:android:3e4f006a50b88f07fb6048",
+        "android_client_info": {
+          "package_name": "com.example.aust_robotics_club_mobile_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAb8aBezsjGllIdLII4BvvUD5vcNsQ2iOY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
