@@ -8,6 +8,13 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // ← Firestore
 const kGreenDark = Color(0xFF0B6B3A);
 const kGreenMain = Color(0xFF16A34A);
 const kOnPrimary = Colors.white;
+class EventItem {
+  final int number;
+  final String imageUrl;
+  final String title;
+
+  EventItem({required this.number, required this.imageUrl, required this.title});
+}
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -114,7 +121,6 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
 /// ========================== BODY CONTENT ===================================
 /// Welcome card + Firestore-powered, infinite carousel
 class HomeBody extends StatelessWidget {
@@ -139,6 +145,13 @@ class HomeBody extends StatelessWidget {
         _QuickActionsRow(),
         SizedBox(height: 16),
         _EducationalProgramsSection(),
+        const SizedBox(height: 16),
+        const _MentorshipTrainingSection(),   // 👈 add this line
+        const SizedBox(height: 16),
+        const VoiceOfAUSTRC(),
+
+
+
       ],
     );
   }
@@ -190,6 +203,12 @@ class _WelcomeCard extends StatelessWidget {
     );
   }
 }
+class _EventItem {
+  final int number;
+  final String imageUrl;
+  final String title;
+  const _EventItem({required this.number, required this.imageUrl, required this.title});
+}
 
 /// Firestore listener → dynamic list of poster URLs → infinite auto-sliding carousel
 class _RecentEventsCarousel extends StatefulWidget {
@@ -199,7 +218,8 @@ class _RecentEventsCarousel extends StatefulWidget {
   State<_RecentEventsCarousel> createState() => _RecentEventsCarouselState();
 }
 
-class _RecentEventsCarouselState extends State<_RecentEventsCarousel> {
+class _RecentEventsCarouselState extends State<_RecentEventsCarousel>
+    with AutomaticKeepAliveClientMixin {
   final _docRef =
   FirebaseFirestore.instance.collection('All_Data').doc('Recent_Events');
 
@@ -208,7 +228,8 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel> {
   static const _autoSlideEvery = Duration(seconds: 3);
   static const _animDuration = Duration(milliseconds: 400);
 
-  // We use a high initial page for a seamless infinite illusion.
+  int? _lastCount;
+  bool _didInitialJump = false;
   int _initialPage(int itemCount) => itemCount * 1000;
 
   @override
@@ -224,50 +245,60 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel> {
     super.dispose();
   }
 
-  void _startAutoSlide(int itemCount) {
-    _timer?.cancel();
-    if (itemCount <= 1) return;
+  @override
+  bool get wantKeepAlive => true;
 
-    // Ensure we start from a stable far page to allow infinite feel.
+  void _ensureStartPosition(int itemCount) {
+    if (_didInitialJump || itemCount <= 0) return;
     final start = _initialPage(itemCount);
     if (_controller.hasClients) {
       _controller.jumpToPage(start);
+      _didInitialJump = true;
     } else {
-      // Delay to the next frame if controller isn't attached yet.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _controller.hasClients) {
+        if (!mounted) return;
+        if (_controller.hasClients) {
           _controller.jumpToPage(start);
+          _didInitialJump = true;
         }
       });
     }
+  }
 
+  void _ensureAutoTimer(int itemCount) {
+    if (_timer != null || itemCount <= 1) return;
     _timer = Timer.periodic(_autoSlideEvery, (_) {
       if (!mounted || !_controller.hasClients) return;
       _controller.nextPage(duration: _animDuration, curve: Curves.easeOut);
     });
   }
 
-  /// Extracts all fields that look like "Event_<number>" and sorts by number DESC
-  List<String> _extractSortedUrls(Map<String, dynamic>? data) {
+  List<EventItem> _extractSortedEvents(Map<String, dynamic>? data) {
     if (data == null) return const [];
     final reg = RegExp(r'^Event_(\d+)$');
-    final entries = <MapEntry<int, String>>[];
+    final items = <EventItem>[];
 
     data.forEach((key, value) {
       final m = reg.firstMatch(key);
       if (m != null && value is String && value.trim().isNotEmpty) {
         final n = int.tryParse(m.group(1) ?? '');
-        if (n != null) entries.add(MapEntry(n, value.trim()));
+        if (n != null) {
+          final url = value.trim();
+          final titleKey = 'Event_${n}_Name';
+          final title = (data[titleKey] as String?)?.trim() ?? 'Event $n';
+          items.add(EventItem(number: n, imageUrl: url, title: title));
+        }
       }
     });
 
-    // Most recent first (e.g., Event_6 before Event_5)
-    entries.sort((a, b) => b.key.compareTo(a.key));
-    return entries.map((e) => e.value).toList(growable: false);
+    items.sort((a, b) => b.number.compareTo(a.number));
+    return items;
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: _docRef.snapshots(),
       builder: (context, snap) {
@@ -275,27 +306,37 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel> {
           return _errorBox('Failed to load recent events.\n${snap.error}');
         }
         if (snap.connectionState == ConnectionState.waiting) {
-          return _skeleton(height: 180);
+          return _skeleton(height: 200);
         }
 
-        final urls = _extractSortedUrls(snap.data?.data());
-        if (urls.isEmpty) {
+        final events = _extractSortedEvents(snap.data?.data());
+        if (events.isEmpty) {
+          _timer?.cancel();
+          _timer = null;
+          _didInitialJump = false;
+          _lastCount = 0;
           return _emptyBox(
-              'No recent event posters yet.\nAdd Event_1, Event_2, … to Firestore.');
+              'No recent event posters yet.\nAdd Event_1, Event_1_Name … to Firestore.');
         }
 
-        // Kick off/refresh auto-slide whenever list changes
-        _startAutoSlide(urls.length);
+        if (_lastCount != events.length) {
+          _lastCount = events.length;
+          _didInitialJump = false;
+          _timer?.cancel();
+          _timer = null;
+        }
 
-        // Reverse = true makes the motion look left→right while we call nextPage().
+        _ensureStartPosition(events.length);
+        _ensureAutoTimer(events.length);
+
         return SizedBox(
-          height: 180,
+          height: 200,
           child: PageView.builder(
             controller: _controller,
-            // reverse: true, // movement appears left-to-right
+            allowImplicitScrolling: true,
             itemBuilder: (context, index) {
-              final url = urls[index % urls.length];
-              return _PosterCard(url: url);
+              final item = events[index % events.length];
+              return _PosterCard(item: item);
             },
           ),
         );
@@ -303,62 +344,54 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel> {
     );
   }
 
-  Widget _skeleton({double height = 180}) {
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0F3F1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      alignment: Alignment.center,
-      child: const SizedBox(
-        height: 20,
-        width: 20,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      ),
-    );
-  }
+  Widget _skeleton({double height = 200}) => Container(
+    height: height,
+    decoration: BoxDecoration(
+      color: const Color(0xFFF0F3F1),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    alignment: Alignment.center,
+    child: const SizedBox(
+      height: 20,
+      width: 20,
+      child: CircularProgressIndicator(strokeWidth: 2),
+    ),
+  );
 
-  Widget _emptyBox(String message) {
-    return Container(
-      height: 140,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Text(
-        message,
-        textAlign: TextAlign.center,
-        style: const TextStyle(color: Colors.black54),
-      ),
-    );
-  }
+  Widget _emptyBox(String message) => Container(
+    height: 160,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFFE2E8F0)),
+    ),
+    child: Text(
+      message,
+      textAlign: TextAlign.center,
+      style: const TextStyle(color: Colors.black54),
+    ),
+  );
 
-  Widget _errorBox(String message) {
-    return Container(
-      height: 140,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF1F2),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFFCDD2)),
-      ),
-      child: Text(
-        message,
-        textAlign: TextAlign.center,
-        style: const TextStyle(color: Color(0xFFB00020)),
-      ),
-    );
-  }
+  Widget _errorBox(String message) => Container(
+    height: 160,
+    alignment: Alignment.center,
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    decoration: BoxDecoration(
+      color: const Color(0xFFFFF1F2),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFFFFCDD2)),
+    ),
+    child: Text(
+      message,
+      textAlign: TextAlign.center,
+      style: const TextStyle(color: Color(0xFFB00020)),
+    ),
+  );
 }
-
-/// Single poster with rounded corners, shadow, network loading & error states
+/// Single poster with rounded corners, shadow, network loading & bottom title
 class _PosterCard extends StatelessWidget {
-  const _PosterCard({required this.url});
-
-  final String url;
+  const _PosterCard({required this.item});
+  final EventItem item;
 
   @override
   Widget build(BuildContext context) {
@@ -377,45 +410,79 @@ class _PosterCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Image.network(
-            url,
-            fit: BoxFit.cover,
-            // progress indicator
-            loadingBuilder: (context, child, progress) {
-              if (progress == null) return child;
-              final expected = progress.expectedTotalBytes;
-              final loaded = progress.cumulativeBytesLoaded;
-              return Container(
-                color: const Color(0xFFF5F5F5),
-                alignment: Alignment.center,
-                child: SizedBox(
-                  height: 22,
-                  width: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    value: expected != null ? loaded / expected : null,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Poster image
+              Image.network(
+                item.imageUrl,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return Container(
+                    color: const Color(0xFFF5F5F5),
+                    alignment: Alignment.center,
+                    child: const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: const Color(0xFFFDECEC),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Image error',
+                      style: TextStyle(color: Color(0xFFB00020)),
+                    ),
+                  );
+                },
+              ),
+
+              // Bottom gradient + title
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Container(
+                  width: double.infinity,
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.6),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                  child: Text(
+                    item.title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 4,
+                          color: Colors.black45,
+                          offset: Offset(1, 1),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.right,
                   ),
                 ),
-              );
-            },
-            // graceful error
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: const Color(0xFFFDECEC),
-                alignment: Alignment.center,
-                child: const Text(
-                  'Failed to load poster',
-                  style: TextStyle(color: Color(0xFFB00020)),
-                ),
-              );
-            },
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
-
 /// ======================= (unchanged) Typewriter text =======================
 class TypewriterText extends StatefulWidget {
   const TypewriterText({
@@ -526,49 +593,74 @@ class _QuickActionsRow extends StatelessWidget {
   const _QuickActionsRow();
 
   @override
+  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 80,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: const [
-          _QuickActionButton(
-            label: 'Governing Panel',
-            icon: Icons.groups_rounded,
-            primary: Color(0xFF0B6B3A),    // deep green
-            secondary: Color(0xFF16A34A),  // main green
-            accent: Color(0xFFD1FAE5),     // light mint
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Icon(Icons.flash_on_rounded, color: kGreenDark, size: 20),
+            SizedBox(width: 8),
+            Text(
+              'Quick Actions',
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0F3D2E),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Horizontal scrollable buttons
+        SizedBox(
+          height: 80,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            children: const [
+              _QuickActionButton(
+                label: 'Governing Panel',
+                icon: Icons.groups_rounded,
+                primary: Color(0xFF0B6B3A),
+                secondary: Color(0xFF16A34A),
+                accent: Color(0xFFD1FAE5),
+              ),
+              SizedBox(width: 16),
+              _QuickActionButton(
+                label: 'Research & Projects',
+                icon: Icons.biotech_rounded,
+                primary: Color(0xFF065F46),
+                secondary: Color(0xFF22C55E),
+                accent: Color(0xFFCCFBF1),
+              ),
+              SizedBox(width: 16),
+              _QuickActionButton(
+                label: 'Activities',
+                icon: Icons.event_available_rounded,
+                primary: Color(0xFF047857),
+                secondary: Color(0xFF10B981),
+                accent: Color(0xFFD1FAE5),
+              ),
+              SizedBox(width: 16),
+              _QuickActionButton(
+                label: 'Achievements',
+                icon: Icons.emoji_events_rounded,
+                primary: Color(0xFF4D7C0F),
+                secondary: Color(0xFF84CC16),
+                accent: Color(0xFFECFCCB),
+              ),
+            ],
           ),
-          SizedBox(width: 16),
-          _QuickActionButton(
-            label: 'Research & Projects',
-            icon: Icons.biotech_rounded,
-            primary: Color(0xFF065F46),    // emerald dark
-            secondary: Color(0xFF22C55E),  // emerald
-            accent: Color(0xFFCCFBF1),     // light cyan
-          ),
-          SizedBox(width: 16),
-          _QuickActionButton(
-            label: 'Activities',
-            icon: Icons.event_available_rounded,
-            primary: Color(0xFF047857),    // teal dark
-            secondary: Color(0xFF10B981),  // teal
-            accent: Color(0xFFD1FAE5),     // light mint
-          ),
-          SizedBox(width: 16),
-          _QuickActionButton(
-            label: 'Achievements',
-            icon: Icons.emoji_events_rounded,
-            primary: Color(0xFF4D7C0F),    // olive green
-            secondary: Color(0xFF84CC16),  // lime green
-            accent: Color(0xFFECFCCB),     // light lime
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
+
 }
 
 /// Professional gradient button with subtle shadows and refined styling
@@ -662,7 +754,7 @@ class _QuickActionButtonState extends State<_QuickActionButton>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(35),
+                borderRadius: BorderRadius.circular(40),
                 boxShadow: [
                   // Main shadow
                   BoxShadow(
@@ -681,14 +773,14 @@ class _QuickActionButtonState extends State<_QuickActionButton>
                 ],
                 border: Border.all(
                   color: Colors.white.withOpacity(0.2),
-                  width: 0.5,
+                  width: 1,
                 ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(2),
+                    padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -1074,4 +1166,520 @@ class _EduErrorBox extends StatelessWidget {
     );
   }
 }
+class _MentorProgramItem {
+  final int number;       // e.g., 3 for MentorShip_3
+  final String imageUrl;  // direct link
+  final String title;     // MentorShip_3_Name
+
+  _MentorProgramItem({
+    required this.number,
+    required this.imageUrl,
+    required this.title,
+  });
+
+  static List<_MentorProgramItem> fromFirestoreMap(Map<String, dynamic> data) {
+    // handle “MentorShip” or “Mentorship” variants (case-insensitive)
+    final reg = RegExp(r'^MentorShip_(\d+)$', caseSensitive: false);
+    final list = <_MentorProgramItem>[];
+
+    data.forEach((key, value) {
+      final m = reg.firstMatch(key);
+      if (m != null && value is String && value.trim().isNotEmpty) {
+        final n = int.tryParse(m.group(1)!);
+        if (n != null) {
+          final url = value.trim();
+          final nameKey = 'MentorShip_${n}_Name'; // keep same capitalization
+          final title = (data[nameKey] as String?)?.trim() ?? 'Mentorship $n';
+          list.add(_MentorProgramItem(number: n, imageUrl: url, title: title));
+        }
+      }
+    });
+
+    // newest first (higher number means more recent)
+    list.sort((a, b) => b.number.compareTo(a.number));
+    return list;
+  }
+}
+class _MentorshipTrainingSection extends StatelessWidget {
+  const _MentorshipTrainingSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final docRef = FirebaseFirestore.instance
+        .collection('All_Data')
+        .doc('Mentorship_Training');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            children: [
+              Icon(Icons.support_agent_rounded, color: kGreenDark),
+              SizedBox(width: 8),
+              Text(
+                'Mentorship & Training Programs',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F3D2E),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Live data
+        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: docRef.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const _MTErrorBox('Failed to load mentorship programs.');
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const _MTSkeletonList();
+            }
+
+            final data = snapshot.data?.data() ?? {};
+            final items = _MentorProgramItem.fromFirestoreMap(data);
+
+            if (items.isEmpty) {
+              return const _MTEmptyBox('No mentorship programs yet.');
+            }
+
+            // Zig-zag alternating wide cards (not a grid, not a carousel)
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return _MentorZigZagCard(item: item, index: index);
+              },
+            );
+          },
+        ),
+
+        const SizedBox(height: 12),
+
+        // Bottom action
+        Align(
+          alignment: Alignment.centerRight,
+          child: OutlinedButton.icon(
+            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+            label: const Text('See all Mentorship Programs'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: kGreenDark,
+              side: const BorderSide(color: kGreenMain, width: 1.2),
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              textStyle: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            onPressed: () {
+              // TODO: Navigate to mentorship list screen
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Open: All Mentorship Programs')),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+class _MentorZigZagCard extends StatelessWidget {
+  const _MentorZigZagCard({required this.item, required this.index});
+
+  final _MentorProgramItem item;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLeft = index.isEven; // alternate sides
+    final width = MediaQuery.of(context).size.width;
+
+    // Poster (image only — no overlay inside the picture)
+    final poster = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Image.network(
+            item.imageUrl,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return Container(
+                color: const Color(0xFFF5F5F5),
+                alignment: Alignment.center,
+                child: const SizedBox(
+                  height: 22, width: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              );
+            },
+            errorBuilder: (_, __, ___) => Container(
+              color: const Color(0xFFFDECEC),
+              alignment: Alignment.center,
+              child: const Text('Image error', style: TextStyle(color: Color(0xFFB00020))),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Staggered entrance
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        final dx = (1 - value) * (isLeft ? -18 : 18);
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(dx, (1 - value) * 10),
+            child: child,
+          ),
+        );
+      },
+      child: Align(
+        alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
+        child: SizedBox(
+          width: width * 0.82, // wide card (distinct from grid & carousel)
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              poster,
+              const SizedBox(height: 6),
+              // Title OUTSIDE the poster, bottom-right aligned
+              Row(
+                children: [
+                  const Spacer(),
+                  Flexible(
+                    child: Text(
+                      item.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        color: Color(0xFF0F3D2E),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12.5,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+class _MTSkeletonList extends StatelessWidget {
+  const _MTSkeletonList();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: List.generate(3, (i) {
+        final isLeft = i.isEven;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Align(
+            alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.82,
+              height: 160,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F3F1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+class _MTEmptyBox extends StatelessWidget {
+  const _MTEmptyBox(this.message);
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 120,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54)),
+    );
+  }
+}
+class _MTErrorBox extends StatelessWidget {
+  const _MTErrorBox(this.message);
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF1F2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFFCDD2)),
+      ),
+      child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFB00020))),
+    );
+  }
+}
+
+/// ================= VOICE OF AUSTRC =================
+
+class VoiceOfAUSTRC extends StatefulWidget {
+  const VoiceOfAUSTRC({super.key});
+
+  @override
+  State<VoiceOfAUSTRC> createState() => _VoiceOfAUSTRCState();
+}
+
+class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
+    with AutomaticKeepAliveClientMixin {
+  final _docRef =
+  FirebaseFirestore.instance.collection('All_Data').doc('Voice_of_AUSTRC');
+
+  late final PageController _controller;
+  Timer? _timer;
+
+  // Slide config
+  static const _autoSlideEvery = Duration(seconds: 3);
+  static const _animDuration = Duration(milliseconds: 500);
+
+  int _initialPageIndex = 5000; // large enough for "infinite" feel
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PageController(
+      viewportFraction: 0.9,
+      initialPage: _initialPageIndex,
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  void _startTimer(List<String> urls) {
+    _timer?.cancel();
+    if (urls.length <= 1) return;
+
+    _timer = Timer.periodic(_autoSlideEvery, (_) {
+      if (!mounted || !_controller.hasClients) return;
+      _controller.nextPage(
+        duration: _animDuration,
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  /// Extract fields like Voice_1, Voice_2 and sort by number ascending
+  List<String> _extractUrls(Map<String, dynamic>? data) {
+    if (data == null) return [];
+    final reg = RegExp(r'^Voice_(\d+)$');
+    final entries = <MapEntry<int, String>>[];
+
+    data.forEach((key, value) {
+      final m = reg.firstMatch(key);
+      if (m != null && value is String && value.trim().isNotEmpty) {
+        final n = int.tryParse(m.group(1)!);
+        if (n != null) entries.add(MapEntry(n, value.trim()));
+      }
+    });
+
+    entries.sort((a, b) => a.key.compareTo(b.key)); // Voice_1 → Voice_2 …
+    return entries.map((e) => e.value).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section header
+        Row(
+          children: const [
+            Icon(Icons.campaign_rounded, color: kGreenDark),
+            SizedBox(width: 8),
+            Text(
+              'Voice of AUSTRC',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0F3D2E),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: _docRef.snapshots(),
+          builder: (context, snap) {
+            if (snap.hasError) {
+              return _errorBox('Failed to load posters.\n${snap.error}');
+            }
+            if (snap.connectionState == ConnectionState.waiting) {
+              return _skeleton();
+            }
+
+            final urls = _extractUrls(snap.data?.data());
+            if (urls.isEmpty) {
+              return _emptyBox('No posters yet.\nAdd Voice_1, Voice_2 …');
+            }
+            _startTimer(urls);
+            return SizedBox(
+              height: 400,
+              width: 450,
+              child: PageView.builder(
+                controller: _controller,
+                allowImplicitScrolling: true,
+                itemBuilder: (context, index) {
+                  final url = urls[index % urls.length];
+                  return _VoicePosterCard(url: url);
+                },
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _skeleton() => Container(
+    height: 200,
+    decoration: BoxDecoration(
+      color: const Color(0xFFF0F3F1),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    alignment: Alignment.center,
+    child: const SizedBox(
+      height: 22,
+      width: 22,
+      child: CircularProgressIndicator(strokeWidth: 2),
+    ),
+  );
+
+  Widget _emptyBox(String message) => Container(
+    height: 150,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFFE2E8F0)),
+    ),
+    child: Text(
+      message,
+      textAlign: TextAlign.center,
+      style: const TextStyle(color: Colors.black54),
+    ),
+  );
+
+  Widget _errorBox(String message) => Container(
+    height: 150,
+    alignment: Alignment.center,
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: const Color(0xFFFFF1F2),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFFFFCDD2)),
+    ),
+    child: Text(
+      message,
+      textAlign: TextAlign.center,
+      style: const TextStyle(color: Color(0xFFB00020)),
+    ),
+  );
+}
+
+/// Single poster card with rounded corners and shadow
+class _VoicePosterCard extends StatelessWidget {
+  final String url;
+  const _VoicePosterCard({required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x22000000),
+              blurRadius: 8,
+              offset: Offset(0, 4),
+            )
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.network(
+            url,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return Container(
+                color: const Color(0xFFF5F5F5),
+                alignment: Alignment.center,
+                child: const SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) => Container(
+              color: const Color(0xFFFDECEC),
+              alignment: Alignment.center,
+              child: const Text(
+                'Image error',
+                style: TextStyle(color: Color(0xFFB00020)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
 
