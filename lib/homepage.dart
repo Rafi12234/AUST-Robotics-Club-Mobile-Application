@@ -107,7 +107,7 @@ class HomePage extends StatelessWidget {
       ),
       // ------------------------------------------------------------------------------
 
-      body: const SafeArea(
+      body: SafeArea(
         child: HomeBody(),
       ),
       backgroundColor: Colors.white,
@@ -121,16 +121,28 @@ class HomeBody extends StatelessWidget {
   const HomeBody({super.key});
 
   @override
+  @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      children: const [
-        _WelcomeCard(),
+      children: [
+        const _WelcomeCard(),
+        const SizedBox(height: 16),
+        const _RecentEventsCarousel(),
+        const SizedBox(height: 8),
+        // Right-aligned "Explore All Events" button
+        Align(
+          alignment: Alignment.centerRight,
+          child: _ExploreEventsButton(),
+        ),
         SizedBox(height: 16),
-        _RecentEventsCarousel(),
+        _QuickActionsRow(),
+        SizedBox(height: 16),
+        _EducationalProgramsSection(),
       ],
     );
   }
+
 }
 
 /// A friendly welcome container (green theme)
@@ -193,7 +205,7 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel> {
 
   late final PageController _controller;
   Timer? _timer;
-  static const _autoSlideEvery = Duration(seconds: 2);
+  static const _autoSlideEvery = Duration(seconds: 3);
   static const _animDuration = Duration(milliseconds: 400);
 
   // We use a high initial page for a seamless infinite illusion.
@@ -280,7 +292,7 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel> {
           height: 180,
           child: PageView.builder(
             controller: _controller,
-            reverse: true, // movement appears left-to-right
+            // reverse: true, // movement appears left-to-right
             itemBuilder: (context, index) {
               final url = urls[index % urls.length];
               return _PosterCard(url: url);
@@ -478,3 +490,588 @@ class _TypewriterTextState extends State<TypewriterText> {
     );
   }
 }
+
+class _ExploreEventsButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: kGreenDark,
+        side: const BorderSide(color: kGreenMain, width: 1.2),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        shape: const StadiumBorder(),
+        textStyle: const TextStyle(fontWeight: FontWeight.w700),
+      ),
+      onPressed: () {
+        // TODO: navigate to your events screen / route
+        // Navigator.pushNamed(context, '/events');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Navigate to: All Events')),
+        );
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Text('Explore All Events'),
+          SizedBox(width: 6),
+          Icon(Icons.arrow_forward_rounded, size: 18),
+        ],
+      ),
+    );
+  }
+}
+
+/// —— Horizontal, scrollable quick actions row
+class _QuickActionsRow extends StatelessWidget {
+  const _QuickActionsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 80,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: const [
+          _QuickActionButton(
+            label: 'Governing Panel',
+            icon: Icons.groups_rounded,
+            primary: Color(0xFF0B6B3A),    // deep green
+            secondary: Color(0xFF16A34A),  // main green
+            accent: Color(0xFFD1FAE5),     // light mint
+          ),
+          SizedBox(width: 16),
+          _QuickActionButton(
+            label: 'Research & Projects',
+            icon: Icons.biotech_rounded,
+            primary: Color(0xFF065F46),    // emerald dark
+            secondary: Color(0xFF22C55E),  // emerald
+            accent: Color(0xFFCCFBF1),     // light cyan
+          ),
+          SizedBox(width: 16),
+          _QuickActionButton(
+            label: 'Activities',
+            icon: Icons.event_available_rounded,
+            primary: Color(0xFF047857),    // teal dark
+            secondary: Color(0xFF10B981),  // teal
+            accent: Color(0xFFD1FAE5),     // light mint
+          ),
+          SizedBox(width: 16),
+          _QuickActionButton(
+            label: 'Achievements',
+            icon: Icons.emoji_events_rounded,
+            primary: Color(0xFF4D7C0F),    // olive green
+            secondary: Color(0xFF84CC16),  // lime green
+            accent: Color(0xFFECFCCB),     // light lime
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Professional gradient button with subtle shadows and refined styling
+class _QuickActionButton extends StatefulWidget {
+  const _QuickActionButton({
+    required this.label,
+    required this.icon,
+    required this.primary,
+    required this.secondary,
+    required this.accent,
+    this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color primary;
+  final Color secondary;
+  final Color accent;
+  final VoidCallback? onTap;
+
+  @override
+  State<_QuickActionButton> createState() => _QuickActionButtonState();
+}
+
+class _QuickActionButtonState extends State<_QuickActionButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    setState(() => _isPressed = true);
+    _animationController.forward();
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    setState(() => _isPressed = false);
+    _animationController.reverse();
+  }
+
+  void _onTapCancel() {
+    setState(() => _isPressed = false);
+    _animationController.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: GestureDetector(
+            onTapDown: _onTapDown,
+            onTapUp: _onTapUp,
+            onTapCancel: _onTapCancel,
+            onTap: widget.onTap ??
+                    () => ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Open: ${widget.label}')),
+                ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    widget.primary,
+                    widget.secondary,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(35),
+                boxShadow: [
+                  // Main shadow
+                  BoxShadow(
+                    color: widget.primary.withOpacity(0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                    spreadRadius: 0,
+                  ),
+                  // Subtle inner highlight
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.1),
+                    offset: const Offset(0, 2),
+                    blurRadius: 8,
+                    blurStyle: BlurStyle.inner, // inner blur
+                  ),
+                ],
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 0.5,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      widget.icon,
+                      size: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    widget.label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+/// ======================= Educational Programs ==========================
+class _EducationalProgramsSection extends StatelessWidget {
+  const _EducationalProgramsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final docRef = FirebaseFirestore.instance
+        .collection('All_Data')
+        .doc('Educational_Programs');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section header
+        Row(
+          children: const [
+            Icon(Icons.school_rounded, color: kGreenDark),
+            SizedBox(width: 8),
+            Text(
+              'Educational Programs',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0F3D2E),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: docRef.snapshots(),
+          builder: (context, snapshot) {
+            Widget body;
+
+            if (snapshot.hasError) {
+              body = _EduErrorBox('Failed to load programs.\n${snapshot.error}');
+            } else if (snapshot.connectionState == ConnectionState.waiting ||
+                !snapshot.hasData) {
+              body = const _EduGridSkeleton();
+            } else {
+              final data = snapshot.data?.data() ?? {};
+              final items = _ProgramItem.fromFirestoreMap(data);
+
+              if (items.isEmpty) {
+                body = const _EduEmptyBox(
+                  'No programs yet.\nAdd Program_1 and Program_1_Name in Firestore.',
+                );
+              } else {
+                body = GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: items.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 3 / 4, // poster look
+                  ),
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return _ProgramCard(item: item, index: index);
+                  },
+                );
+              }
+            }
+
+            // Add the CTA button at the bottom-right
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                body,
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                    label: const Text('See All Educational Programs'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: kGreenDark,
+                      side: const BorderSide(color: kGreenMain, width: 1.2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
+                      shape: const StadiumBorder(),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: () {
+                      // TODO: navigate to your full programs screen/route
+                      // Navigator.pushNamed(context, '/educational-programs');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Navigate to: All Educational Programs'),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+}
+
+/// Data holder for a program
+class _ProgramItem {
+  final int number;      // e.g., 6 for Program_6
+  final String imageUrl; // direct link (imgbb)
+  final String name;     // Program_6_Name
+
+  _ProgramItem({required this.number, required this.imageUrl, required this.name});
+
+  static List<_ProgramItem> fromFirestoreMap(Map<String, dynamic> data) {
+    final reg = RegExp(r'^Program_(\d+)$');
+    final list = <_ProgramItem>[];
+
+    data.forEach((key, value) {
+      final m = reg.firstMatch(key);
+      if (m != null && value is String && value.trim().isNotEmpty) {
+        final n = int.tryParse(m.group(1)!);
+        if (n != null) {
+          final url = value.trim();
+          final nameKey = 'Program_${n}_Name';
+          final name = (data[nameKey] as String?)?.trim() ?? 'Program $n';
+          list.add(_ProgramItem(number: n, imageUrl: url, name: name));
+        }
+      }
+    });
+
+    // Newest first (higher number)
+    list.sort((a, b) => b.number.compareTo(a.number));
+    return list;
+  }
+}
+
+/// Pretty, rounded poster card with fade-in + name below
+class _ProgramCard extends StatelessWidget {
+  const _ProgramCard({required this.item, required this.index});
+
+  final _ProgramItem item;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    // Smooth staggered fade-in without extra packages
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOut,
+      // small staggering based on index
+      // delay: Duration(milliseconds: 40 * (index % 10)),
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, (1 - value) * 16),
+            child: child,
+          ),
+        );
+      },
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            // TODO: open program details if you have a screen
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Open: ${item.name}')),
+            );
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Poster
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x22000000),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          item.imageUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return Container(
+                              color: const Color(0xFFF5F5F5),
+                              alignment: Alignment.center,
+                              child: const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: const Color(0xFFFDECEC),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                'Image error',
+                                style: TextStyle(color: Color(0xFFB00020)),
+                              ),
+                            );
+                          },
+                        ),
+                        // Subtle gradient top & bottom for premium feel
+                        const _PosterGradient(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Name under poster
+              Text(
+                item.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F3D2E),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Soft overlay so posters look richer (no text on image, just styling)
+class _PosterGradient extends StatelessWidget {
+  const _PosterGradient();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Column(
+        children: [
+          Container(
+            height: 26,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.black.withOpacity(0.12), Colors.transparent],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+          const Spacer(),
+          Container(
+            height: 26,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.transparent, Colors.black.withOpacity(0.08)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Skeleton/loading grid
+class _EduGridSkeleton extends StatelessWidget {
+  const _EduGridSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 4,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 3 / 4,
+      ),
+      itemBuilder: (_, __) {
+        return Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F3F1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Empty state
+class _EduEmptyBox extends StatelessWidget {
+  const _EduEmptyBox(this.message);
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 120,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: const TextStyle(color: Colors.black54),
+      ),
+    );
+  }
+}
+
+/// Error state
+class _EduErrorBox extends StatelessWidget {
+  const _EduErrorBox(this.message);
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF1F2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFFCDD2)),
+      ),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: const TextStyle(color: Color(0xFFB00020)),
+      ),
+    );
+  }
+}
+
