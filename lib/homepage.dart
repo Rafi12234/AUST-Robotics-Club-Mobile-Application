@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // ← Firestore
+import 'governing_panel_page.dart';
 
 /// AUST RC brand greens + white
 const kGreenDark = Color(0xFF0B6B3A);
@@ -622,32 +623,37 @@ class _QuickActionsRow extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: const [
+            children: [
               _QuickActionButton(
                 label: 'Governing Panel',
                 icon: Icons.groups_rounded,
-                primary: Color(0xFF0B6B3A),
-                secondary: Color(0xFF16A34A),
-                accent: Color(0xFFD1FAE5),
+                primary: const Color(0xFF0B6B3A),
+                secondary: const Color(0xFF16A34A),
+                accent: const Color(0xFFD1FAE5),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) =>  GoverningPanelPage()),
+                  );
+                },
               ),
-              SizedBox(width: 16),
-              _QuickActionButton(
+              const SizedBox(width: 16),
+              const _QuickActionButton(
                 label: 'Research & Projects',
                 icon: Icons.biotech_rounded,
                 primary: Color(0xFF065F46),
                 secondary: Color(0xFF22C55E),
                 accent: Color(0xFFCCFBF1),
               ),
-              SizedBox(width: 16),
-              _QuickActionButton(
+              const SizedBox(width: 16),
+              const _QuickActionButton(
                 label: 'Activities',
                 icon: Icons.event_available_rounded,
                 primary: Color(0xFF047857),
                 secondary: Color(0xFF10B981),
                 accent: Color(0xFFD1FAE5),
               ),
-              SizedBox(width: 16),
-              _QuickActionButton(
+              const SizedBox(width: 16),
+              const _QuickActionButton(
                 label: 'Achievements',
                 icon: Icons.emoji_events_rounded,
                 primary: Color(0xFF4D7C0F),
