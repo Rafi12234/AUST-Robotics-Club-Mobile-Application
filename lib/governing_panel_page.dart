@@ -503,33 +503,33 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                         horizontal: 16,
                         vertical: 12,
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: brandStart.withOpacity(0.3),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.arrow_back_rounded,
-                            color: brandStart,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Back',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: brandStart,
-                            ),
-                          ),
-                        ],
-                      ),
+                      // decoration: BoxDecoration(
+                      //   color: Colors.white,
+                      //   borderRadius: BorderRadius.circular(12),
+                      //   border: Border.all(
+                      //     color: brandStart.withOpacity(0.3),
+                      //     width: 1.5,
+                      //   ),
+                      // ),
+                      // child: Row(
+                      //   mainAxisSize: MainAxisSize.min,
+                      //   children: [
+                      //     const Icon(
+                      //       Icons.arrow_back_rounded,
+                      //       color: brandStart,
+                      //       size: 20,
+                      //     ),
+                      //     const SizedBox(width: 8),
+                      //     Text(
+                      //       'Back',
+                      //       style: TextStyle(
+                      //         fontSize: 14,
+                      //         fontWeight: FontWeight.w600,
+                      //         color: brandStart,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
                     ),
                   ),
                 ),
@@ -586,11 +586,11 @@ class _SemesterButtonState extends State<_SemesterButton> {
   Widget build(BuildContext context) {
     final gradients = [
       const [Color(0xFF0B6B3A), Color(0xFF16A34A)],
-      const [Color(0xFF0D47A1), Color(0xFF42A5F5)],
-      const [Color(0xFF4A148C), Color(0xFF9C27B0)],
-      const [Color(0xFFE65100), Color(0xFFFF9800)],
-      const [Color(0xFFB71C1C), Color(0xFFEF5350)],
-      const [Color(0xFF004D40), Color(0xFF26A69A)],
+      // const [Color(0xFF0D47A1), Color(0xFF42A5F5)],
+      // const [Color(0xFF4A148C), Color(0xFF9C27B0)],
+      // const [Color(0xFFE65100), Color(0xFFFF9800)],
+      // const [Color(0xFFB71C1C), Color(0xFFEF5350)],
+       const [Color(0xFF0BAB64), Color(0xFF3BB78F)],
     ];
     final colorPair = gradients[widget.index % gradients.length];
 

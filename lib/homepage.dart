@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // ← Firestore
 import 'governing_panel_page.dart';
+import 'ResearchProjectsPage.dart';
 
 /// AUST RC brand greens + white
 const kGreenDark = Color(0xFF0B6B3A);
@@ -637,12 +638,17 @@ class _QuickActionsRow extends StatelessWidget {
                 },
               ),
               const SizedBox(width: 16),
-              const _QuickActionButton(
+               _QuickActionButton(
                 label: 'Research & Projects',
                 icon: Icons.biotech_rounded,
                 primary: Color(0xFF065F46),
                 secondary: Color(0xFF22C55E),
                 accent: Color(0xFFCCFBF1),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) =>  ResearchProjectsPage()),
+                  );
+                },
               ),
               const SizedBox(width: 16),
               const _QuickActionButton(
