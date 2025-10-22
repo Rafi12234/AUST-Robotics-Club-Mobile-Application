@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // ← Firestore
 import 'governing_panel_page.dart';
 import 'ResearchProjectsPage.dart';
+import 'event_page.dart';
 
 /// AUST RC brand greens + white
 const kGreenDark = Color(0xFF0B6B3A);
@@ -572,12 +573,14 @@ class _ExploreEventsButton extends StatelessWidget {
         textStyle: const TextStyle(fontWeight: FontWeight.w700),
       ),
       onPressed: () {
-        // TODO: navigate to your events screen / route
-        // Navigator.pushNamed(context, '/events');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Navigate to: All Events')),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const EventsPage(),
+          ),
         );
       },
+
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: const [
