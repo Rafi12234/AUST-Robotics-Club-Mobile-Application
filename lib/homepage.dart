@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // ← Firestore
 import 'governing_panel_page.dart';
 import 'ResearchProjectsPage.dart';
 import 'event_page.dart';
+import 'achievement.dart';
 
 /// AUST RC brand greens + white
 const kGreenDark = Color(0xFF0B6B3A);
@@ -662,12 +663,17 @@ class _QuickActionsRow extends StatelessWidget {
                 accent: Color(0xFFD1FAE5),
               ),
               const SizedBox(width: 16),
-              const _QuickActionButton(
+               _QuickActionButton(
                 label: 'Achievements',
                 icon: Icons.emoji_events_rounded,
                 primary: Color(0xFF4D7C0F),
                 secondary: Color(0xFF84CC16),
                 accent: Color(0xFFECFCCB),
+                 onTap: () {
+                   Navigator.of(context).push(
+                     MaterialPageRoute(builder: (_) =>  AchievementPage()),
+                   );
+                 },
               ),
             ],
           ),
