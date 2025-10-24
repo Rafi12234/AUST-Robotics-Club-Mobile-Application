@@ -7,6 +7,7 @@ import 'governing_panel_page.dart';
 import 'ResearchProjectsPage.dart';
 import 'event_page.dart';
 import 'achievement.dart';
+import 'member_recruitment_page.dart';
 
 /// AUST RC brand greens + white
 const kGreenDark = Color(0xFF0B6B3A);
@@ -655,12 +656,17 @@ class _QuickActionsRow extends StatelessWidget {
                 },
               ),
               const SizedBox(width: 16),
-              const _QuickActionButton(
-                label: 'Activities',
+               _QuickActionButton(
+                label: 'New Member Recruitment',
                 icon: Icons.event_available_rounded,
                 primary: Color(0xFF047857),
                 secondary: Color(0xFF10B981),
                 accent: Color(0xFFD1FAE5),
+                 onTap: () {
+                   Navigator.of(context).push(
+                     MaterialPageRoute(builder: (_) =>  MemberRecruitmentPage()),
+                   );
+                 },
               ),
               const SizedBox(width: 16),
                _QuickActionButton(

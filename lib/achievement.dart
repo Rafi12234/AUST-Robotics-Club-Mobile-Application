@@ -53,77 +53,80 @@ class _AchievementPageState extends State<AchievementPage>
                 onPressed: () => Navigator.pop(context),
               ),
             ),
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: false,
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
-              title: Row(
-                children: [
-                  Text(
-                    'Achievements of',
+            flexibleSpace: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                // Calculate collapse ratio
+                final expandedHeight = 200.0;
+                final collapsedHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
+                final currentHeight = constraints.maxHeight;
+                final collapseRatio = ((expandedHeight - currentHeight) /
+                    (expandedHeight - collapsedHeight)).clamp(0.0, 1.0);
+
+                // Calculate left padding based on collapse ratio
+                final leftPadding = 20.0 + (40.0 * collapseRatio); // Starts at 20, goes to 60 when collapsed
+
+                return FlexibleSpaceBar(
+                  centerTitle: false,
+                  titlePadding: EdgeInsets.only(
+                    left: leftPadding,
+                    bottom: 16,
+                  ),
+                  title: Text(
+                    'Achievements of AUSTRC',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 22,
+                      fontSize: 28 - (5 * collapseRatio), // Shrinks from 28 to 16
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
-                      fontFamily: "font1"
+                      fontFamily: "font1",
                     ),
                   ),
-                  Text(
-                    ' AUSTRC',
-                    style: TextStyle(
-                        color: Color(0xffa7e8c2),
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                        fontFamily: "font1"
-                    ),
-                  ),
-                ],
-              ),
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF1B5E20),
-                          Color(0xFF2E7D32),
-                          Color(0xFF43A047),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Animated Pattern
-                  Positioned.fill(
-                    child: AnimatedBuilder(
-                      animation: _controller,
-                      builder: (context, child) {
-                        return CustomPaint(
-                          painter: AchievementPatternPainter(
-                            animation: _controller.value,
+                  background: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFF1B5E20),
+                              Color(0xFF2E7D32),
+                              Color(0xFF43A047),
+                            ],
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                      // Animated Pattern
+                      Positioned.fill(
+                        child: AnimatedBuilder(
+                          animation: _controller,
+                          builder: (context, child) {
+                            return CustomPaint(
+                              painter: AchievementPatternPainter(
+                                animation: _controller.value,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      // Subtitle
+                      // Positioned(
+                      //   left: 20,
+                      //   bottom: 50,
+                      //   child: Text(
+                      //     'Our Hall of Fame',
+                      //     style: TextStyle(
+                      //       color: Colors.white.withOpacity(0.9),
+                      //       fontSize: 14,
+                      //       fontWeight: FontWeight.w500,
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
                   ),
-                  // Subtitle
-                  // Positioned(
-                  //   left: 20,
-                  //   bottom: 50,
-                  //   child: Text(
-                  //     'Our Hall of Fame',
-                  //     style: TextStyle(
-                  //       color: Colors.white.withOpacity(0.9),
-                  //       fontSize: 14,
-                  //       fontWeight: FontWeight.w500,
-                  //     ),
-                  //   ),
-                  // ),
-                ],
-              ),
+                );
+              },
             ),
           ),
 
@@ -651,48 +654,48 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                                   builder: (context, value, child) {
                                     return Transform.scale(
                                       scale: value,
-                                      // child: Container(
-                                      //   padding: const EdgeInsets.symmetric(
-                                      //     horizontal: 14,
-                                      //     vertical: 8,
-                                      //   ),
-                                      //   decoration: BoxDecoration(
-                                      //     gradient: const LinearGradient(
-                                      //       colors: [
-                                      //         Color(0xFFFFD700),
-                                      //         Color(0xFFFFA500),
-                                      //       ],
-                                      //     ),
-                                      //     borderRadius: BorderRadius.circular(25),
-                                      //     boxShadow: [
-                                      //       BoxShadow(
-                                      //         color: const Color(0xFFFFD700)
-                                      //             .withOpacity(0.4),
-                                      //         blurRadius: 12,
-                                      //         offset: const Offset(0, 4),
-                                      //       ),
-                                      //     ],
-                                      //   ),
-                                      //   child: Row(
-                                      //     mainAxisSize: MainAxisSize.min,
-                                      //     children: const [
-                                      //       Icon(
-                                      //         Icons.emoji_events,
-                                      //         color: Colors.white,
-                                      //         size: 18,
-                                      //       ),
-                                      //       SizedBox(width: 6),
-                                      //       Text(
-                                      //         'Achievement Unlocked',
-                                      //         style: TextStyle(
-                                      //           color: Colors.white,
-                                      //           fontSize: 13,
-                                      //           fontWeight: FontWeight.bold,
-                                      //         ),
-                                      //       ),
-                                      //     ],
-                                      //   ),
-                                      // ),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              Color(0xFFFFD700),
+                                              Color(0xFFFFA500),
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.circular(25),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFFFFD700)
+                                                  .withOpacity(0.4),
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: const [
+                                            Icon(
+                                              Icons.emoji_events,
+                                              color: Colors.white,
+                                              size: 18,
+                                            ),
+                                            SizedBox(width: 6),
+                                            Text(
+                                              'Achievement Unlocked',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     );
                                   },
                                 ),
