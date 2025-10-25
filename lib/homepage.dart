@@ -8,6 +8,7 @@ import 'ResearchProjectsPage.dart';
 import 'event_page.dart';
 import 'achievement.dart';
 import 'member_recruitment_page.dart';
+import 'educational_mentorship_training_programs_page.dart';
 
 /// AUST RC brand greens + white
 const kGreenDark = Color(0xFF0B6B3A);
@@ -149,7 +150,7 @@ class HomeBody extends StatelessWidget {
         SizedBox(height: 16),
         _QuickActionsRow(),
         SizedBox(height: 16),
-        _EducationalProgramsSection(),
+        //_EducationalProgramsSection(),
         const SizedBox(height: 16),
         const _MentorshipTrainingSection(),   // 👈 add this line
         const SizedBox(height: 16),
@@ -838,111 +839,111 @@ class _QuickActionButtonState extends State<_QuickActionButton>
   }
 }
 /// ======================= Educational Programs ==========================
-class _EducationalProgramsSection extends StatelessWidget {
-  const _EducationalProgramsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    final docRef = FirebaseFirestore.instance
-        .collection('All_Data')
-        .doc('Educational_Programs');
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section header
-        Row(
-          children: const [
-            Icon(Icons.school_rounded, color: kGreenDark),
-            SizedBox(width: 8),
-            Text(
-              'Educational Programs',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F3D2E),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-
-        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          stream: docRef.snapshots(),
-          builder: (context, snapshot) {
-            Widget body;
-
-            if (snapshot.hasError) {
-              body = _EduErrorBox('Failed to load programs.\n${snapshot.error}');
-            } else if (snapshot.connectionState == ConnectionState.waiting ||
-                !snapshot.hasData) {
-              body = const _EduGridSkeleton();
-            } else {
-              final data = snapshot.data?.data() ?? {};
-              final items = _ProgramItem.fromFirestoreMap(data);
-
-              if (items.isEmpty) {
-                body = const _EduEmptyBox(
-                  'No programs yet.\nAdd Program_1 and Program_1_Name in Firestore.',
-                );
-              } else {
-                body = GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: items.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 3 / 4, // poster look
-                  ),
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    return _ProgramCard(item: item, index: index);
-                  },
-                );
-              }
-            }
-
-            // Add the CTA button at the bottom-right
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                body,
-                const SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                    label: const Text('See All Educational Programs'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: kGreenDark,
-                      side: const BorderSide(color: kGreenMain, width: 1.2),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      shape: const StadiumBorder(),
-                      textStyle: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    onPressed: () {
-                      // TODO: navigate to your full programs screen/route
-                      // Navigator.pushNamed(context, '/educational-programs');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Navigate to: All Educational Programs'),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-}
+// class _EducationalProgramsSection extends StatelessWidget {
+//   const _EducationalProgramsSection();
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final docRef = FirebaseFirestore.instance
+//         .collection('All_Data')
+//         .doc('Educational_Programs');
+//
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         // Section header
+//         Row(
+//           children: const [
+//             Icon(Icons.school_rounded, color: kGreenDark),
+//             SizedBox(width: 8),
+//             Text(
+//               'Educational Programs',
+//               style: TextStyle(
+//                 fontSize: 18,
+//                 fontWeight: FontWeight.w800,
+//                 color: Color(0xFF0F3D2E),
+//               ),
+//             ),
+//           ],
+//         ),
+//         const SizedBox(height: 10),
+//
+//         StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+//           stream: docRef.snapshots(),
+//           builder: (context, snapshot) {
+//             Widget body;
+//
+//             if (snapshot.hasError) {
+//               body = _EduErrorBox('Failed to load programs.\n${snapshot.error}');
+//             } else if (snapshot.connectionState == ConnectionState.waiting ||
+//                 !snapshot.hasData) {
+//               body = const _EduGridSkeleton();
+//             } else {
+//               final data = snapshot.data?.data() ?? {};
+//               final items = _ProgramItem.fromFirestoreMap(data);
+//
+//               if (items.isEmpty) {
+//                 body = const _EduEmptyBox(
+//                   'No programs yet.\nAdd Program_1 and Program_1_Name in Firestore.',
+//                 );
+//               } else {
+//                 body = GridView.builder(
+//                   shrinkWrap: true,
+//                   physics: const NeverScrollableScrollPhysics(),
+//                   itemCount: items.length,
+//                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+//                     crossAxisCount: 2,
+//                     mainAxisSpacing: 12,
+//                     crossAxisSpacing: 12,
+//                     childAspectRatio: 3 / 4, // poster look
+//                   ),
+//                   itemBuilder: (context, index) {
+//                     final item = items[index];
+//                     return _ProgramCard(item: item, index: index);
+//                   },
+//                 );
+//               }
+//             }
+//
+//             // Add the CTA button at the bottom-right
+//             return Column(
+//               crossAxisAlignment: CrossAxisAlignment.stretch,
+//               children: [
+//                 body,
+//                 const SizedBox(height: 10),
+//                 Align(
+//                   alignment: Alignment.centerRight,
+//                   child: OutlinedButton.icon(
+//                     icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+//                     label: const Text('See All Educational Programs'),
+//                     style: OutlinedButton.styleFrom(
+//                       foregroundColor: kGreenDark,
+//                       side: const BorderSide(color: kGreenMain, width: 1.2),
+//                       padding: const EdgeInsets.symmetric(
+//                           horizontal: 14, vertical: 8),
+//                       shape: const StadiumBorder(),
+//                       textStyle: const TextStyle(fontWeight: FontWeight.w700),
+//                     ),
+//                     onPressed: () {
+//                       // TODO: navigate to your full programs screen/route
+//                       // Navigator.pushNamed(context, '/educational-programs');
+//                       ScaffoldMessenger.of(context).showSnackBar(
+//                         const SnackBar(
+//                           content: Text('Navigate to: All Educational Programs'),
+//                         ),
+//                       );
+//                     },
+//                   ),
+//                 ),
+//               ],
+//             );
+//           },
+//         ),
+//       ],
+//     );
+//   }
+//
+// }
 
 /// Data holder for a program
 class _ProgramItem {
@@ -1247,7 +1248,7 @@ class _MentorshipTrainingSection extends StatelessWidget {
               Icon(Icons.support_agent_rounded, color: kGreenDark),
               SizedBox(width: 8),
               Text(
-                'Mentorship & Training Programs',
+                'Educational, Mentorship & Training Programs',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -1307,11 +1308,14 @@ class _MentorshipTrainingSection extends StatelessWidget {
               textStyle: const TextStyle(fontWeight: FontWeight.w700),
             ),
             onPressed: () {
-              // TODO: Navigate to mentorship list screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Open: All Mentorship Programs')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EducationalProgramsPage(),
+                ),
               );
             },
+
           ),
         ),
       ],
