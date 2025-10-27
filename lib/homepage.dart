@@ -9,6 +9,7 @@ import 'event_page.dart';
 import 'achievement.dart';
 import 'member_recruitment_page.dart';
 import 'educational_mentorship_training_programs_page.dart';
+import 'FancyFloatingButton.dart';
 
 /// AUST RC brand greens + white
 const kGreenDark = Color(0xFF0B6B3A);
@@ -31,11 +32,11 @@ class HomePage extends StatelessWidget {
       // Keep body behind status bar = false so AppBar is fully visible
       extendBodyBehindAppBar: false,
 
-      // -------------------- DO NOT TOUCH (your AppBar kept as-is) --------------------
+      // -------------------- AppBar (unchanged) --------------------
       appBar: AppBar(
         toolbarHeight: 72,
         automaticallyImplyLeading: false,
-        backgroundColor: Color(0xFF005022),
+        backgroundColor: const Color(0xFF005022),
         foregroundColor: kOnPrimary,
         elevation: 6,
         centerTitle: false,
@@ -120,12 +121,18 @@ class HomePage extends StatelessWidget {
       ),
       // ------------------------------------------------------------------------------
 
-      body: SafeArea(
+      body: const SafeArea(
         child: HomeBody(),
       ),
+
+      // 👇 Add the Floating Action Button here
+      floatingActionButton: const FancyFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
       backgroundColor: Colors.white,
     );
   }
+
 }
 /// ========================== BODY CONTENT ===================================
 /// Welcome card + Firestore-powered, infinite carousel
@@ -157,7 +164,6 @@ class HomeBody extends StatelessWidget {
         const VoiceOfAUSTRC(),
 
 
-
       ],
     );
   }
@@ -165,49 +171,310 @@ class HomeBody extends StatelessWidget {
 }
 
 /// A friendly welcome container (green theme)
-class _WelcomeCard extends StatelessWidget {
+// Modern Welcome Card with Smooth Animations
+class _WelcomeCard extends StatefulWidget {
   const _WelcomeCard();
 
   @override
+  State<_WelcomeCard> createState() => _WelcomeCardState();
+}
+
+class _WelcomeCardState extends State<_WelcomeCard> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFE8F5E9), Color(0xFFD7F0DF)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFB8E3C8)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            height: 42,
-            width: 42,
-            decoration: BoxDecoration(
-              color: kGreenMain.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(12),
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF0F3D2E),
+                Color(0xFF1A5C43),
+                Color(0xFF267556),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            child: const Icon(Icons.handshake_rounded, color: kGreenDark),
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              "Welcome to AUST Robotics Club!\nExplore our latest events and projects.",
-              style: TextStyle(
-                color: Color(0xFF1B4332),
-                fontSize: 14,
-                height: 1.25,
-                fontWeight: FontWeight.w600,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: kGreenDark.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+                spreadRadius: 2,
               ),
-            ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
+          child: Stack(
+            children: [
+              // Animated Background Pattern
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: CustomPaint(
+                    painter: _WelcomePatternPainter(),
+                  ),
+                ),
+              ),
+
+              // Content
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    // Animated Icon Container
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: 1),
+                      duration: const Duration(milliseconds: 800),
+                      curve: Curves.elasticOut,
+                      builder: (context, value, child) {
+                        return Transform.scale(
+                          scale: value,
+                          child: Transform.rotate(
+                            angle: (1 - value) * 0.5,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        height: 56,
+                        width: 56,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.2),
+                              blurRadius: 12,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.handshake_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+
+                    // Text Content with Slide Animation
+                    Expanded(
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: 1),
+                        duration: const Duration(milliseconds: 900),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, child) {
+                          return Opacity(
+                            opacity: value,
+                            child: Transform.translate(
+                              offset: Offset(30 * (1 - value), 0),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Welcome to AUST Robotics Club!",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                height: 1.3,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.3,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black26,
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 3,
+                                  height: 16,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF7FE5A9),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Expanded(
+                                  child: Text(
+                                    "Explore our latest events and projects",
+                                    style: TextStyle(
+                                      color: Color(0xFFB8E6D5),
+                                      fontSize: 13.5,
+                                      height: 1.3,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Animated Arrow Indicator
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: 1),
+                      duration: const Duration(milliseconds: 1400),
+                      curve: Curves.easeInOut,
+                      builder: (context, value, child) {
+                        return Opacity(
+                          opacity: value,
+                          child: Transform.translate(
+                            offset: Offset(8 * (1 - value), 0),
+                            child: child,
+                          ),
+                        );
+                      },
+
+                    ),
+                  ],
+                ),
+              ),
+
+              // Shimmer Effect Overlay
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: -1.0, end: 2.0),
+                    duration: const Duration(milliseconds: 2500),
+                    curve: Curves.easeInOut,
+                    builder: (context, shimmerValue, child) {
+                      return CustomPaint(
+                        painter: _WelcomeShimmerPainter(shimmerProgress: shimmerValue),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
+}
+
+// Custom Painter for Background Pattern
+class _WelcomePatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final circlePaint = Paint()
+      ..color = Colors.white.withOpacity(0.03)
+      ..style = PaintingStyle.fill;
+
+    // Draw circular patterns
+    for (var i = 0; i < 8; i++) {
+      final xPos = size.width * (0.2 + (i * 0.15));
+      final yPos = size.height * (i.isEven ? 0.3 : 0.7);
+      canvas.drawCircle(Offset(xPos, yPos), 40, circlePaint);
+    }
+
+    // Draw grid lines
+    final linePaint = Paint()
+      ..color = Colors.white.withOpacity(0.05)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    for (var i = 0; i < 6; i++) {
+      canvas.drawLine(
+        Offset(size.width * i / 6, 0),
+        Offset(size.width * i / 6, size.height),
+        linePaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Custom Painter for Shimmer Effect
+class _WelcomeShimmerPainter extends CustomPainter {
+  final double shimmerProgress;
+
+  _WelcomeShimmerPainter({required this.shimmerProgress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shimmerPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [
+          Colors.transparent,
+          Colors.white.withOpacity(0.1),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.5, 1.0],
+      ).createShader(
+        Rect.fromLTWH(
+          size.width * shimmerProgress - size.width * 0.3,
+          0,
+          size.width * 0.6,
+          size.height,
+        ),
+      );
+
+    canvas.drawRect(Offset.zero & size, shimmerPaint);
+  }
+
+  @override
+  bool shouldRepaint(_WelcomeShimmerPainter oldDelegate) =>
+      oldDelegate.shimmerProgress != shimmerProgress;
 }
 class _EventItem {
   final int number;
@@ -567,138 +834,226 @@ class _TypewriterTextState extends State<TypewriterText> {
 class _ExploreEventsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: kGreenDark,
-        side: const BorderSide(color: kGreenMain, width: 1.2),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        shape: const StadiumBorder(),
-        textStyle: const TextStyle(fontWeight: FontWeight.w700),
-      ),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const EventsPage(),
+    return Column(
+      children: [
+        SizedBox(height: 20,),
+        Center(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1A5C43), Color(0xFF0F3D2E)],
+              ),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: kGreenMain.withOpacity(0.4),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EventsPage(),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(30),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Explore All Events',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: 1),
+                        duration: const Duration(milliseconds: 1200),
+                        curve: Curves.easeInOut,
+                        builder: (context, value, child) {
+                          return Transform.translate(
+                            offset: Offset(4 * value, 0),
+                            child: child,
+                          );
+                        },
+                        child: const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 15,),
+      ],
+    );
+  }
+}
+
+/// —— Creative Grid-Based Quick Actions with Floating Card Design
+class _QuickActionsRow extends StatelessWidget {
+  const _QuickActionsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 30 * (1 - value)),
+            child: child,
           ),
         );
       },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Animated Title with Gradient
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: kGreenDark.withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.smart_button_sharp, color: Colors.white, size: 28),
+                SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Quick Action Buttons',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'All important options are in one place ',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFFB8E6D5),
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Text('Explore All Events'),
-          SizedBox(width: 6),
-          Icon(Icons.arrow_forward_rounded, size: 18),
+          const SizedBox(height: 16),
+          // Creative 2x2 Grid Layout
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 14,
+            crossAxisSpacing: 14,
+            childAspectRatio: 1.9,
+            children: [
+              _QuickActionCard(
+                label: 'Governing\nPanel',
+                icon: Icons.groups_rounded,
+                primary: const Color(0xFF0B6B3A),
+                secondary: const Color(0xFF16A34A),
+                delay: 0,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => GoverningPanelPage()),
+                  );
+                },
+              ),
+              _QuickActionCard(
+                label: 'Research &\nProjects',
+                icon: Icons.biotech_rounded,
+                primary: const Color(0xFF065F46),
+                secondary: const Color(0xFF22C55E),
+                delay: 100,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => ResearchProjectsPage()),
+                  );
+                },
+              ),
+              _QuickActionCard(
+                label: 'Member\nRecruitment',
+                icon: Icons.event_available_rounded,
+                primary: const Color(0xFF047857),
+                secondary: const Color(0xFF10B981),
+                delay: 200,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => MemberRecruitmentPage()),
+                  );
+                },
+              ),
+              _QuickActionCard(
+                label: 'Achievements',
+                icon: Icons.emoji_events_rounded,
+                primary: const Color(0xFF4D7C0F),
+                secondary: const Color(0xFF84CC16),
+                delay: 300,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => AchievementPage()),
+                  );
+                },
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 }
 
-/// —— Horizontal, scrollable quick actions row
-class _QuickActionsRow extends StatelessWidget {
-  const _QuickActionsRow();
-
-  @override
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Icon(Icons.flash_on_rounded, color: kGreenDark, size: 20),
-            SizedBox(width: 8),
-            Text(
-              'Quick Actions',
-              style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F3D2E),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        // Horizontal scrollable buttons
-        SizedBox(
-          height: 80,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              _QuickActionButton(
-                label: 'Governing Panel',
-                icon: Icons.groups_rounded,
-                primary: const Color(0xFF0B6B3A),
-                secondary: const Color(0xFF16A34A),
-                accent: const Color(0xFFD1FAE5),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) =>  GoverningPanelPage()),
-                  );
-                },
-              ),
-              const SizedBox(width: 16),
-               _QuickActionButton(
-                label: 'Research & Projects',
-                icon: Icons.biotech_rounded,
-                primary: Color(0xFF065F46),
-                secondary: Color(0xFF22C55E),
-                accent: Color(0xFFCCFBF1),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) =>  ResearchProjectsPage()),
-                  );
-                },
-              ),
-              const SizedBox(width: 16),
-               _QuickActionButton(
-                label: 'New Member Recruitment',
-                icon: Icons.event_available_rounded,
-                primary: Color(0xFF047857),
-                secondary: Color(0xFF10B981),
-                accent: Color(0xFFD1FAE5),
-                 onTap: () {
-                   Navigator.of(context).push(
-                     MaterialPageRoute(builder: (_) =>  MemberRecruitmentPage()),
-                   );
-                 },
-              ),
-              const SizedBox(width: 16),
-               _QuickActionButton(
-                label: 'Achievements',
-                icon: Icons.emoji_events_rounded,
-                primary: Color(0xFF4D7C0F),
-                secondary: Color(0xFF84CC16),
-                accent: Color(0xFFECFCCB),
-                 onTap: () {
-                   Navigator.of(context).push(
-                     MaterialPageRoute(builder: (_) =>  AchievementPage()),
-                   );
-                 },
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-}
-
-/// Professional gradient button with subtle shadows and refined styling
-class _QuickActionButton extends StatefulWidget {
-  const _QuickActionButton({
+/// Floating Card Design with Layered Depth Effect
+class _QuickActionCard extends StatefulWidget {
+  const _QuickActionCard({
     required this.label,
     required this.icon,
     required this.primary,
     required this.secondary,
-    required this.accent,
+    required this.delay,
     this.onTap,
   });
 
@@ -706,137 +1061,224 @@ class _QuickActionButton extends StatefulWidget {
   final IconData icon;
   final Color primary;
   final Color secondary;
-  final Color accent;
+  final int delay;
   final VoidCallback? onTap;
 
   @override
-  State<_QuickActionButton> createState() => _QuickActionButtonState();
+  State<_QuickActionCard> createState() => _QuickActionCardState();
 }
 
-class _QuickActionButtonState extends State<_QuickActionButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+class _QuickActionCardState extends State<_QuickActionCard>
+    with TickerProviderStateMixin {
+  late AnimationController _pressController;
+  late AnimationController _entryController;
+  late AnimationController _shimmerController;
   late Animation<double> _scaleAnimation;
-  bool _isPressed = false;
+  late Animation<double> _elevationAnimation;
+  late Animation<double> _entryAnimation;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 100),
+
+    // Press animation
+    _pressController = AnimationController(
+      duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
+      CurvedAnimation(parent: _pressController, curve: Curves.easeInOut),
+    );
+    _elevationAnimation = Tween<double>(begin: 1.0, end: 0.5).animate(
+      CurvedAnimation(parent: _pressController, curve: Curves.easeInOut),
+    );
+
+    // Entry animation
+    _entryController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
+    _entryAnimation = CurvedAnimation(
+      parent: _entryController,
+      curve: Curves.easeOutBack,
+    );
+
+    // Shimmer effect
+    _shimmerController = AnimationController(
+      duration: const Duration(milliseconds: 2500),
+      vsync: this,
+    )..repeat();
+
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) _entryController.forward();
+    });
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _pressController.dispose();
+    _entryController.dispose();
+    _shimmerController.dispose();
     super.dispose();
-  }
-
-  void _onTapDown(TapDownDetails details) {
-    setState(() => _isPressed = true);
-    _animationController.forward();
-  }
-
-  void _onTapUp(TapUpDetails details) {
-    setState(() => _isPressed = false);
-    _animationController.reverse();
-  }
-
-  void _onTapCancel() {
-    setState(() => _isPressed = false);
-    _animationController.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _scaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: GestureDetector(
-            onTapDown: _onTapDown,
-            onTapUp: _onTapUp,
-            onTapCancel: _onTapCancel,
-            onTap: widget.onTap ??
-                    () => ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Open: ${widget.label}')),
-                ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    widget.primary,
-                    widget.secondary,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(40),
-                boxShadow: [
-                  // Main shadow
-                  BoxShadow(
-                    color: widget.primary.withOpacity(0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                    spreadRadius: 0,
+    return ScaleTransition(
+      scale: _entryAnimation,
+      child: FadeTransition(
+        opacity: _entryAnimation,
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_scaleAnimation, _shimmerController]),
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: GestureDetector(
+                onTapDown: (_) => _pressController.forward(),
+                onTapUp: (_) {
+                  _pressController.reverse();
+                  widget.onTap?.call();
+                },
+                onTapCancel: () => _pressController.reverse(),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      colors: [
+                        widget.primary,
+                        widget.secondary,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: widget.primary.withOpacity(0.4 * _elevationAnimation.value),
+                        blurRadius: 16 * _elevationAnimation.value,
+                        offset: Offset(0, 8 * _elevationAnimation.value),
+                        spreadRadius: 2 * _elevationAnimation.value,
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1 * _elevationAnimation.value),
+                        blurRadius: 8 * _elevationAnimation.value,
+                        offset: Offset(0, 4 * _elevationAnimation.value),
+                      ),
+                    ],
                   ),
-                  // Subtle inner highlight
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.1),
-                    offset: const Offset(0, 2),
-                    blurRadius: 8,
-                    blurStyle: BlurStyle.inner, // inner blur
+                  child: Stack(
+                    children: [
+                      // Animated shimmer overlay
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: CustomPaint(
+                            painter: _ShimmerPainter(
+                              animation: _shimmerController,
+                              color: Colors.white.withOpacity(0.15),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Content
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Icon with background circle
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Icon(
+                                widget.icon,
+                                size: 28,
+                                color: Colors.white,
+                              ),
+                            ),
+                            // Label
+                            Text(
+                              widget.label,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                                height: 1.2,
+                                letterSpacing: 0.3,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black26,
+                                    offset: Offset(0, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Corner accent
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.6),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
-                  width: 1,
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(7),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      widget.icon,
-                      size: 18,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    widget.label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
+}
+
+/// Custom painter for diagonal shimmer effect
+class _ShimmerPainter extends CustomPainter {
+  final Animation<double> animation;
+  final Color color;
+
+  _ShimmerPainter({required this.animation, required this.color})
+      : super(repaint: animation);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final progress = animation.value;
+    final shimmerWidth = size.width * 0.3;
+    final startX = -shimmerWidth + (size.width + shimmerWidth * 2) * progress;
+
+    final path = Path()
+      ..moveTo(startX, 0)
+      ..lineTo(startX + shimmerWidth, 0)
+      ..lineTo(startX + shimmerWidth * 1.5, size.height)
+      ..lineTo(startX + shimmerWidth * 0.5, size.height)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_ShimmerPainter oldDelegate) => true;
 }
 /// ======================= Educational Programs ==========================
 // class _EducationalProgramsSection extends StatelessWidget {
@@ -1195,9 +1637,9 @@ class _EduErrorBox extends StatelessWidget {
   }
 }
 class _MentorProgramItem {
-  final int number;       // e.g., 3 for MentorShip_3
-  final String imageUrl;  // direct link
-  final String title;     // MentorShip_3_Name
+  final int number;
+  final String imageUrl;
+  final String title;
 
   _MentorProgramItem({
     required this.number,
@@ -1206,7 +1648,6 @@ class _MentorProgramItem {
   });
 
   static List<_MentorProgramItem> fromFirestoreMap(Map<String, dynamic> data) {
-    // handle “MentorShip” or “Mentorship” variants (case-insensitive)
     final reg = RegExp(r'^MentorShip_(\d+)$', caseSensitive: false);
     final list = <_MentorProgramItem>[];
 
@@ -1216,18 +1657,18 @@ class _MentorProgramItem {
         final n = int.tryParse(m.group(1)!);
         if (n != null) {
           final url = value.trim();
-          final nameKey = 'MentorShip_${n}_Name'; // keep same capitalization
+          final nameKey = 'MentorShip_${n}_Name';
           final title = (data[nameKey] as String?)?.trim() ?? 'Mentorship $n';
           list.add(_MentorProgramItem(number: n, imageUrl: url, title: title));
         }
       }
     });
 
-    // newest first (higher number means more recent)
     list.sort((a, b) => b.number.compareTo(a.number));
     return list;
   }
 }
+// Enhanced Mentorship Training Section with Modern Design
 class _MentorshipTrainingSection extends StatelessWidget {
   const _MentorshipTrainingSection();
 
@@ -1237,219 +1678,442 @@ class _MentorshipTrainingSection extends StatelessWidget {
         .collection('All_Data')
         .doc('Mentorship_Training');
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            children: [
-              Icon(Icons.support_agent_rounded, color: kGreenDark),
-              SizedBox(width: 8),
-              Text(
-                'Educational, Mentorship & Training Programs',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F3D2E),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        // Live data
-        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          stream: docRef.snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return const _MTErrorBox('Failed to load mentorship programs.');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const _MTSkeletonList();
-            }
-
-            final data = snapshot.data?.data() ?? {};
-            final items = _MentorProgramItem.fromFirestoreMap(data);
-
-            if (items.isEmpty) {
-              return const _MTEmptyBox('No mentorship programs yet.');
-            }
-
-            // Zig-zag alternating wide cards (not a grid, not a carousel)
-            return ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return _MentorZigZagCard(item: item, index: index);
-              },
-            );
-          },
-        ),
-
-        const SizedBox(height: 12),
-
-        // Bottom action
-        Align(
-          alignment: Alignment.centerRight,
-          child: OutlinedButton.icon(
-            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-            label: const Text('See all Mentorship Programs'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: kGreenDark,
-              side: const BorderSide(color: kGreenMain, width: 1.2),
-              shape: const StadiumBorder(),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              textStyle: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const EducationalProgramsPage(),
+    return Container(
+      // decoration: BoxDecoration(
+      //   gradient: LinearGradient(
+      //     begin: Alignment.topLeft,
+      //     end: Alignment.bottomRight,
+      //     colors: [
+      //       const Color(0xFF0B6B3A),
+      //       const Color(0xFFFFFFFF),
+      //       const Color(0xFFF5FBF8),
+      //     ],
+      //   ),
+      //   borderRadius: BorderRadius.circular(24),
+      // ),
+      //padding: const EdgeInsets.all(5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Animated Header with Gradient
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(1, 20 * (1 - value)),
+                  child: child,
                 ),
               );
             },
-
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: kGreenDark.withOpacity(0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.support_agent_rounded, color: Colors.white, size: 28),
+                  SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Educational & Mentorship',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Training Programs',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFFB8E6D5),
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 20),
+
+          // Live data with enhanced cards
+          StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            stream: docRef.snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const _MTErrorBox('Failed to load mentorship programs.');
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const _MTSkeletonList();
+              }
+
+              final data = snapshot.data?.data() ?? {};
+              final items = _MentorProgramItem.fromFirestoreMap(data);
+
+              if (items.isEmpty) {
+                return const _MTEmptyBox('No mentorship programs yet.');
+              }
+
+              if (items.isEmpty) {
+                return const _MTEmptyBox('No mentorship programs yet.');
+              }
+
+              // Horizontal scrollable cards (3 items max for preview)
+              final previewItems = items.take(3).toList();
+              return SizedBox(
+                height: 240,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: previewItems.length,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  itemBuilder: (context, index) {
+                    return _MentorModernCard(
+                      item: previewItems[index],
+                      index: index,
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+
+          const SizedBox(height: 20),
+
+          // Enhanced CTA Button
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.scale(scale: 0.95 + (0.05 * value), child: child),
+              );
+            },
+            child: Center(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF1A5C43), Color(0xFF0F3D2E)],
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: kGreenMain.withOpacity(0.4),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EducationalProgramsPage(),
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(30),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Explore All Programs',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: 1),
+                            duration: const Duration(milliseconds: 1200),
+                            curve: Curves.easeInOut,
+                            builder: (context, value, child) {
+                              return Transform.translate(
+                                offset: Offset(4 * value, 0),
+                                child: child,
+                              );
+                            },
+                            child: const Icon(
+                              Icons.arrow_forward_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
-class _MentorZigZagCard extends StatelessWidget {
-  const _MentorZigZagCard({required this.item, required this.index});
+
+// Modern Card with Glassmorphism Effect
+class _MentorModernCard extends StatefulWidget {
+  const _MentorModernCard({required this.item, required this.index});
 
   final _MentorProgramItem item;
   final int index;
 
   @override
+  State<_MentorModernCard> createState() => _MentorModernCardState();
+}
+
+class _MentorModernCardState extends State<_MentorModernCard> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    final isLeft = index.isEven; // alternate sides
-    final width = MediaQuery.of(context).size.width;
-
-    // Poster (image only — no overlay inside the picture)
-    final poster = DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x22000000),
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: AspectRatio(
-          aspectRatio: 16 / 9,
-          child: Image.network(
-            item.imageUrl,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, progress) {
-              if (progress == null) return child;
-              return Container(
-                color: const Color(0xFFF5F5F5),
-                alignment: Alignment.center,
-                child: const SizedBox(
-                  height: 22, width: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              );
-            },
-            errorBuilder: (_, __, ___) => Container(
-              color: const Color(0xFFFDECEC),
-              alignment: Alignment.center,
-              child: const Text('Image error', style: TextStyle(color: Color(0xFFB00020))),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Staggered entrance
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 420),
-      curve: Curves.easeOut,
-      builder: (context, value, child) {
-        final dx = (1 - value) * (isLeft ? -18 : 18);
+      duration: Duration(milliseconds: 500 + (widget.index * 100)),
+      curve: Curves.easeOutCubic,
+      builder: (context, animValue, child) {
         return Opacity(
-          opacity: value,
+          opacity: animValue,
           child: Transform.translate(
-            offset: Offset(dx, (1 - value) * 10),
+            offset: Offset((1 - animValue) * 50, 0),
             child: child,
           ),
         );
       },
-      child: Align(
-        alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
-        child: SizedBox(
-          width: width * 0.82, // wide card (distinct from grid & carousel)
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              poster,
-              const SizedBox(height: 6),
-              // Title OUTSIDE the poster, bottom-right aligned
-              Row(
-                children: [
-                  const Spacer(),
-                  Flexible(
-                    child: Text(
-                      item.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.right,
-                      style: const TextStyle(
-                        color: Color(0xFF0F3D2E),
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12.5,
-                        height: 1.2,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          margin: const EdgeInsets.only(right: 16, bottom: 8, top: 8),
+          width: 280,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(_isHovered ? 0.15 : 0.08),
+                blurRadius: _isHovered ? 20 : 12,
+                offset: Offset(0, _isHovered ? 8 : 4),
+              ),
+            ],
+          ),
+          transform: Matrix4.identity()
+            ..translate(0.0, _isHovered ? -6.0 : 0.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              children: [
+                // Background Image
+                Positioned.fill(
+                  child: Image.network(
+                    widget.item.imageUrl,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFFE8F5E9),
+                              const Color(0xFFC8E6C9),
+                            ],
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation(kGreenDark),
+                        ),
+                      );
+                    },
+                    errorBuilder: (_, __, ___) => Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFFFEBEE), Color(0xFFFFCDD2)],
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.broken_image, size: 48, color: Color(0xFFB00020)),
+                    ),
+                  ),
+                ),
+
+                // Gradient Overlay
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.3),
+                          Colors.black.withOpacity(0.75),
+                        ],
+                        stops: const [0.4, 0.7, 1.0],
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+
+                // Content
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 16,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Number Badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: kGreenMain.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: kGreenMain.withOpacity(0.4),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          'Program #${widget.item.number}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Title
+                      Text(
+                        widget.item.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          height: 1.3,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black45,
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Shine Effect on Hover
+                if (_isHovered)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withOpacity(0.1),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+// Enhanced Skeleton Loader
 class _MTSkeletonList extends StatelessWidget {
   const _MTSkeletonList();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(3, (i) {
-        final isLeft = i.isEven;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Align(
-            alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 3,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        itemBuilder: (context, i) {
+          return TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.3, end: 1.0),
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
+            builder: (context, value, child) {
+              return Opacity(opacity: value, child: child);
+            },
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.82,
-              height: 160,
+              width: 280,
+              margin: const EdgeInsets.only(right: 16, bottom: 8, top: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF0F3F1),
-                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFFE8F5E9),
+                    const Color(0xFFF1F8F4),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
               ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 }
+
+// Modern Empty State
 class _MTEmptyBox extends StatelessWidget {
   const _MTEmptyBox(this.message);
   final String message;
@@ -1457,16 +2121,34 @@ class _MTEmptyBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 120,
+      height: 180,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.5),
       ),
-      child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54)),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.school_outlined, size: 48, color: Colors.grey[400]),
+          const SizedBox(height: 12),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+
+// Enhanced Error State
 class _MTErrorBox extends StatelessWidget {
   const _MTErrorBox(this.message);
   final String message;
@@ -1474,13 +2156,30 @@ class _MTErrorBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF1F2),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFFCDD2)),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF5F5), Color(0xFFFFEBEE)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFFFCDD2), width: 1.5),
       ),
-      child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFB00020))),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: Color(0xFFB00020), size: 32),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Color(0xFFB00020),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
