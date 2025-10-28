@@ -4,6 +4,8 @@ import 'governing_panel_page.dart';
 import 'achievement.dart';
 import 'member_recruitment_page.dart';
 import 'best_panel_member_page.dart';
+import 'admin_login_page.dart';
+
 class FancyFloatingButton extends StatefulWidget {
   const FancyFloatingButton({super.key});
 
@@ -126,9 +128,9 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
       ),
       _FabMenuItem(
         icon: Icons.person_add_rounded,
-        label: 'Member Recruitment',
+        label: 'Admin Login',
         color: const Color(0xFF00897B),
-        onTap: () => _navigateToPage(const MemberRecruitmentPage()),
+        onTap: () => _navigateToPage(const AdminLoginPage()),
       ),
     ];
   }
