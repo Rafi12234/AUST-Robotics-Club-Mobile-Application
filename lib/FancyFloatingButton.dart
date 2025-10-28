@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'governing_panel_page.dart';
 import 'achievement.dart';
 import 'member_recruitment_page.dart';
-
+import 'best_panel_member_page.dart';
 class FancyFloatingButton extends StatefulWidget {
   const FancyFloatingButton({super.key});
 
@@ -120,9 +120,9 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
       ),
       _FabMenuItem(
         icon: Icons.emoji_events_rounded,
-        label: 'Achievement',
+        label: 'Best Panel Members',
         color: const Color(0xFF8BC34A),
-        onTap: () => _navigateToPage(const AchievementPage()),
+        onTap: () => _navigateToPage(const BestPanelMembersPage()),
       ),
       _FabMenuItem(
         icon: Icons.person_add_rounded,
@@ -334,7 +334,7 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
           onTap: _toggleMenu,
           borderRadius: BorderRadius.circular(_fabSize / 2),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 650), // was 400ms
+            duration: const Duration(milliseconds: 550), // was 400ms
             curve: Curves.easeInOutCubic,
             width: _fabSize,
             height: _fabSize,
@@ -362,7 +362,7 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
               ),
             ),
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 700), // was 600ms
+              duration: const Duration(milliseconds: 600), // was 600ms
               switchInCurve: Curves.easeOutBack,
               switchOutCurve: Curves.easeInBack,
               transitionBuilder: (child, animation) => ScaleTransition(
@@ -370,7 +370,7 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
                 child: FadeTransition(opacity: animation, child: child),
               ),
               child: Icon(
-                _isOpen ? Icons.close_rounded : Icons.add_rounded,
+                _isOpen ? Icons.close_rounded : Icons.menu,
                 key: ValueKey<bool>(_isOpen),
                 color: Colors.white,
                 size: 32,
