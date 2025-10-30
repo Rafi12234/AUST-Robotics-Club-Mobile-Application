@@ -1,8 +1,12 @@
+// admin_login_page.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
-import 'admin_homepage.dart';
+
+// ✅ Import the page you want to open after successful login
+// Make sure this file exports a widget named AdminDashboardPage
+import 'admin_homepage.dart'; // or: import 'admin_dashboard_page.dart';
 
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({Key? key}) : super(key: key);
@@ -17,16 +21,19 @@ class _AdminLoginPageState extends State<AdminLoginPage>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  // Animations
   late AnimationController _logoController;
   late AnimationController _formController;
   late AnimationController _backgroundController;
   late AnimationController _successController;
   late AnimationController _errorController;
+  late AnimationController _glowController;
 
   late Animation<double> _logoAnimation;
   late Animation<double> _formAnimation;
   late Animation<Offset> _slideAnimation;
 
+  // UI state
   bool _obscurePassword = true;
   bool _isLoading = false;
   bool _showSuccess = false;
@@ -37,7 +44,6 @@ class _AdminLoginPageState extends State<AdminLoginPage>
   void initState() {
     super.initState();
 
-    // Logo Animation
     _logoController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -47,7 +53,6 @@ class _AdminLoginPageState extends State<AdminLoginPage>
       curve: Curves.elasticOut,
     );
 
-    // Form Animation
     _formController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
@@ -61,28 +66,29 @@ class _AdminLoginPageState extends State<AdminLoginPage>
       end: Offset.zero,
     ).animate(_formAnimation);
 
-    // Background Animation
     _backgroundController = AnimationController(
       duration: const Duration(seconds: 20),
       vsync: this,
     )..repeat();
 
-    // Success Animation
     _successController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
-    // Error Animation
     _errorController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
-    // Start animations
+    _glowController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+
     _logoController.forward();
     Future.delayed(const Duration(milliseconds: 500), () {
-      _formController.forward();
+      if (mounted) _formController.forward();
     });
   }
 
@@ -93,6 +99,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
     _backgroundController.dispose();
     _successController.dispose();
     _errorController.dispose();
+    _glowController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -110,7 +117,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
 
-      // Step 1: Check if email is in Admin list
+      // 1) Verify email is in Admin list (Firestore)
       final adminDoc = await FirebaseFirestore.instance
           .collection('Admin')
           .doc('Admin Infos')
@@ -121,15 +128,14 @@ class _AdminLoginPageState extends State<AdminLoginPage>
         return;
       }
 
-      final adminEmail = adminDoc.data()?['Admin_Email'];
-
-      // Check if Admin_Email is a string or array
+      final adminEmailField = adminDoc.data()?['Admin_Email'];
       bool isAuthorized = false;
-      if (adminEmail is String) {
-        isAuthorized = adminEmail.toLowerCase() == email.toLowerCase();
-      } else if (adminEmail is List) {
-        isAuthorized = adminEmail.any((e) =>
-        e.toString().toLowerCase() == email.toLowerCase()
+
+      if (adminEmailField is String) {
+        isAuthorized = adminEmailField.toLowerCase() == email.toLowerCase();
+      } else if (adminEmailField is List) {
+        isAuthorized = adminEmailField.any(
+              (e) => e.toString().toLowerCase() == email.toLowerCase(),
         );
       }
 
@@ -138,30 +144,23 @@ class _AdminLoginPageState extends State<AdminLoginPage>
         return;
       }
 
-      // Step 2: Authenticate with Firebase Auth
+      // 2) Firebase Auth sign in
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Success!
+      // Success animation, then navigate
       _showSuccessAnimation('Login Successful!');
-
-      // Navigate to admin panel after animation
       await Future.delayed(const Duration(milliseconds: 2000));
-      if (mounted) {
+      if (!mounted) return;
 
-         Navigator.pushReplacement(
-          context,
-           MaterialPageRoute(builder: (context) => AdminHomePage()),
-         );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login Successful! Navigate to Admin Panel'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AdminDashboardPage(), // <- your dashboard
+        ),
+      );
     } on FirebaseAuthException catch (e) {
       String message = 'Login failed';
       if (e.code == 'user-not-found') {
@@ -179,7 +178,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
     }
   }
 
-  void _showSuccessAnimation(String message) {
+  void _showSuccessAnimation(String _msg) {
     setState(() {
       _isLoading = false;
       _showSuccess = true;
@@ -197,12 +196,10 @@ class _AdminLoginPageState extends State<AdminLoginPage>
     });
     _errorController.forward(from: 0);
 
-    // Shake animation
+    // triple shake
     for (int i = 0; i < 3; i++) {
       Future.delayed(Duration(milliseconds: i * 100), () {
-        if (mounted) {
-          _errorController.forward(from: 0);
-        }
+        if (mounted) _errorController.forward(from: 0);
       });
     }
   }
@@ -212,7 +209,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
     return Scaffold(
       body: Stack(
         children: [
-          // Animated Background
+          // Animated background gradient
           AnimatedBuilder(
             animation: _backgroundController,
             builder: (context, child) {
@@ -240,7 +237,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
             },
           ),
 
-          // Floating Particles
+          // Floating particles
           ...List.generate(20, (index) {
             return AnimatedBuilder(
               animation: _backgroundController,
@@ -251,18 +248,14 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                   top: MediaQuery.of(context).size.height * offset,
                   child: Opacity(
                     opacity: 0.1,
-                    child: Icon(
-                      Icons.circle,
-                      size: 10 + (index % 3) * 5,
-                      color: Colors.white,
-                    ),
+                    child: const Icon(Icons.circle, size: 10, color: Colors.white),
                   ),
                 );
               },
             );
           }),
 
-          // Main Content
+          // Content
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -270,28 +263,54 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                 children: [
                   const SizedBox(height: 60),
 
-                  // Animated Logo
+                  // Animated logo with glow
                   ScaleTransition(
                     scale: _logoAnimation,
-                    child: Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 30,
-                            spreadRadius: 5,
+                    child: AnimatedBuilder(
+                      animation: _glowController,
+                      builder: (context, child) {
+                        return Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF43A047)
+                                    .withOpacity(0.3 + (_glowController.value * 0.4)),
+                                blurRadius: 40 + (_glowController.value * 20),
+                                spreadRadius: 10 + (_glowController.value * 5),
+                              ),
+                              BoxShadow(
+                                color: const Color(0xFF2E7D32)
+                                    .withOpacity(0.4 + (_glowController.value * 0.3)),
+                                blurRadius: 30 + (_glowController.value * 15),
+                                spreadRadius: 5 + (_glowController.value * 3),
+                              ),
+                              BoxShadow(
+                                color: const Color(0xFF1B5E20)
+                                    .withOpacity(0.5 + (_glowController.value * 0.2)),
+                                blurRadius: 20 + (_glowController.value * 10),
+                                spreadRadius: 2,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(20),
-                      child: Image.asset(
-                        'assets/images/logo2.png',
-                        fit: BoxFit.contain,
-                      ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0xFF43A047)
+                                    .withOpacity(0.3 + (_glowController.value * 0.4)),
+                                width: 3,
+                              ),
+                            ),
+                            child: Image.asset(
+                              'assets/images/logo2.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
 
@@ -313,10 +332,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                         ),
                         const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(20),
@@ -336,7 +352,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
 
                   const SizedBox(height: 50),
 
-                  // Login Form
+                  // Login form
                   SlideTransition(
                     position: _slideAnimation,
                     child: FadeTransition(
@@ -358,7 +374,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                           key: _formKey,
                           child: Column(
                             children: [
-                              // Email Field
+                              // Email
                               AnimatedBuilder(
                                 animation: _errorController,
                                 builder: (context, child) {
@@ -378,37 +394,26 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                   style: const TextStyle(fontSize: 16),
                                   decoration: InputDecoration(
                                     labelText: 'Admin Email',
-                                    prefixIcon: const Icon(
-                                      Icons.admin_panel_settings,
-                                      color: Color(0xFF1B5E20),
-                                    ),
+                                    prefixIcon: const Icon(Icons.admin_panel_settings,
+                                        color: Color(0xFF1B5E20)),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(15),
-                                      borderSide: const BorderSide(
-                                        color: Color(0xFF1B5E20),
-                                      ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(15),
-                                      borderSide: BorderSide(
-                                        color: Colors.grey[300]!,
-                                      ),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(15),
                                       borderSide: const BorderSide(
-                                        color: Color(0xFF1B5E20),
-                                        width: 2,
-                                      ),
+                                          color: Color(0xFF1B5E20), width: 2),
                                     ),
                                     filled: true,
                                     fillColor: Colors.grey[50],
                                   ),
                                   validator: (value) {
-                                    if (value?.isEmpty ?? true) {
-                                      return 'Email is required';
-                                    }
-                                    if (!value!.contains('@')) {
+                                    if (value?.isEmpty ?? true) return 'Email is required';
+                                    if (!(value!.contains('@') && value.contains('.'))) {
                                       return 'Invalid email format';
                                     }
                                     return null;
@@ -418,7 +423,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
 
                               const SizedBox(height: 20),
 
-                              // Password Field
+                              // Password
                               AnimatedBuilder(
                                 animation: _errorController,
                                 builder: (context, child) {
@@ -438,10 +443,8 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                   style: const TextStyle(fontSize: 16),
                                   decoration: InputDecoration(
                                     labelText: 'Password',
-                                    prefixIcon: const Icon(
-                                      Icons.lock,
-                                      color: Color(0xFF1B5E20),
-                                    ),
+                                    prefixIcon:
+                                    const Icon(Icons.lock, color: Color(0xFF1B5E20)),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscurePassword
@@ -449,30 +452,20 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                             : Icons.visibility,
                                         color: Colors.grey,
                                       ),
-                                      onPressed: () {
-                                        setState(() {
-                                          _obscurePassword = !_obscurePassword;
-                                        });
-                                      },
+                                      onPressed: () =>
+                                          setState(() => _obscurePassword = !_obscurePassword),
                                     ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(15),
-                                      borderSide: const BorderSide(
-                                        color: Color(0xFF1B5E20),
-                                      ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(15),
-                                      borderSide: BorderSide(
-                                        color: Colors.grey[300]!,
-                                      ),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(15),
                                       borderSide: const BorderSide(
-                                        color: Color(0xFF1B5E20),
-                                        width: 2,
-                                      ),
+                                          color: Color(0xFF1B5E20), width: 2),
                                     ),
                                     filled: true,
                                     fillColor: Colors.grey[50],
@@ -491,7 +484,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
 
                               const SizedBox(height: 30),
 
-                              // Login Button
+                              // Submit
                               SizedBox(
                                 width: double.infinity,
                                 height: 56,
@@ -531,7 +524,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                 ),
                               ),
 
-                              // Error Message
+                              // Error message
                               if (_showError) ...[
                                 const SizedBox(height: 20),
                                 AnimatedBuilder(
@@ -544,18 +537,12 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                         decoration: BoxDecoration(
                                           color: Colors.red[50],
                                           borderRadius: BorderRadius.circular(10),
-                                          border: Border.all(
-                                            color: Colors.red,
-                                            width: 1.5,
-                                          ),
+                                          border: Border.all(color: Colors.red, width: 1.5),
                                         ),
                                         child: Row(
                                           children: [
-                                            const Icon(
-                                              Icons.error_outline,
-                                              color: Colors.red,
-                                              size: 20,
-                                            ),
+                                            const Icon(Icons.error_outline,
+                                                color: Colors.red, size: 20),
                                             const SizedBox(width: 8),
                                             Expanded(
                                               child: Text(
@@ -601,7 +588,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
             ),
           ),
 
-          // Success Overlay
+          // Success overlay
           if (_showSuccess)
             AnimatedBuilder(
               animation: _successController,
@@ -638,18 +625,12 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                 height: 100,
                                 decoration: const BoxDecoration(
                                   gradient: LinearGradient(
-                                    colors: [
-                                      Color(0xFF1B5E20),
-                                      Color(0xFF43A047),
-                                    ],
+                                    colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
                                   ),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
-                                  Icons.check_rounded,
-                                  size: 60,
-                                  color: Colors.white,
-                                ),
+                                child: const Icon(Icons.check_rounded,
+                                    size: 60, color: Colors.white),
                               ),
                               const SizedBox(height: 24),
                               const Text(
