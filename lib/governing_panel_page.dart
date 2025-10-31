@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// NEW: import the detail page
 import 'executive_panel_page.dart';
 
 class GoverningPanelPage extends StatefulWidget {
@@ -80,9 +79,9 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
 
   int _seasonPriority(String label) {
     final l = label.toLowerCase();
-    if (l.contains('fall')) return 2;   // Fall before Spring
+    if (l.contains('fall')) return 2; // Fall before Spring
     if (l.contains('spring')) return 1;
-    return 0;                           // Unknown seasons go last within year
+    return 0; // Unknown seasons go last within year
   }
   // ---------------------------------------------------------------
 
@@ -96,6 +95,9 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
         .collection('All_Data')
         .doc('Governing_Panel')
         .collection('Semesters');
+
+    final width = MediaQuery.of(context).size.width;
+    final isSmall = width < 360; // ★ small devices
 
     return Scaffold(
       body: Container(
@@ -150,8 +152,7 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                                 end: Alignment.bottomRight,
                               ),
                             ),
-                            padding:
-                            EdgeInsets.fromLTRB(20, topInset + 16, 20, 20),
+                            padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 20),
                             child: Column(
                               children: [
                                 Row(
@@ -163,11 +164,14 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                                       ),
                                       onPressed: () => Navigator.pop(context),
                                     ),
-                                    const Expanded(
+                                    // ★ make title flexible and ellipsize
+                                    Flexible(
                                       child: Text(
                                         'Governing Panel',
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: const TextStyle(
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -183,6 +187,7 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                                   _showSemesters
                                       ? 'Select a semester to view details'
                                       : 'Welcome to the panel management',
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.white.withOpacity(0.95),
@@ -205,39 +210,22 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                   stream: semestersQuery.snapshots(),
                   builder: (context, snap) {
                     if (snap.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            // Not const: CircularProgressIndicator isn’t const
-                            // (keep the list non-const to avoid issues)
-                          ],
-                        ),
-                      );
+                      return const Center(child: CircularProgressIndicator());
                     }
                     if (snap.hasError) {
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
-                            Icon(Icons.error_outline,
-                                size: 64, color: Colors.redAccent),
+                            Icon(Icons.error_outline, size: 64, color: Colors.redAccent),
                             SizedBox(height: 16),
                             Text(
                               'Error loading semesters',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),
                       );
-                    }
-
-                    if (snap.connectionState == ConnectionState.waiting) {
-                      // (safety: though already handled above)
-                      return const Center(child: CircularProgressIndicator());
                     }
 
                     final docs = snap.data?.docs ?? [];
@@ -246,8 +234,7 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.folder_open,
-                                size: 80, color: Colors.grey[400]),
+                            Icon(Icons.folder_open, size: 80, color: Colors.grey[400]),
                             const SizedBox(height: 20),
                             Text(
                               'No semesters yet',
@@ -261,30 +248,23 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                             Text(
                               'Add documents under\nAll_Data/Governing_Panel/Semesters',
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
+                              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                             ),
                           ],
                         ),
                       );
                     }
 
-                    // ------------------ Modified sorting ------------------
                     // Sort by year desc, then season (Fall before Spring)
                     final sortedDocs = [...docs];
                     sortedDocs.sort((a, b) {
                       final ay = _extractYear(a.id) ?? -1;
                       final by = _extractYear(b.id) ?? -1;
-
-                      if (ay != by) return by.compareTo(ay); // year desc
-
+                      if (ay != by) return by.compareTo(ay);
                       final sa = _seasonPriority(a.id);
                       final sb = _seasonPriority(b.id);
-                      return sb.compareTo(sa); // Fall(2) > Spring(1) > others
+                      return sb.compareTo(sa);
                     });
-                    // ------------------------------------------------------
 
                     return AnimatedSwitcher(
                       duration: const Duration(milliseconds: 600),
@@ -302,7 +282,7 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                       },
                       child: _showSemesters
                           ? _buildSemestersList(sortedDocs)
-                          : _buildInitialButton(),
+                          : _buildInitialButton(isSmall),
                     );
                   },
                 ),
@@ -314,12 +294,13 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
     );
   }
 
-  Widget _buildInitialButton() {
+  // ---------- Initial (landing) section ----------
+  Widget _buildInitialButton(bool isSmall) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: IntrinsicHeight(
@@ -364,13 +345,13 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                       );
                     },
                   ),
-                  const SizedBox(height: 32), // a bit smaller to help on short screens
+                  const SizedBox(height: 32),
 
                   Text(
                     'Ready to Explore?',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: isSmall ? 24 : 28, // ★ slightly smaller on tiny devices
                       fontWeight: FontWeight.bold,
                       color: Colors.grey[800],
                     ),
@@ -387,13 +368,14 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                   ),
                   const SizedBox(height: 32),
 
-                  // Animated button
+                  // Animated CTA Button (responsive)
                   AnimatedBuilder(
                     animation: _buttonController,
                     builder: (context, child) {
                       return Transform.scale(
                         scale: _buttonScale.value,
                         child: Container(
+                          width: double.infinity, // ★ allow wrapping
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
@@ -418,27 +400,39 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                                   ),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 40,
-                                    vertical: 20,
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 18,
+                                ),
+                                // ★ Use Wrap so the long label can flow to two lines
+                                child: Center(
+                                  child: Wrap(
+                                    alignment: WrapAlignment.center,
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 12,
+                                    runSpacing: 8,
                                     children: const [
                                       Icon(
                                         Icons.touch_app_rounded,
                                         color: Colors.white,
-                                        size: 28,
+                                        size: 26,
                                       ),
-                                      SizedBox(width: 16),
-                                      Text(
-                                        'Select the Semester for Panel Information',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          letterSpacing: 0.3,
+                                      SizedBox(width: 1),
+                                      // Let text wrap + ellipsize if needed
+                                      SizedBox(
+                                        width: 260, // fits most phones; expands when possible
+                                        child: Text(
+                                          'Select the Semester for Panel Information',
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            letterSpacing: 0.3,
+                                            height: 1.25,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -452,7 +446,7 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                     },
                   ),
 
-                  const SizedBox(height: 16), // bottom breathing room
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -462,7 +456,7 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
     );
   }
 
-
+  // ---------- Semesters list ----------
   Widget _buildSemestersList(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> sortedDocs,
       ) {
@@ -474,17 +468,13 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Back button
             TweenAnimationBuilder<double>(
               duration: const Duration(milliseconds: 400),
               tween: Tween(begin: 0.0, end: 1.0),
               builder: (context, value, child) {
                 return Transform.translate(
                   offset: Offset(-50 * (1 - value), 0),
-                  child: Opacity(
-                    opacity: value,
-                    child: child,
-                  ),
+                  child: Opacity(opacity: value, child: child),
                 );
               },
               child: Container(
@@ -492,60 +482,22 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _showSemesters = false;
-                      });
-                    },
+                    onTap: () => setState(() => _showSemesters = false),
                     borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      // decoration: BoxDecoration(
-                      //   color: Colors.white,
-                      //   borderRadius: BorderRadius.circular(12),
-                      //   border: Border.all(
-                      //     color: brandStart.withOpacity(0.3),
-                      //     width: 1.5,
-                      //   ),
-                      // ),
-                      // child: Row(
-                      //   mainAxisSize: MainAxisSize.min,
-                      //   children: [
-                      //     const Icon(
-                      //       Icons.arrow_back_rounded,
-                      //       color: brandStart,
-                      //       size: 20,
-                      //     ),
-                      //     const SizedBox(width: 8),
-                      //     Text(
-                      //       'Back',
-                      //       style: TextStyle(
-                      //         fontSize: 14,
-                      //         fontWeight: FontWeight.w600,
-                      //         color: brandStart,
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                    ),
+                    child: const SizedBox(height: 1, width: 1), // invisible tap target
                   ),
                 ),
               ),
             ),
 
-            // Semester button list
+            // Buttons
             ...List.generate(sortedDocs.length, (index) {
               final doc = sortedDocs[index];
               final label = doc.id;
-
               return _SemesterButton(
                 label: label,
                 index: index,
                 onTap: () {
-                  // CHANGED: open the semester's Executive Panel page
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -562,7 +514,7 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
   }
 }
 
-// ---- Semester Button (single, correct definition) ----
+// ---- Semester Button ----
 class _SemesterButton extends StatefulWidget {
   final String label;
   final int index;
@@ -586,11 +538,7 @@ class _SemesterButtonState extends State<_SemesterButton> {
   Widget build(BuildContext context) {
     final gradients = [
       const [Color(0xFF0B6B3A), Color(0xFF16A34A)],
-      // const [Color(0xFF0D47A1), Color(0xFF42A5F5)],
-      // const [Color(0xFF4A148C), Color(0xFF9C27B0)],
-      // const [Color(0xFFE65100), Color(0xFFFF9800)],
-      // const [Color(0xFFB71C1C), Color(0xFFEF5350)],
-       const [Color(0xFF0BAB64), Color(0xFF3BB78F)],
+      const [Color(0xFF0BAB64), Color(0xFF3BB78F)],
     ];
     final colorPair = gradients[widget.index % gradients.length];
 
@@ -602,10 +550,7 @@ class _SemesterButtonState extends State<_SemesterButton> {
         builder: (context, value, child) {
           return Transform.translate(
             offset: Offset(0, 50 * (1 - value)),
-            child: Opacity(
-              opacity: value,
-              child: child,
-            ),
+            child: Opacity(opacity: value, child: child),
           );
         },
         child: AnimatedScale(
@@ -652,12 +597,15 @@ class _SemesterButtonState extends State<_SemesterButton> {
                       ),
                     ),
                     const SizedBox(width: 20),
+                    // ★ Keep text flexible and safe on long labels
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             widget.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -668,6 +616,8 @@ class _SemesterButtonState extends State<_SemesterButton> {
                           const SizedBox(height: 6),
                           Text(
                             'Tap to view details',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.85),
                               fontSize: 13,
@@ -677,6 +627,7 @@ class _SemesterButtonState extends State<_SemesterButton> {
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
                     const Icon(
                       Icons.arrow_forward_ios_rounded,
                       color: Colors.white,
