@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
+import 'size_config.dart';
 
 // Main Best Panel Members Page - Semester List
 class BestPanelMembersPage extends StatefulWidget {
@@ -39,6 +40,7 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -57,44 +59,44 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
             children: [
               // Custom App Bar
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                 child: Row(
                   children: [
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.3),
                           width: 1.5,
                         ),
                       ),
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new,
-                            color: Colors.white, size: 20),
+                        icon: Icon(Icons.arrow_back_ios_new,
+                            color: Colors.white, size: SizeConfig.screenWidth *0.05),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: SizeConfig.screenWidth * 0.03),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Hall of Excellence',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 24,
+                              fontSize: SizeConfig.screenWidth * 0.05,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          SizedBox(height: SizeConfig.screenWidth * 0.005),
                           Text(
                             'Best Panel Members',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.8),
-                              fontSize: 14,
+                              fontSize: SizeConfig.screenWidth *0.028,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -107,7 +109,7 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
 
               // Animated Trophy Icon
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
+                padding:EdgeInsets.symmetric(vertical: SizeConfig.screenWidth * 0.05),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -118,8 +120,8 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
                         return Transform.rotate(
                           angle: _rotationController.value * 2 * math.pi,
                           child: Container(
-                            width: 120,
-                            height: 120,
+                            width: SizeConfig.screenWidth *0.3,
+                            height: SizeConfig.screenWidth * 0.3,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
@@ -152,8 +154,8 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
                     ),
                     // Trophy Icon
                     Container(
-                      width: 80,
-                      height: 80,
+                      width: SizeConfig.screenWidth *0.19,
+                      height: SizeConfig.screenWidth *0.19,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
@@ -162,15 +164,15 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
                         boxShadow: [
                           BoxShadow(
                             color: Colors.amber.withOpacity(0.5),
-                            blurRadius: 20,
-                            spreadRadius: 5,
+                            blurRadius: SizeConfig.screenWidth *0.22,
+                            spreadRadius: SizeConfig.screenWidth *0.05,
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.emoji_events,
                         color: Colors.white,
-                        size: 40,
+                        size: SizeConfig.screenWidth * 0.095,
                       ),
                     ),
                   ],
@@ -179,19 +181,19 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
 
               // Subtitle
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
+                padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.09),
                 child: Text(
                   'Select a semester to view our outstanding performers',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
-                    fontSize: 15,
-                    height: 1.5,
+                    fontSize: SizeConfig.screenWidth * 0.034,
+                    height: SizeConfig.screenWidth *0.003,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 30),
+              SizedBox(height: SizeConfig.screenWidth *0.05),
 
               // Semester List - Dynamically fetched
               Expanded(
@@ -310,7 +312,7 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
     final cardColor = colors[index % colors.length];
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: SizeConfig.screenWidth * 0.03),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -336,12 +338,12 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
             ),
           );
         },
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(SizeConfig.screenWidth *0.1),
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(SizeConfig.screenWidth *0.04),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth *0.05),
             boxShadow: [
               BoxShadow(
                 color: cardColor[1].withOpacity(0.3),
@@ -354,15 +356,15 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
             children: [
               // Medal Icon
               Container(
-                width: 60,
-                height: 60,
+                width: SizeConfig.screenWidth * 0.15,
+                height: SizeConfig.screenHeight * 0.06,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: cardColor,
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth *0.04),
                   boxShadow: [
                     BoxShadow(
                       color: cardColor[1].withOpacity(0.4),
@@ -371,13 +373,13 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.military_tech,
                   color: Colors.white,
-                  size: 30,
+                  size: SizeConfig.screenWidth *0.08,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: SizeConfig.screenWidth *0.03),
               // Semester Info
               Expanded(
                 child: Column(
@@ -385,17 +387,17 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
                   children: [
                     Text(
                       semester,
-                      style: const TextStyle(
-                        fontSize: 20,
+                      style: TextStyle(
+                        fontSize: SizeConfig.screenWidth *0.042,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF1B5E20),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: SizeConfig.screenHeight *0.005),
                     Text(
                       'View Outstanding Members',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: SizeConfig.screenWidth *0.03,
                         color: Colors.grey[600],
                         fontWeight: FontWeight.w500,
                       ),
@@ -405,15 +407,15 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
               ),
               // Arrow
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(SizeConfig.screenWidth *0.02),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1B5E20).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.023),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_forward_ios,
                   color: Color(0xFF1B5E20),
-                  size: 18,
+                  size: SizeConfig.screenWidth * 0.04,
                 ),
               ),
             ],
@@ -423,6 +425,7 @@ class _BestPanelMembersPageState extends State<BestPanelMembersPage>
     );
   }
 }
+
 
 // Panel Members Detail Page
 class PanelMembersDetailPage extends StatefulWidget {
