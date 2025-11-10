@@ -472,6 +472,7 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: CustomScrollView(
@@ -480,29 +481,18 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
         slivers: [
           // Curved Header
           SliverAppBar(
-            expandedHeight: 180,
+            expandedHeight: SizeConfig.screenWidth*0.4,
             floating: false,
             pinned: true,
             stretch: true,
             elevation: 0,
             backgroundColor: const Color(0xFF1B5E20),
-            leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 1.5,
-                  ),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new,
-                      color: Colors.white, size: 20),
-                  onPressed: () => Navigator.pop(context),
-                  padding: EdgeInsets.zero,
-                ),
+            leading: Container(
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios_new,
+                    color: Colors.white, size: SizeConfig.screenWidth * 0.05),
+                onPressed: () => Navigator.pop(context),
+                padding: EdgeInsets.zero,
               ),
             ),
             flexibleSpace: LayoutBuilder(
@@ -515,7 +505,7 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                     (expandedHeight - collapsedHeight))
                     .clamp(0.0, 1.0);
 
-                final leftPadding = 24.0 + (48.0 * collapseRatio);
+                final leftPadding = SizeConfig.screenWidth * 0.04 + (48.0 * collapseRatio);
 
                 return Container(
                   decoration: const BoxDecoration(
@@ -532,7 +522,7 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                   child: Stack(
                     children: [
                       // Decorative Stars
-                      ...List.generate(20, (index) {
+                      ...List.generate(50, (index) {
                         return Positioned(
                           left: (index * 37.3) %
                               MediaQuery.of(context).size.width,
@@ -548,7 +538,7 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                       Positioned(
                         left: leftPadding,
                         right: 24,
-                        bottom: 20,
+                        bottom: SizeConfig.screenHeight * 0.015,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -583,14 +573,14 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                               //   ],
                               // ),
                             ),
-                            const SizedBox(height: 12),
+                            //SizedBox(height: SizeConfig.screenHeight * 0.09),
                             Row(
                               children: [
                                 Text(
                                   widget.semester,
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 28 - (8 * collapseRatio),
+                                    fontSize: SizeConfig.screenWidth * 0.06 - (8 * collapseRatio),
                                     fontWeight: FontWeight.bold,
                                     fontFamily: "font1"
                                   ),
@@ -599,7 +589,7 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                                   "'s Best Panel Members",
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 28 - (8 * collapseRatio),
+                                    fontSize: SizeConfig.screenWidth * 0.06 - (8 * collapseRatio),
                                     fontWeight: FontWeight.bold,
                                     fontFamily: "font1"
                                   ),
@@ -638,14 +628,14 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(20),
+                          padding: EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
                               colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
                             ),
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const CircularProgressIndicator(
+                          child: CircularProgressIndicator(
                             color: Colors.white,
                             strokeWidth: 3,
                           ),
@@ -688,9 +678,9 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                             shape: BoxShape.circle,
                           ),
                           child: Icon(Icons.people_outline,
-                              size: 80, color: Colors.grey[400]),
+                              size: SizeConfig.screenWidth * 0.07, color: Colors.grey[400]),
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: SizeConfig.screenHeight * 0.02),
                         const Text(
                           'No members found',
                           style: TextStyle(
@@ -731,8 +721,8 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
           ),
 
           // Bottom Spacing
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 40),
+           SliverToBoxAdapter(
+            child: SizedBox(height: SizeConfig.screenWidth * 0.07),
           ),
         ],
       ),
@@ -747,7 +737,7 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
       int index,
       ) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      padding:  EdgeInsets.fromLTRB(SizeConfig.screenWidth*0.04, SizeConfig.screenWidth*0.04, SizeConfig.screenWidth*0.04, 0),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -765,7 +755,7 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
             // Team Name Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight*0.015, horizontal: SizeConfig.screenWidth*0.055),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
@@ -778,33 +768,33 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding:  EdgeInsets.all(SizeConfig.screenWidth*0.02),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.groups,
                       color: Colors.white,
-                      size: 20,
+                      size: SizeConfig.screenWidth*0.04,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                   SizedBox(width: SizeConfig.screenWidth*0.022),
                   Expanded(
                     child: Text(
                       teamName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: SizeConfig.screenWidth*0.035,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
                       ),
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.screenWidth*0.02,
+                      vertical: SizeConfig.screenHeight*0.005,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.amber,
@@ -812,14 +802,14 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.star, color: Colors.white, size: 14),
-                        SizedBox(width: 4),
+                      children:[
+                        Icon(Icons.star, color: Colors.white, size: SizeConfig.screenWidth*0.03),
+                        SizedBox(width: SizeConfig.screenWidth*0.01),
                         Text(
                           'Best',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 12,
+                            fontSize: SizeConfig.screenWidth*0.027,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -832,13 +822,13 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
 
             // Member Image with Decorative Border
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(SizeConfig.screenHeight*0.03),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   // Decorative circles
                   Container(
-                    width: 280,
+                    width: SizeConfig.screenWidth*0.6,
                     height: 280,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -851,8 +841,8 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                     ),
                   ),
                   Container(
-                    width: 250,
-                    height: 250,
+                    width: SizeConfig.screenWidth*0.5,
+                    height: SizeConfig.screenWidth*0.5,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
@@ -863,8 +853,8 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                   ),
                   // Image Container
                   Container(
-                    width: 220,
-                    height: 220,
+                    width: SizeConfig.screenWidth*0.45,
+                    height: SizeConfig.screenWidth*0.45,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: const LinearGradient(
@@ -878,7 +868,7 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                         ),
                       ],
                     ),
-                    padding: const EdgeInsets.all(4),
+                    padding: EdgeInsets.all(SizeConfig.screenWidth*0.013),
                     child: ClipOval(
                       child: imageUrl.isNotEmpty
                           ? CachedNetworkImage(
@@ -944,24 +934,25 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
 
             // Member Info
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              padding:EdgeInsets.fromLTRB(SizeConfig.screenWidth*0.05, 0, SizeConfig.screenWidth*0.05, SizeConfig.screenWidth*0.05),
               child: Column(
                 children: [
                   Text(
                     memberName,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 24,
+                    style: TextStyle(
+                      fontSize: SizeConfig.screenWidth*0.05,
                       fontWeight: FontWeight.bold,
+                      fontFamily: "font1",
                       color: Color(0xFF1B5E20),
                       letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: SizeConfig.screenHeight*0.015),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.screenWidth*0.04,
+                      vertical: SizeConfig.screenHeight*0.01,
                     ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -973,22 +964,22 @@ class _PanelMembersDetailPageState extends State<PanelMembersDetailPage>
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: const Color(0xFF2E7D32).withOpacity(0.3),
-                        width: 1.5,
+                        width: 2.5,
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.school,
                           color: Color(0xFF1B5E20),
-                          size: 18,
+                          size: SizeConfig.screenWidth*0.045,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: SizeConfig.screenWidth*0.02),
                         Text(
                           department,
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: SizeConfig.screenWidth*0.035,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF1B5E20),
                           ),

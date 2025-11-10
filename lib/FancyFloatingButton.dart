@@ -5,6 +5,7 @@ import 'achievement.dart';
 import 'member_recruitment_page.dart';
 import 'best_panel_member_page.dart';
 import 'admin_login_page.dart';
+import 'size_config.dart';
 
 class FancyFloatingButton extends StatefulWidget {
   const FancyFloatingButton({super.key});
@@ -323,7 +324,7 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
         ).value;
 
         return Transform.scale(
-          scale: 0.92 + (scaleProgress * 0.08),
+          scale: SizeConfig.screenWidth*0.0017 + (scaleProgress * 0.08),
           child: Transform.rotate(
             angle: rotationProgress * math.pi / 1.8, // < 90° for softness
             child: child,

@@ -10,6 +10,7 @@ import 'achievement.dart';
 import 'member_recruitment_page.dart';
 import 'educational_mentorship_training_programs_page.dart';
 import 'FancyFloatingButton.dart';
+import 'size_config.dart';
 
 /// AUST RC brand greens + white
 const kGreenDark = Color(0xFF0B6B3A);
@@ -28,19 +29,20 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Scaffold(
       // Keep body behind status bar = false so AppBar is fully visible
       extendBodyBehindAppBar: false,
 
       // -------------------- AppBar (unchanged) --------------------
       appBar: AppBar(
-        toolbarHeight: 72,
+        toolbarHeight: SizeConfig.screenHeight*0.08,
         automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFF005022),
         foregroundColor: kOnPrimary,
         elevation: 6,
         centerTitle: false,
-        titleSpacing: 16,
+        titleSpacing: SizeConfig.screenWidth*0.04,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
         ),
@@ -59,15 +61,15 @@ class HomePage extends StatelessWidget {
         title: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               child: Image.asset(
                 'assets/images/logo2.png',
-                height: 45,
-                width: 45,
+                height: SizeConfig.screenHeight*0.045,
+                width: SizeConfig.screenHeight*0.045,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return CircleAvatar(
-                    radius: 18,
+                    radius: 20,
                     backgroundColor: Colors.white24,
                     child: const Text(
                       'RC',
@@ -80,17 +82,17 @@ class HomePage extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: SizeConfig.screenWidth*0.02),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   Text(
                     'AUST ROBOTICS CLUB',
                     style: TextStyle(
                       color: kOnPrimary,
-                      fontSize: 16,
+                      fontSize: SizeConfig.screenWidth*0.035,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.4,
                     ),
@@ -101,7 +103,7 @@ class HomePage extends StatelessWidget {
                     text: 'Robotics for Building a Safer Future',
                     style: TextStyle(
                       color: Color.fromARGB(217, 255, 255, 255),
-                      fontSize: 12,
+                      fontSize: SizeConfig.screenWidth*0.028,
                       fontWeight: FontWeight.w500,
                     ),
                     speed: Duration(milliseconds: 60),
@@ -112,12 +114,12 @@ class HomePage extends StatelessWidget {
             ),
           ],
         ),
-        actions: const [
-          Icon(Icons.search),
-          SizedBox(width: 12),
-          Icon(Icons.notifications_none),
-          SizedBox(width: 8),
-        ],
+        // actions: const [
+        //   Icon(Icons.search),
+        //   SizedBox(width: 12),
+        //   Icon(Icons.notifications_none),
+        //   SizedBox(width: 8),
+        // ],
       ),
       // ------------------------------------------------------------------------------
 
@@ -126,7 +128,7 @@ class HomePage extends StatelessWidget {
       ),
 
       // 👇 Add the Floating Action Button here
-      floatingActionButton: const FancyFloatingButton(),
+      floatingActionButton: FancyFloatingButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
       backgroundColor: Colors.white,
@@ -146,24 +148,22 @@ class HomeBody extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
         const _WelcomeCard(),
-        const SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight*0.015),
         const _RecentEventsCarousel(),
-        const SizedBox(height: 8),
+        SizedBox(height: SizeConfig.screenHeight*0.001),
         // Right-aligned "Explore All Events" button
         Align(
           alignment: Alignment.centerRight,
           child: _ExploreEventsButton(),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight*0.005),
         _QuickActionsRow(),
-        SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight*0.005),
         //_EducationalProgramsSection(),
-        const SizedBox(height: 16),
-        const _MentorshipTrainingSection(),   // 👈 add this line
-        const SizedBox(height: 16),
-        const VoiceOfAUSTRC(),
-
-
+        SizedBox(height: SizeConfig.screenHeight*0.015),
+         _MentorshipTrainingSection(),   // 👈 add this line
+        SizedBox(height: SizeConfig.screenHeight*0.03),
+        VoiceOfAUSTRC(),
       ],
     );
   }
@@ -255,7 +255,7 @@ class _WelcomeCardState extends State<_WelcomeCard> with SingleTickerProviderSta
 
               // Content
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(20),
                 child: Row(
                   children: [
                     // Animated Icon Container
@@ -902,7 +902,7 @@ class _ExploreEventsButton extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 15,),
+        SizedBox(height: 13,),
       ],
     );
   }
@@ -967,7 +967,7 @@ class _QuickActionsRow extends StatelessWidget {
                       Text(
                         'All important options are in one place ',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFFB8E6D5),
                           letterSpacing: 0.2,
@@ -980,7 +980,7 @@ class _QuickActionsRow extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: 20),
           // Creative 2x2 Grid Layout
           GridView.count(
             crossAxisCount: 2,
@@ -1181,14 +1181,14 @@ class _QuickActionCardState extends State<_QuickActionCard>
                       ),
                       // Content
                       Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(SizeConfig.screenWidth*0.025),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             // Icon with background circle
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: EdgeInsets.all(SizeConfig.screenWidth*0.022),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.2),
                                 shape: BoxShape.circle,
@@ -1199,17 +1199,17 @@ class _QuickActionCardState extends State<_QuickActionCard>
                               ),
                               child: Icon(
                                 widget.icon,
-                                size: 28,
+                                size: SizeConfig.screenWidth*0.050,
                                 color: Colors.white,
                               ),
                             ),
                             // Label
                             Text(
                               widget.label,
-                              style: const TextStyle(
+                              style:TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800,
-                                fontSize: 15,
+                                fontSize: SizeConfig.screenWidth*0.035,
                                 height: 1.2,
                                 letterSpacing: 0.3,
                                 shadows: [
@@ -2265,21 +2265,55 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section header
-        Row(
-          children: const [
-            Icon(Icons.campaign_rounded, color: kGreenDark),
-            SizedBox(width: 8),
-            Text(
-              'Voice of AUSTRC',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F3D2E),
-              ),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
             ),
-          ],
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: kGreenDark.withOpacity(0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.record_voice_over, color: Colors.white, size: 28),
+              SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Voice of AUSTRC',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Voices from or dedicated members',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFFB8E6D5),
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 40),
         StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
           stream: _docRef.snapshots(),
           builder: (context, snap) {
@@ -2297,7 +2331,7 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
             _startTimer(urls);
             return SizedBox(
               height: 400,
-              width: 450,
+              width: 520,
               child: PageView.builder(
                 controller: _controller,
                 allowImplicitScrolling: true,
