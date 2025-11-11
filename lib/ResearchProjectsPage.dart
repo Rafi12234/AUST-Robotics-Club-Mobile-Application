@@ -1,274 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/services.dart'; // <-- for Clipboard
+import 'dart:math' as math;
 
 // Main Research Projects List Page
-class ResearchProjectsPage extends StatelessWidget {
+class ResearchProjectsPage extends StatefulWidget {
   const ResearchProjectsPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(140),
-        child: AppBar(
-          elevation: 0,
-          flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
-              ),
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Research & Projects',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Explore our innovative research and projects',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          backgroundColor: Colors.transparent,
-        ),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('All_Data')
-            .doc('Research_Projects')
-            .collection('research_projects')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF2E7D32),
-              ),
-            );
-          }
+  State<ResearchProjectsPage> createState() => _ResearchProjectsPageState();
+}
 
-          if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 60,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error: ${snapshot.error}',
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
-          }
+class _ResearchProjectsPageState extends State<ResearchProjectsPage>
+    with TickerProviderStateMixin {
+  late AnimationController _headerController;
+  late AnimationController _particleController;
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.science_outlined,
-                    size: 80,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No research projects available',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
+  @override
+  void initState() {
+    super.initState();
+    _headerController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat();
 
-          final projects = snapshot.data!.docs;
+    _particleController = AnimationController(
+      duration: const Duration(seconds: 15),
+      vsync: this,
+    )..repeat();
+  }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: projects.length,
-            itemBuilder: (context, index) {
-              final project = projects[index];
-              final data = project.data() as Map<String, dynamic>;
-              final title = data['Title'] ?? 'Untitled Project';
-              final subtitle = data['Subtitle'] ?? '';
-              final projectBy = data['Project_by'] ?? 'Unknown Author';
-
-              // Get first image for thumbnail
-              String? thumbnailUrl;
-              for (int i = 1; i <= 10; i++) {
-                if (data.containsKey('Image_$i') && data['Image_$i'] != null) {
-                  thumbnailUrl = data['Image_$i'];
-                  break;
-                }
-              }
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProjectDetailPage(
-                          projectId: project.id,
-                          projectData: data,
-                        ),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        // Thumbnail
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey[300],
-                          ),
-                          child: thumbnailUrl != null
-                              ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: CachedNetworkImage(
-                              imageUrl: thumbnailUrl,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                              errorWidget: (context, url, error) =>
-                              const Icon(Icons.image_not_supported),
-                            ),
-                          )
-                              : const Icon(
-                            Icons.science,
-                            size: 40,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        // Project Info
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1B5E20),
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              if (subtitle.isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  subtitle,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[700],
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.person_outline,
-                                    size: 16,
-                                    color: Colors.grey[600],
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      projectBy,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey[600],
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 20,
-                          color: Color(0xFF2E7D32),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showProposalDialog(context);
-        },
-        backgroundColor: const Color(0xFF2E7D32),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
+  @override
+  void dispose() {
+    _headerController.dispose();
+    _particleController.dispose();
+    super.dispose();
   }
 
   void _showProposalDialog(BuildContext context) {
@@ -277,9 +44,510 @@ class ResearchProjectsPage extends StatelessWidget {
       builder: (context) => const ProposalDialog(),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      // FAB to open the ProposalDialog
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showProposalDialog(context),
+        backgroundColor: const Color(0xFF2E7D32),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+
+      body: Stack(
+        children: [
+          // Animated Background Particles
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _particleController,
+              builder: (context, child) {
+                return CustomPaint(
+                  painter: _ParticlesPainter(
+                    animation: _particleController.value,
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Main Content
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              // Custom Animated Header
+              SliverAppBar(
+                expandedHeight: 220,
+                floating: false,
+                pinned: true,
+                stretch: true,
+                elevation: 0,
+                backgroundColor: const Color(0xFF1B5E20),
+                leading: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new,
+                          color: Colors.white, size: 20),
+                      onPressed: () => Navigator.pop(context),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+                flexibleSpace: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final expandedHeight = 220.0;
+                    final collapsedHeight =
+                        kToolbarHeight + MediaQuery.of(context).padding.top;
+                    final currentHeight = constraints.maxHeight;
+                    final collapseRatio = ((expandedHeight - currentHeight) /
+                        (expandedHeight - collapsedHeight))
+                        .clamp(0.0, 1.0);
+
+                    return Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF0D3B1F),
+                            Color(0xFF1B5E20),
+                            Color(0xFF2E7D32),
+                          ],
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          // Animated DNA Helix Pattern
+                          Positioned.fill(
+                            child: AnimatedBuilder(
+                              animation: _headerController,
+                              builder: (context, child) {
+                                return CustomPaint(
+                                  painter: _DNAHelixPainter(
+                                    animation: _headerController.value,
+                                    opacity: 1 - collapseRatio,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+
+                          // Content
+                          Positioned(
+                            left: 24 + (48 * collapseRatio),
+                            right: 24,
+                            bottom: 20,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (collapseRatio < 0.5) ...[
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 7,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.4),
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.science,
+                                            color: Colors.white, size: 16),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          'Innovation Hub',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                                Text(
+                                  'Research & Projects',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 32 - (12 * collapseRatio),
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.1,
+                                  ),
+                                ),
+                                if (collapseRatio < 0.5) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Explore groundbreaking innovations',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.9),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              // Projects List
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('All_Data')
+                    .doc('Research_Projects')
+                    .collection('research_projects')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SliverFillRemaining(
+                      child: Center(
+                        child: SizedBox(
+                          width: 80,
+                          height: 80,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+                              ),
+                              borderRadius: BorderRadius.all(Radius.circular(20)),
+                            ),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 3,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return SliverFillRemaining(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error_outline,
+                                size: 70, color: Colors.red[300]),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Error loading projects',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return SliverFillRemaining(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(30),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1B5E20).withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.science_outlined,
+                                size: 80,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            const Text(
+                              'No Projects Yet',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Check back soon for amazing projects!',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  final projects = snapshot.data!.docs;
+
+                  return SliverPadding(
+                    padding: const EdgeInsets.all(20),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                          final project = projects[index];
+                          final projectName = project.id;
+                          final data = project.data() as Map<String, dynamic>?;
+
+                          return TweenAnimationBuilder<double>(
+                            duration:
+                            Duration(milliseconds: 500 + (index * 100)),
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, value, child) {
+                              return Transform.translate(
+                                offset: Offset(-100 * (1 - value), 0),
+                                child: Opacity(opacity: value, child: child),
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: _buildProjectCard(
+                                context,
+                                projectName,
+                                data,
+                                index,
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: projects.length,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProjectCard(
+      BuildContext context,
+      String projectName,
+      Map<String, dynamic>? data,
+      int index,
+      ) {
+    final colors = [
+      [const Color(0xFF1B5E20), const Color(0xFF2E7D32)],
+      [const Color(0xFF00695C), const Color(0xFF00897B)],
+      [const Color(0xFF1565C0), const Color(0xFF1976D2)],
+      [const Color(0xFF6A1B9A), const Color(0xFF7B1FA2)],
+    ];
+    final gradient = colors[index % colors.length];
+
+    // Cover image URL from project data
+    final coverUrl = (data?['Cover_Picture'] ?? '').toString();
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                ProjectDetailPage(
+                  projectName: projectName,
+                  projectData: data ?? {},
+                ),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              var tween = Tween<double>(begin: 0.0, end: 1.0);
+              var fadeAnimation = animation.drive(tween);
+
+              var scaleTween = Tween<double>(begin: 0.9, end: 1.0);
+              var scaleAnimation = animation.drive(scaleTween);
+
+              return FadeTransition(
+                opacity: fadeAnimation,
+                child: ScaleTransition(
+                  scale: scaleAnimation,
+                  child: child,
+                ),
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 400),
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: gradient[1].withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Hexagon Pattern
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: CustomPaint(
+                  painter: _HexagonPatternPainter(),
+                ),
+              ),
+            ),
+
+            // Content
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  // Cover image box (replaces bulb icon)
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 2,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: coverUrl.isNotEmpty
+                          ? GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  FullScreenImagePage(imageUrl: coverUrl),
+                            ),
+                          );
+                        },
+                        child: CachedNetworkImage(
+                          imageUrl: coverUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) =>
+                          const Icon(
+                            Icons.broken_image_outlined,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                      )
+                          : const Icon(
+                        Icons.photo_outlined,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+
+                  // Text
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          projectName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.arrow_forward,
+                                  color: Colors.white, size: 12),
+                              SizedBox(width: 4),
+                              Text(
+                                'View Details',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-// Proposal Dialog Widget
+// ==== Proposal Dialog (verification + submission) ====
 class ProposalDialog extends StatefulWidget {
   const ProposalDialog({Key? key}) : super(key: key);
 
@@ -332,7 +600,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
       final data = doc.data() as Map<String, dynamic>;
       bool found = false;
 
-      // Search through all Member fields
+      // Search through all Member_* fields
       for (var entry in data.entries) {
         if (entry.key.startsWith('Member_') && entry.value == id) {
           found = true;
@@ -662,14 +930,14 @@ class _ProposalDialogState extends State<ProposalDialog> {
   }
 }
 
-// Project Detail Page
+// ===================== Project Detail Page =====================
 class ProjectDetailPage extends StatefulWidget {
-  final String projectId;
+  final String projectName;
   final Map<String, dynamic> projectData;
 
   const ProjectDetailPage({
     Key? key,
-    required this.projectId,
+    required this.projectName,
     required this.projectData,
   }) : super(key: key);
 
@@ -677,259 +945,829 @@ class ProjectDetailPage extends StatefulWidget {
   State<ProjectDetailPage> createState() => _ProjectDetailPageState();
 }
 
-class _ProjectDetailPageState extends State<ProjectDetailPage> {
-  int _currentImageIndex = 0;
-  final CarouselSliderController _carouselController = CarouselSliderController();
+class _ProjectDetailPageState extends State<ProjectDetailPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late PageController _pageController;
+  final Map<int, int> _sectionImageIndices = {};
 
-  List<String> _getImageUrls() {
-    List<String> imageUrls = [];
-    for (int i = 1; i <= 20; i++) {
-      if (widget.projectData.containsKey('Image_$i') &&
-          widget.projectData['Image_$i'] != null &&
-          widget.projectData['Image_$i'].toString().isNotEmpty) {
-        imageUrls.add(widget.projectData['Image_$i']);
+  // Cache network image aspect ratios: url -> (width / height)
+  final Map<String, double> _imageAspect = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..forward();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  // Resolve and cache intrinsic aspect ratio for URL
+  void _resolveImageAspect(String url) {
+    if (url.isEmpty || _imageAspect.containsKey(url)) return;
+    final img = Image.network(url);
+    final ImageStream stream = img.image.resolve(const ImageConfiguration());
+    ImageStreamListener? listener;
+    listener = ImageStreamListener((ImageInfo info, bool _) {
+      final w = info.image.width.toDouble();
+      final h = info.image.height.toDouble();
+      if (h != 0) {
+        if (mounted) {
+          setState(() {
+            _imageAspect[url] = w / h; // aspect = width / height
+          });
+        } else {
+          _imageAspect[url] = w / h;
+        }
+      }
+      stream.removeListener(listener!);
+    }, onError: (error, stackTrace) {
+      stream.removeListener(listener!);
+    });
+    stream.addListener(listener);
+  }
+
+  List<Map<String, dynamic>> _getOwners() {
+    List<Map<String, dynamic>> owners = [];
+    int ownerIndex = 1;
+    while (true) {
+      final nameKey = 'Owner_${ownerIndex}_Name';
+      final designationKey = 'Owner_${ownerIndex}_Designation_Department';
+
+      if (widget.projectData.containsKey(nameKey) &&
+          widget.projectData[nameKey] != null) {
+        owners.add({
+          'name': widget.projectData[nameKey],
+          'designation': widget.projectData[designationKey] ?? 'N/A',
+        });
+        ownerIndex++;
+      } else {
+        break;
       }
     }
-    return imageUrls;
+    return owners;
+  }
+
+  List<Map<String, dynamic>> _getSections() {
+    List<Map<String, dynamic>> sections = [];
+    int sectionIndex = 1;
+    while (true) {
+      final nameKey = 'Section_${sectionIndex}_Name';
+      final descriptionKey = 'Section_${sectionIndex}_Description';
+
+      if (widget.projectData.containsKey(nameKey) &&
+          widget.projectData[nameKey] != null) {
+        // Get images for this section
+        List<String> images = [];
+        int imageIndex = 1;
+        while (true) {
+          final imageKey = 'Section_${sectionIndex}_Image_$imageIndex';
+          if (widget.projectData.containsKey(imageKey) &&
+              widget.projectData[imageKey] != null &&
+              widget.projectData[imageKey].toString().isNotEmpty) {
+            images.add(widget.projectData[imageKey]);
+            imageIndex++;
+          } else {
+            break;
+          }
+        }
+
+        sections.add({
+          'name': widget.projectData[nameKey],
+          'description': widget.projectData[descriptionKey] ?? '',
+          'images': images,
+        });
+        sectionIndex++;
+      } else {
+        break;
+      }
+    }
+    return sections;
   }
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.projectData['Title'] ?? 'Untitled Project';
+    final coverPhoto = widget.projectData['Cover_Picture'] ?? '';
+    final title = widget.projectData['Title'] ?? widget.projectName;
     final subtitle = widget.projectData['Subtitle'] ?? '';
-    final projectBy = widget.projectData['Project_by'] ?? 'Unknown Author';
-    final description = widget.projectData['Project_Des'] ?? 'No description available.';
-    final imageUrls = _getImageUrls();
+    final owners = _getOwners();
+    final sections = _getSections();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
-          // App Bar
+          // Cover Photo Header
           SliverAppBar(
-            expandedHeight: 0,
+            expandedHeight: 300,
             floating: false,
             pinned: true,
-            elevation: 2,
-            flexibleSpace: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+            stretch: true,
+            elevation: 0,
+            backgroundColor: const Color(0xFF1B5E20),
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1.5,
+                  ),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new,
+                      color: Colors.white, size: 20),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
                 ),
               ),
             ),
-            foregroundColor: Colors.white,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-          // Content
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title Section
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1B5E20),
-                          height: 1.3,
-                        ),
-                      ),
-                      if (subtitle.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[700],
-                            fontWeight: FontWeight.w500,
-                            height: 1.4,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (coverPhoto.isNotEmpty)
+                    CachedNetworkImage(
+                      imageUrl: coverPhoto,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF2E7D32),
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2E7D32).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.person,
-                              size: 18,
-                              color: Color(0xFF1B5E20),
-                            ),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                projectBy,
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  color: Color(0xFF1B5E20),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: const Icon(
+                          Icons.science,
+                          size: 80,
+                          color: Colors.white,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                // Image Carousel
-                if (imageUrls.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Column(
-                    children: [
-                      CarouselSlider(
-                        carouselController: _carouselController,
-                        options: CarouselOptions(
-                          height: 300,
-                          viewportFraction: 0.9,
-                          enlargeCenterPage: true,
-                          enableInfiniteScroll: imageUrls.length > 1,
-                          autoPlay: imageUrls.length > 1,
-                          autoPlayInterval: const Duration(seconds: 5),
-                          autoPlayAnimationDuration: const Duration(milliseconds: 800),
-                          autoPlayCurve: Curves.fastOutSlowIn,
-                          onPageChanged: (index, reason) {
-                            setState(() {
-                              _currentImageIndex = index;
-                            });
-                          },
+                    )
+                  else
+                    Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
                         ),
-                        items: imageUrls.map((url) {
-                          return Builder(
-                            builder: (BuildContext context) {
-                              return Container(
-                                width: MediaQuery.of(context).size.width,
-                                margin: const EdgeInsets.symmetric(horizontal: 5),
+                      ),
+                      child: const Icon(
+                        Icons.science,
+                        size: 80,
+                        color: Colors.white,
+                      ),
+                    ),
+                  // Gradient Overlay
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Content
+          SliverToBoxAdapter(
+            child: FadeTransition(
+              opacity: _animationController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title & Subtitle Card
+                  Container(
+                    margin: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF1B5E20).withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1B5E20),
+                            height: 1.3,
+                          ),
+                        ),
+                        if (subtitle.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[700],
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  // Owners Section
+                  if (owners.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.people,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Project Team',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1B5E20),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ...owners.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final owner = entry.value;
+                      return TweenAnimationBuilder<double>(
+                        duration: Duration(milliseconds: 600 + (index * 100)),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        builder: (context, value, child) {
+                          return Transform.translate(
+                            offset: Offset(30 * (1 - value), 0),
+                            child: Opacity(opacity: value, child: child),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 8,
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFF2E7D32).withOpacity(0.2),
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                const Color(0xFF1B5E20).withOpacity(0.08),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 50,
+                                height: 50,
                                 decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF1B5E20),
+                                      Color(0xFF43A047)
+                                    ],
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
+                                ),
+                                child: const Icon(
+                                  Icons.person,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      owner['name'],
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1B5E20),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      owner['designation'],
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey[600],
+                                      ),
                                     ),
                                   ],
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: CachedNetworkImage(
-                                    imageUrl: url,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Container(
-                                      color: Colors.grey[300],
-                                      child: const Center(
-                                        child: CircularProgressIndicator(
-                                          color: Color(0xFF2E7D32),
-                                        ),
-                                      ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    const SizedBox(height: 24),
+                  ],
+
+                  // Sections
+                  ...sections.asMap().entries.map((entry) {
+                    final sectionIndex = entry.key;
+                    final section = entry.value;
+                    final images = section['images'] as List<String>;
+                    final description = (section['description'] as String?) ?? '';
+
+                    return TweenAnimationBuilder<double>(
+                      duration:
+                      Duration(milliseconds: 800 + (sectionIndex * 150)),
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Transform.translate(
+                          offset: Offset(0, 30 * (1 - value)),
+                          child: Opacity(opacity: value, child: child),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Section Header
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF1B5E20)
+                                        .withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                    errorWidget: (context, url, error) => Container(
-                                      color: Colors.grey[300],
-                                      child: const Icon(
-                                        Icons.broken_image,
-                                        size: 60,
-                                        color: Colors.grey,
+                                    child: Text(
+                                      '${sectionIndex + 1}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 16),
-                      // Image Indicators
-                      if (imageUrls.length > 1)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: imageUrls.asMap().entries.map((entry) {
-                            return GestureDetector(
-                              onTap: () => _carouselController.animateToPage(entry.key),
-                              child: Container(
-                                width: _currentImageIndex == entry.key ? 24 : 8,
-                                height: 8,
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4),
-                                  color: _currentImageIndex == entry.key
-                                      ? const Color(0xFF1976D2)
-                                      : Colors.grey[400],
-                                ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      section['name'],
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            );
-                          }).toList(),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                            ),
 
-                // Description Section
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Project Description',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1B5E20),
+                            // Section Images (original-size display)
+                            if (images.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+
+                              // Determine dynamic height from current image aspect ratio
+                              Builder(
+                                builder: (context) {
+                                  final currentIdx =
+                                      _sectionImageIndices[sectionIndex] ?? 0;
+                                  final currentUrl =
+                                  images[currentIdx].toString();
+                                  _resolveImageAspect(currentUrl);
+
+                                  final screenWidth =
+                                      MediaQuery.of(context).size.width;
+                                  final aspect = _imageAspect[currentUrl];
+                                  final targetHeight =
+                                  aspect != null ? (screenWidth / aspect) : 260.0;
+
+                                  return AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeInOut,
+                                    height: targetHeight,
+                                    child: PageView.builder(
+                                      controller:
+                                      PageController(viewportFraction: 1),
+                                      onPageChanged: (idx) {
+                                        setState(() {
+                                          _sectionImageIndices[sectionIndex] =
+                                              idx;
+                                        });
+                                      },
+                                      itemCount: images.length,
+                                      itemBuilder: (context, imageIndex) {
+                                        final url = images[imageIndex].toString();
+                                        _resolveImageAspect(url);
+
+                                        return Container(
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 8),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                            BorderRadius.circular(20),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: const Color(0xFF1B5E20)
+                                                    .withOpacity(0.2),
+                                                blurRadius: 15,
+                                                offset: const Offset(0, 8),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                            BorderRadius.circular(20),
+                                            child: Stack(
+                                              fit: StackFit.expand,
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            FullScreenImagePage(
+                                                                imageUrl: url),
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: CachedNetworkImage(
+                                                    imageUrl: url,
+                                                    // contain = no cropping; respects natural aspect
+                                                    fit: BoxFit.contain,
+                                                    placeholder:
+                                                        (context, url) =>
+                                                        Container(
+                                                          color: Colors.grey[200],
+                                                          child: const Center(
+                                                            child:
+                                                            CircularProgressIndicator(
+                                                              color:
+                                                              Color(0xFF2E7D32),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                    errorWidget: (context, url,
+                                                        error) =>
+                                                        Container(
+                                                          color: Colors.grey[200],
+                                                          child: const Icon(
+                                                            Icons.broken_image,
+                                                            size: 60,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        ),
+                                                  ),
+                                                ),
+
+                                                // Image Counter
+                                                Positioned(
+                                                  bottom: 12,
+                                                  right: 12,
+                                                  child: Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 6,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.black
+                                                          .withOpacity(0.6),
+                                                      borderRadius:
+                                                      BorderRadius.circular(
+                                                          20),
+                                                    ),
+                                                    child: Text(
+                                                      '${imageIndex + 1}/${images.length}',
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                        FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              const SizedBox(height: 12),
+                              // Image Indicators
+                              if (images.length > 1)
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(
+                                    images.length,
+                                        (idx) {
+                                      final currentIndex =
+                                          _sectionImageIndices[sectionIndex] ??
+                                              0;
+                                      final active = currentIndex == idx;
+                                      return AnimatedContainer(
+                                        duration:
+                                        const Duration(milliseconds: 300),
+                                        width: active ? 30 : 8,
+                                        height: 8,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 4),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(4),
+                                          gradient: active
+                                              ? const LinearGradient(
+                                            colors: [
+                                              Color(0xFF1B5E20),
+                                              Color(0xFF2E7D32),
+                                            ],
+                                          )
+                                              : null,
+                                          color: active
+                                              ? null
+                                              : Colors.grey[300],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
+
+                            // Section Description (with copy icon)
+                            if (description.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              Stack(
+                                children: [
+                                  // Description card
+                                  Container(
+                                    // Add extra top-right padding so text doesn't hide under the icon
+                                    padding: const EdgeInsets.fromLTRB(20, 20, 48, 20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: const Color(0xFF2E7D32)
+                                            .withOpacity(0.2),
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      description,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.grey[800],
+                                        height: 1.7,
+                                        letterSpacing: 0.3,
+                                      ),
+                                      textAlign: TextAlign.justify,
+                                    ),
+                                  ),
+
+                                  // Copy button at top-right
+                                  Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: IconButton(
+                                        tooltip: 'Copy description',
+                                        icon: const Icon(Icons.copy_rounded,
+                                            size: 20, color: Color(0xFF2E7D32)),
+                                        onPressed: () async {
+                                          await Clipboard.setData(
+                                            ClipboardData(text: description),
+                                          );
+                                          if (!mounted) return;
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Description copied'),
+                                              duration: Duration(seconds: 1),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+
+                            const SizedBox(height: 20),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Container(
-                        width: 60,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2E7D32),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        description,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[800],
-                          height: 1.6,
-                          letterSpacing: 0.2,
-                        ),
-                        textAlign: TextAlign.justify,
-                      ),
-                      const SizedBox(height: 40),
-                    ],
-                  ),
-                ),
-              ],
+                    );
+                  }).toList(),
+
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+// ================ Full Screen Image (optional, on tap) =================
+class FullScreenImagePage extends StatelessWidget {
+  final String imageUrl;
+  const FullScreenImagePage({Key? key, required this.imageUrl}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Center(
+            child: InteractiveViewer(
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.contain,
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+                errorWidget: (context, url, error) => const Icon(
+                  Icons.broken_image,
+                  color: Colors.white,
+                  size: 60,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 40,
+            left: 16,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ===================== Custom Painters =====================
+class _ParticlesPainter extends CustomPainter {
+  final double animation;
+
+  _ParticlesPainter({required this.animation});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF1B5E20).withOpacity(0.03)
+      ..style = PaintingStyle.fill;
+
+    for (int i = 0; i < 30; i++) {
+      final x = (i * 73.5 + animation * size.width) % size.width;
+      final y = (i * 47.3) % size.height;
+      canvas.drawCircle(Offset(x, y), 3 + (i % 3), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class _DNAHelixPainter extends CustomPainter {
+  final double animation;
+  final double opacity;
+
+  _DNAHelixPainter({required this.animation, required this.opacity});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.1 * opacity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    for (double x = 0; x < size.width; x += 10) {
+      final y1 = size.height * 0.5 +
+          math.sin((x / 30) + animation * 2 * math.pi) * 30;
+      final y2 = size.height * 0.5 -
+          math.sin((x / 30) + animation * 2 * math.pi) * 30;
+
+      canvas.drawCircle(Offset(x, y1), 2, paint);
+      canvas.drawCircle(Offset(x, y2), 2, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class _HexagonPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    for (double y = -20; y < size.height + 20; y += 40) {
+      for (double x = -20; x < size.width + 20; x += 35) {
+        final path = Path();
+        for (int i = 0; i < 6; i++) {
+          final angle = (i * 60) * math.pi / 180;
+          final px = x + 15 * math.cos(angle);
+          final py = y + 15 * math.sin(angle);
+          if (i == 0) {
+            path.moveTo(px, py);
+          } else {
+            path.lineTo(px, py);
+          }
+        }
+        path.close();
+        canvas.drawPath(path, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
