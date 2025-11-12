@@ -273,8 +273,8 @@ class _WelcomeCardState extends State<_WelcomeCard> with SingleTickerProviderSta
                         );
                       },
                       child: Container(
-                        height: 56,
-                        width: 56,
+                        height: SizeConfig.screenHeight*0.054,
+                        width: SizeConfig.screenWidth*0.12,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(16),
@@ -603,7 +603,7 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel>
         _ensureAutoTimer(events.length);
 
         return SizedBox(
-          height: 200,
+          height: SizeConfig.screenHeight*0.19,
           child: PageView.builder(
             controller: _controller,
             allowImplicitScrolling: true,
@@ -616,6 +616,7 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel>
       },
     );
   }
+
 
   Widget _skeleton({double height = 200}) => Container(
     height: height,
@@ -836,7 +837,7 @@ class _ExploreEventsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: 20,),
+        SizedBox(height: 17,),
         Center(
           child: Container(
             decoration: BoxDecoration(
@@ -865,16 +866,16 @@ class _ExploreEventsButton extends StatelessWidget {
                 },
                 borderRadius: BorderRadius.circular(30),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.039, vertical: SizeConfig.screenHeight*0.01),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
+                      Text(
                         'Explore All Events',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
-                          fontSize: 15,
+                          fontSize: SizeConfig.screenHeight*0.014,
                           letterSpacing: 0.3,
                         ),
                       ),
@@ -1622,7 +1623,7 @@ class _EduErrorBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.039, vertical: SizeConfig.screenHeight*0.01),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF1F2),
         borderRadius: BorderRadius.circular(16),
@@ -1843,16 +1844,16 @@ class _MentorshipTrainingSection extends StatelessWidget {
                     },
                     borderRadius: BorderRadius.circular(30),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.039, vertical: SizeConfig.screenHeight*0.01),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
+                          Text(
                             'Explore All Programs',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
-                              fontSize: 15,
+                              fontSize: SizeConfig.screenHeight*0.014,
                               letterSpacing: 0.3,
                             ),
                           ),
@@ -2330,8 +2331,8 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
             }
             _startTimer(urls);
             return SizedBox(
-              height: 400,
-              width: 520,
+              height: SizeConfig.screenHeight*0.4,
+              width: SizeConfig.screenWidth*0.94,
               child: PageView.builder(
                 controller: _controller,
                 allowImplicitScrolling: true,
