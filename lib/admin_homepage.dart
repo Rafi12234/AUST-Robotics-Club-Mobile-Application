@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 import 'admin_event_management_page.dart';
+import 'educational_mentorship_training_programs_page.dart';
+import 'ResearchProjectsPage.dart';
+import 'achievement.dart';
+import 'admin_research_projects_management_page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -392,6 +396,7 @@ class _DashboardStatsGrid extends StatelessWidget {
           gradient: [const Color(0xFF6366F1), const Color(0xFF8B5CF6)],
           collectionPath: 'All_Data/Event_Page/All_Events_of_RC',
           index: 0,
+          destinationPage: const AdminEventPage(),
         ),
         const SizedBox(height: 16),
         _StatCard(
@@ -400,6 +405,7 @@ class _DashboardStatsGrid extends StatelessWidget {
           gradient: [const Color(0xFF3B82F6), const Color(0xFF06B6D4)],
           collectionPath: 'All_Data/Research_Projects/research_projects',
           index: 1,
+          destinationPage: const AdminResearchProjectsPage(),
         ),
         const SizedBox(height: 16),
         _StatCard(
@@ -409,6 +415,7 @@ class _DashboardStatsGrid extends StatelessWidget {
           collectionPath:
           'All_Data/Educational, Mentorship & Training Programs/educational, mentorship & training programs',
           index: 2,
+          destinationPage: const EducationalProgramsPage(),
         ),
         const SizedBox(height: 16),
         _StatCard(
@@ -417,6 +424,7 @@ class _DashboardStatsGrid extends StatelessWidget {
           gradient: [const Color(0xFFF59E0B), const Color(0xFFEF4444)],
           collectionPath: 'All_Data/Achievement/achievement',
           index: 3,
+          destinationPage: const AchievementPage(),
         ),
         const SizedBox(height: 16),
         _GoverningPanelCard(index: 4),
@@ -431,6 +439,7 @@ class _StatCard extends StatefulWidget {
   final List<Color> gradient;
   final String collectionPath;
   final int index;
+  final Widget destinationPage;
 
   const _StatCard({
     required this.title,
@@ -438,6 +447,7 @@ class _StatCard extends StatefulWidget {
     required this.gradient,
     required this.collectionPath,
     required this.index,
+    required this.destinationPage,
   });
 
   @override
@@ -509,7 +519,7 @@ class _StatCardState extends State<_StatCard>
                 context,
                 PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) =>
-                  const AdminEventPage(), // ✅ Your event management page widget
+                      widget.destinationPage,
                   transitionsBuilder: (context, animation, secondaryAnimation, child) {
                     const begin = Offset(0.0, 1.0);
                     const end = Offset.zero;
