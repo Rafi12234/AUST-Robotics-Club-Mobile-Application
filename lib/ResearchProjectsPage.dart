@@ -559,6 +559,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _institutionalMailController = TextEditingController();
 
   bool _isVerified = false;
   bool _isVerifying = false;
@@ -571,6 +572,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
     _idController.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
+    _institutionalMailController.dispose();
     super.dispose();
   }
 
@@ -644,6 +646,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
   Future<void> _submitProposal() async {
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();
+    final institutionalMail = _institutionalMailController.text.trim();
 
     if (title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -666,6 +669,21 @@ class _ProposalDialogState extends State<ProposalDialog> {
       return;
     }
 
+    if (institutionalMail.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter institutional mail')),
+      );
+      return;
+    }
+
+    // Basic email validation
+    if (!institutionalMail.contains('@') || !institutionalMail.contains('.')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address')),
+      );
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
     });
@@ -680,6 +698,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
         'Proposal': _proposalType,
         'Title': title,
         'Short_Des': description,
+        'Institutional_Mail': institutionalMail,
         'Timestamp': FieldValue.serverTimestamp(),
       });
 
@@ -866,6 +885,28 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Institutional Mail
+                const Text(
+                  'Institutional Mail',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _institutionalMailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your institutional email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    prefixIcon: const Icon(Icons.email),
                   ),
                 ),
                 const SizedBox(height: 16),
