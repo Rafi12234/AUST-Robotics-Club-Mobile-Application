@@ -450,7 +450,7 @@ class _DashboardStatsGrid extends StatelessWidget {
                 title: 'Proposal Approvals',
                 icon: Icons.approval_rounded,
                 gradient: [const Color(0xFF8B5CF6), const Color(0xFFEC4899)],
-                collectionPath: 'All_Data/Research_Projects/research_proposal',
+                collectionPath: 'All_Data/Student_Proposal_for_R&P/student_proposal_for_R&P',
                 index: 4,
                 destinationPage: const AdminProposalApprovalPage(),
               ),
