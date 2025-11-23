@@ -5,6 +5,7 @@ import 'admin_event_management_page.dart';
 import 'educational_mentorship_training_programs_page.dart';
 import 'achievement.dart';
 import 'admin_research_projects_management_page.dart';
+import 'admin_proposal_approval_page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -442,7 +443,24 @@ class _DashboardStatsGrid extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        _GoverningPanelCard(index: 4),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                title: 'Proposal Approvals',
+                icon: Icons.approval_rounded,
+                gradient: [const Color(0xFF8B5CF6), const Color(0xFFEC4899)],
+                collectionPath: 'All_Data/Research_Projects/research_proposal',
+                index: 4,
+                destinationPage: const AdminProposalApprovalPage(),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(child: SizedBox()), // Empty space for symmetry
+          ],
+        ),
+        const SizedBox(height: 16),
+        _GoverningPanelCard(index: 5),
       ],
     );
   }

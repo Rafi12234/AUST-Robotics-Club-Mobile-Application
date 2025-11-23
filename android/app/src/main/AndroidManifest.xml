@@ -1,5 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Internet permission -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- ✅ Permissions for selecting images -->
     <!-- Android 13+ (API 33): read photos -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
@@ -48,6 +51,11 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT" />
             <data android:mimeType="text/plain" />
+        </intent>
+        <!-- Allow launching email apps (Gmail, etc.) -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
         </intent>
     </queries>
 </manifest>
