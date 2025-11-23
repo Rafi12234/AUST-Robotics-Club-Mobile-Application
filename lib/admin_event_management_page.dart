@@ -629,7 +629,7 @@ class _EventEditPageState extends State<EventEditPage> {
               SliverToBoxAdapter(
                 child: _OrderField(
                   eventName: widget.eventName,
-                  currentOrder: data['Order'] ?? 999,
+                  currentOrder: _getOrderValue(data['Order']),
                 ),
               ),
 
@@ -740,6 +740,16 @@ class _EventEditPageState extends State<EventEditPage> {
       count++;
     }
     return count;
+  }
+
+  // Helper method to safely get Order value as int
+  int _getOrderValue(dynamic orderValue) {
+    if (orderValue == null) return 999;
+    if (orderValue is int) return orderValue;
+    if (orderValue is String) {
+      return int.tryParse(orderValue) ?? 999;
+    }
+    return 999;
   }
 
   Future<String?> _pickAndUploadImage() async {
