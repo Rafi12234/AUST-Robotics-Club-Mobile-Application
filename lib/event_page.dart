@@ -128,7 +128,36 @@ class EventsPage extends StatelessWidget {
             );
           }
 
-          final events = snapshot.data!.docs;
+          // Get events and sort them properly by Order field
+          final events = snapshot.data!.docs.toList();
+
+          // Sort events by Order field (handling both int and String types)
+          events.sort((a, b) {
+            final dataA = a.data() as Map<String, dynamic>;
+            final dataB = b.data() as Map<String, dynamic>;
+
+            // Helper function to get Order as int
+            int getOrder(dynamic orderValue) {
+              if (orderValue == null) return 999;
+              if (orderValue is int) return orderValue;
+              if (orderValue is String) {
+                return int.tryParse(orderValue) ?? 999;
+              }
+              return 999;
+            }
+
+            final orderA = getOrder(dataA['Order']);
+            final orderB = getOrder(dataB['Order']);
+
+            return orderA.compareTo(orderB);
+          });
+
+          // Debug: Print order of events AFTER sorting
+          print('=== Events after sorting ===');
+          for (var i = 0; i < events.length; i++) {
+            final data = events[i].data() as Map<String, dynamic>;
+            print('Position $i: ${data['Event_Name']} - Order: ${data['Order']}');
+          }
 
           return GridView.builder(
             padding: const EdgeInsets.all(16),
@@ -144,6 +173,7 @@ class EventsPage extends StatelessWidget {
               final data = event.data() as Map<String, dynamic>;
               final eventName = data['Event_Name'] ?? 'Untitled Event';
               final coverPicture = data['Cover_Picture'] ?? '';
+              final order = data['Order'] ?? 999;
 
               return Hero(
                 tag: 'event_${event.id}',
@@ -199,36 +229,75 @@ class EventsPage extends StatelessWidget {
                           // Event Cover Image
                           Expanded(
                             flex: 3,
-                            child: coverPicture.isNotEmpty
-                                ? CachedNetworkImage(
-                              imageUrl: coverPicture,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                color: Colors.grey[300],
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Color(0xFF2E7D32),
-                                  ),
-                                ),
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  Container(
+                            child: Stack(
+                              children: [
+                                // Cover Image
+                                coverPicture.isNotEmpty
+                                    ? CachedNetworkImage(
+                                  imageUrl: coverPicture,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  placeholder: (context, url) => Container(
                                     color: Colors.grey[300],
-                                    child: const Icon(
-                                      Icons.event,
-                                      size: 50,
-                                      color: Colors.grey,
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Color(0xFF2E7D32),
+                                      ),
                                     ),
                                   ),
-                            )
-                                : Container(
-                              color: Colors.grey[300],
-                              child: const Icon(
-                                Icons.event,
-                                size: 50,
-                                color: Colors.grey,
-                              ),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                        color: Colors.grey[300],
+                                        child: const Icon(
+                                          Icons.event,
+                                          size: 50,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                )
+                                    : Container(
+                                  color: Colors.grey[300],
+                                  child: const Icon(
+                                    Icons.event,
+                                    size: 50,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                // Order Number Badge
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.3),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Text(
+                                      '#$order',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           // Event Name

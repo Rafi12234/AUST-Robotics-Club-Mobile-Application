@@ -483,7 +483,7 @@ class _EventItem {
   const _EventItem({required this.number, required this.imageUrl, required this.title});
 }
 
-/// Firestore listener → dynamic list of poster URLs → infinite auto-sliding carousel
+/// Firestore listener → fetch top 3 events by Order → infinite auto-sliding carousel
 class _RecentEventsCarousel extends StatefulWidget {
   const _RecentEventsCarousel();
 
@@ -493,8 +493,11 @@ class _RecentEventsCarousel extends StatefulWidget {
 
 class _RecentEventsCarouselState extends State<_RecentEventsCarousel>
     with AutomaticKeepAliveClientMixin {
-  final _docRef =
-  FirebaseFirestore.instance.collection('All_Data').doc('Recent_Events');
+  // Changed to fetch from All_Events_of_RC collection
+  final _collectionRef = FirebaseFirestore.instance
+      .collection('All_Data')
+      .doc('Event_Page')
+      .collection('All_Events_of_RC');
 
   late final PageController _controller;
   Timer? _timer;
@@ -546,25 +549,54 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel>
     });
   }
 
-  List<EventItem> _extractSortedEvents(Map<String, dynamic>? data) {
-    if (data == null) return const [];
-    final reg = RegExp(r'^Event_(\d+)$');
+  // Helper to safely get Order value as int
+  int _getOrderValue(dynamic orderValue) {
+    if (orderValue == null) return 999;
+    if (orderValue is int) return orderValue;
+    if (orderValue is String) {
+      return int.tryParse(orderValue) ?? 999;
+    }
+    return 999;
+  }
+
+  List<EventItem> _extractEventsFromDocs(List<QueryDocumentSnapshot> docs) {
     final items = <EventItem>[];
 
-    data.forEach((key, value) {
-      final m = reg.firstMatch(key);
-      if (m != null && value is String && value.trim().isNotEmpty) {
-        final n = int.tryParse(m.group(1) ?? '');
-        if (n != null) {
-          final url = value.trim();
-          final titleKey = 'Event_${n}_Name';
-          final title = (data[titleKey] as String?)?.trim() ?? 'Event $n';
-          items.add(EventItem(number: n, imageUrl: url, title: title));
-        }
-      }
-    });
+    print('=== Recent Events Carousel ===');
+    print('Total docs fetched: ${docs.length}');
 
-    items.sort((a, b) => b.number.compareTo(a.number));
+    // Process all documents but only include those with Order 1, 2, or 3
+    for (var i = 0; i < docs.length; i++) {
+      final doc = docs[i];
+      final data = doc.data() as Map<String, dynamic>?;
+      if (data == null) {
+        print('Doc $i: NULL data');
+        continue;
+      }
+
+      final coverPicture = (data['Cover_Picture'] as String?)?.trim() ?? '';
+      final eventName = (data['Event_Name'] as String?)?.trim() ?? doc.id;
+      final order = _getOrderValue(data['Order']);
+
+      print('Doc $i: $eventName - Order: $order - Has Cover: ${coverPicture.isNotEmpty}');
+
+      // ONLY include events with Order exactly 1, 2, or 3 that have cover pictures
+      if ((order == 1 || order == 2 || order == 3) && coverPicture.isNotEmpty) {
+        items.add(EventItem(
+          number: order,
+          imageUrl: coverPicture,
+          title: eventName,
+        ));
+      }
+    }
+
+    // Sort items by order number to ensure 1, 2, 3 sequence
+    items.sort((a, b) => a.number.compareTo(b.number));
+
+    print('Final items count: ${items.length}');
+    print('Items in order: ${items.map((e) => '#${e.number}: ${e.title}').toList()}');
+    print('===========================');
+
     return items;
   }
 
@@ -572,8 +604,10 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: _docRef.snapshots(),
+    return StreamBuilder<QuerySnapshot>(
+      stream: _collectionRef
+          .orderBy('Order', descending: false)
+          .snapshots(),
       builder: (context, snap) {
         if (snap.hasError) {
           return _errorBox('Failed to load recent events.\n${snap.error}');
@@ -582,14 +616,16 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel>
           return _skeleton(height: 200);
         }
 
-        final events = _extractSortedEvents(snap.data?.data());
+        final docs = snap.data?.docs ?? [];
+        final events = _extractEventsFromDocs(docs);
+
         if (events.isEmpty) {
           _timer?.cancel();
           _timer = null;
           _didInitialJump = false;
           _lastCount = 0;
           return _emptyBox(
-              'No recent event posters yet.\nAdd Event_1, Event_1_Name … to Firestore.');
+              'No events with Order 1, 2, 3 found.\nSet event Order to 1, 2, or 3 in Admin Panel.');
         }
 
         if (_lastCount != events.length) {
