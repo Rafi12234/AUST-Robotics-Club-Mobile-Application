@@ -537,6 +537,7 @@ class _AddEventButtonState extends State<_AddEventButton>
         'Event_Name': result,
         'Cover_Picture': '',
         'Introduction': '',
+        'Order': 999, // Default order (lowest priority)
         'Headline_1': '',
         'Headline_1_description': '',
       });
@@ -621,6 +622,14 @@ class _EventEditPageState extends State<EventEditPage> {
                   fieldName: 'Event_Name',
                   eventName: widget.eventName,
                   icon: Icons.event_rounded,
+                ),
+              ),
+
+              // Order Section (Priority)
+              SliverToBoxAdapter(
+                child: _OrderField(
+                  eventName: widget.eventName,
+                  currentOrder: data['Order'] ?? 999,
                 ),
               ),
 
@@ -1794,3 +1803,319 @@ class _AddHeadlineButton extends StatelessWidget {
     }
   }
 }
+
+// ============================================
+// ORDER FIELD - Edit event display order/priority
+// ============================================
+class _OrderField extends StatefulWidget {
+  final String eventName;
+  final int currentOrder;
+
+  const _OrderField({
+    required this.eventName,
+    required this.currentOrder,
+  });
+
+  @override
+  State<_OrderField> createState() => _OrderFieldState();
+}
+
+class _OrderFieldState extends State<_OrderField> {
+  late TextEditingController _controller;
+  bool _isEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.currentOrder.toString());
+  }
+
+  @override
+  void didUpdateWidget(_OrderField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentOrder != widget.currentOrder && !_isEditing) {
+      _controller.text = widget.currentOrder.toString();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveOrder() async {
+    final orderValue = int.tryParse(_controller.text.trim());
+
+    if (orderValue == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid number'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (orderValue < 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Order must be 1 or greater'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('All_Data')
+          .doc('Event_Page')
+          .collection('All_Events_of_RC')
+          .doc(widget.eventName)
+          .update({'Order': orderValue});
+
+      setState(() => _isEditing = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Text('Order updated to $orderValue'),
+              ],
+            ),
+            backgroundColor: kGreenMain,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating order: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: kGreenMain.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: kAccentGold.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.low_priority_rounded,
+                    color: kAccentGold,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Display Order (Priority)',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: kGreenDark,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Lower number = Higher priority (1 shows first)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (!_isEditing)
+                  IconButton(
+                    onPressed: () => setState(() => _isEditing = true),
+                    icon: const Icon(Icons.edit_rounded),
+                    color: kGreenMain,
+                    tooltip: 'Edit Order',
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (_isEditing) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      keyboardType: TextInputType.number,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        labelText: 'Order Number',
+                        hintText: 'e.g., 1, 2, 3...',
+                        prefixIcon: const Icon(Icons.format_list_numbered),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: kGreenMain, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    onPressed: _saveOrder,
+                    icon: const Icon(Icons.check_rounded, size: 20),
+                    label: const Text('Save'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kGreenMain,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: () {
+                      _controller.text = widget.currentOrder.toString();
+                      setState(() => _isEditing = false);
+                    },
+                    icon: const Icon(Icons.close_rounded),
+                    color: Colors.red,
+                    tooltip: 'Cancel',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Events with order 1 appear first, then 2, 3, etc.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue[900],
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: kGreenLight.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: kGreenLight.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: kGreenMain,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        widget.currentOrder.toString(),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        widget.currentOrder == 1
+                            ? 'Highest Priority (Shows First)'
+                            : widget.currentOrder <= 5
+                                ? 'High Priority'
+                                : widget.currentOrder <= 10
+                                    ? 'Medium Priority'
+                                    : 'Low Priority',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
