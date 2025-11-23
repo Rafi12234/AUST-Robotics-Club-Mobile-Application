@@ -72,6 +72,7 @@ class EventsPage extends StatelessWidget {
             .collection('All_Data')
             .doc('Event_Page')
             .collection('All_Events_of_RC')
+            .orderBy('Order', descending: false) // Sort by Order field ascending (1, 2, 3...)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
