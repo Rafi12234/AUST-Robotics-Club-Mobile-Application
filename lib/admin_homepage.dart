@@ -6,6 +6,7 @@ import 'educational_mentorship_training_programs_page.dart';
 import 'achievement.dart';
 import 'admin_research_projects_management_page.dart';
 import 'admin_proposal_approval_page.dart';
+import 'admin_achievement_management_page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -456,11 +457,20 @@ class _DashboardStatsGrid extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            Expanded(child: SizedBox()), // Empty space for symmetry
+            Expanded(
+              child: _StatCard(
+                title: 'Manage Achievements',
+                icon: Icons.workspace_premium_rounded,
+                gradient: [const Color(0xFFFF6B35), const Color(0xFFF7931E)],
+                collectionPath: 'All_Data/Achievement/achievement',
+                index: 5,
+                destinationPage: const AdminAchievementPage(),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
-        _GoverningPanelCard(index: 5),
+        _GoverningPanelCard(index: 6),
       ],
     );
   }
