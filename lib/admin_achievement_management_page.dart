@@ -618,6 +618,7 @@ class _AddAchievementButtonState extends State<_AddAchievementButton>
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: kGreenMain,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1065,31 +1066,32 @@ class _EditableNameFieldState extends State<_EditableNameField> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        final name = controller.text.trim();
-                        if (name.isNotEmpty && name != widget.currentName) {
-                          Navigator.pop(context, name);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kGreenMain,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final name = controller.text.trim();
+                          if (name.isNotEmpty && name != widget.currentName) {
+                            Navigator.pop(context, name);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kGreenMain,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
                         ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Update',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
+                        child: const Text(
+                          'Update',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ],
