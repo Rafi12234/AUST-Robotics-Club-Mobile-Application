@@ -569,6 +569,7 @@ class _AddAchievementButtonState extends State<_AddAchievementButton>
       child: FloatingActionButton.extended(
         onPressed: () => _showAddAchievementDialog(context),
         backgroundColor: kGreenMain,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
         label: const Text(
           'Add Achievement',
