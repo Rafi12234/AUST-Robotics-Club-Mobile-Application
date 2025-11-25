@@ -74,278 +74,355 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
     String? imageUrl;
     bool isUploading = false;
 
-    await showDialog(
+    await showGeneralDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: kGreenMain.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.person_add, color: kGreenMain),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Add Panel Member',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Position Dropdown
-                  const Text(
-                    'Select Position*',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: selectedPosition,
-                    decoration: InputDecoration(
-                      hintText: 'Choose position',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: kGreenMain, width: 2),
-                      ),
-                    ),
-                    items: positions.map((position) {
-                      return DropdownMenuItem(
-                        value: position,
-                        child: Text(position),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setDialogState(() {
-                        selectedPosition = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Name
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Name*',
-                      hintText: 'Enter member name',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: kGreenMain, width: 2),
-                      ),
+      barrierLabel: 'Add Member',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return ScaleTransition(
+              scale: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              ),
+              child: FadeTransition(
+                opacity: animation,
+                child: AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    side: BorderSide(
+                      color: kGreenMain.withValues(alpha: 0.3),
+                      width: 2,
                     ),
                   ),
-                  const SizedBox(height: 16),
-
-                  // Department
-                  TextField(
-                    controller: departmentController,
-                    decoration: InputDecoration(
-                      labelText: 'Department*',
-                      hintText: 'e.g., CSE',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  backgroundColor: Colors.white,
+                  elevation: 24,
+                  contentPadding: EdgeInsets.zero,
+                  titlePadding: EdgeInsets.zero,
+                  title: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [kGreenDark, kGreenMain],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: kGreenMain, width: 2),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: kGreenMain.withValues(alpha: 0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Designation
-                  TextField(
-                    controller: designationController,
-                    decoration: InputDecoration(
-                      labelText: 'Designation*',
-                      hintText: 'e.g., Student',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: kGreenMain, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Email
-                  TextField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'member@example.com',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: kGreenMain, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Facebook
-                  TextField(
-                    controller: facebookController,
-                    decoration: InputDecoration(
-                      labelText: 'Facebook URL',
-                      hintText: 'https://facebook.com/...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: kGreenMain, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // LinkedIn
-                  TextField(
-                    controller: linkedinController,
-                    decoration: InputDecoration(
-                      labelText: 'LinkedIn URL',
-                      hintText: 'https://linkedin.com/in/...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: kGreenMain, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Order
-                  TextField(
-                    controller: orderController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Order*',
-                      hintText: 'Display order (e.g., 1, 2, 3...)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: kGreenMain, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Image Upload
-                  const Text(
-                    'Profile Image*',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    onPressed: isUploading
-                        ? null
-                        : () async {
-                            setDialogState(() => isUploading = true);
-                            final picker = ImagePicker();
-                            final pickedFile = await picker.pickImage(
-                              source: ImageSource.gallery,
-                              imageQuality: 85,
-                            );
-
-                            if (pickedFile != null) {
-                              try {
-                                final url = await _uploadImageToCloudinary(
-                                  pickedFile.path,
-                                );
-                                setDialogState(() {
-                                  imageUrl = url;
-                                  isUploading = false;
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Image uploaded successfully!'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              } catch (e) {
-                                setDialogState(() => isUploading = false);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Upload failed: $e'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            } else {
-                              setDialogState(() => isUploading = false);
-                            }
-                          },
-                    icon: isUploading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              width: 2,
                             ),
-                          )
-                        : const Icon(Icons.upload_file),
-                    label: Text(isUploading
-                        ? 'Uploading...'
-                        : (imageUrl != null ? 'Image Uploaded ✓' : 'Upload Image')),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: imageUrl != null ? Colors.green : kGreenMain,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.person_add_rounded,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Add Panel Member',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Fill in the details below',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  content: Container(
+                    width: MediaQuery.of(context).size.width * 0.85,
+                    constraints: const BoxConstraints(maxHeight: 480),
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Position Dropdown
+                          const Text(
+                            'Select Position*',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            value: selectedPosition,
+                            decoration: InputDecoration(
+                              hintText: 'Choose position',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                            items: positions.map((position) {
+                              return DropdownMenuItem(
+                                value: position,
+                                child: Text(position),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setDialogState(() {
+                                selectedPosition = value;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Name
+                          TextField(
+                            controller: nameController,
+                            decoration: InputDecoration(
+                              labelText: 'Name*',
+                              hintText: 'Enter member name',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Department
+                          TextField(
+                            controller: departmentController,
+                            decoration: InputDecoration(
+                              labelText: 'Department*',
+                              hintText: 'e.g., CSE',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Designation
+                          TextField(
+                            controller: designationController,
+                            decoration: InputDecoration(
+                              labelText: 'Designation*',
+                              hintText: 'e.g., Student',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Email
+                          TextField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              hintText: 'member@example.com',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Facebook
+                          TextField(
+                            controller: facebookController,
+                            decoration: InputDecoration(
+                              labelText: 'Facebook URL',
+                              hintText: 'https://facebook.com/...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // LinkedIn
+                          TextField(
+                            controller: linkedinController,
+                            decoration: InputDecoration(
+                              labelText: 'LinkedIn URL',
+                              hintText: 'https://linkedin.com/in/...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Order
+                          TextField(
+                            controller: orderController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Order*',
+                              hintText: 'Display order (e.g., 1, 2, 3...)',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Image Upload
+                          const Text(
+                            'Profile Image*',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton.icon(
+                            onPressed: isUploading
+                                ? null
+                                : () async {
+                              setDialogState(() => isUploading = true);
+                              final picker = ImagePicker();
+                              final pickedFile = await picker.pickImage(
+                                source: ImageSource.gallery,
+                                imageQuality: 85,
+                              );
+
+                              if (pickedFile != null) {
+                                try {
+                                  final url = await _uploadImageToCloudinary(
+                                    pickedFile.path,
+                                  );
+                                  setDialogState(() {
+                                    imageUrl = url;
+                                    isUploading = false;
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Image uploaded successfully!'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                } catch (e) {
+                                  setDialogState(() => isUploading = false);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Upload failed: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              } else {
+                                setDialogState(() => isUploading = false);
+                              }
+                            },
+                            icon: isUploading
+                                ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                                : const Icon(Icons.upload_file),
+                            label: Text(isUploading
+                                ? 'Uploading...'
+                                : (imageUrl != null ? 'Image Uploaded ✓' : 'Upload Image')),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: imageUrl != null ? Colors.green : kGreenMain,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          if (imageUrl != null) ...[
+                            const SizedBox(height: 8),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                imageUrl!,
+                                height: 100,
+                                width: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ),
-                  if (imageUrl != null) ...[
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        imageUrl!,
-                        height: 100,
-                        width: 100,
-                        fit: BoxFit.cover,
-                      ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
                     ),
-                  ],
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-              ),
-              ElevatedButton(
-                onPressed: isUploading
-                    ? null
-                    : () async {
+                    ElevatedButton(
+                      onPressed: isUploading
+                          ? null
+                          : () async {
                         if (selectedPosition == null ||
                             nameController.text.trim().isEmpty ||
                             departmentController.text.trim().isEmpty ||
@@ -401,19 +478,22 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                           );
                         }
                       },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kGreenMain,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kGreenMain,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Add Member'),
+                    ),
+                  ],
                 ),
-                child: const Text('Add Member'),
               ),
-            ],
-          );
-        },
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -472,280 +552,355 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
     String? imageUrl = currentData['Image'] ?? '';
     bool isUploading = false;
 
-    await showDialog(
+    await showGeneralDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.edit, color: Colors.blue),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    'Edit Panel Member',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Position Dropdown
-                  const Text(
-                    'Select Position*',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: selectedPosition,
-                    decoration: InputDecoration(
-                      hintText: 'Choose position',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2),
-                      ),
-                    ),
-                    items: positions.map((position) {
-                      return DropdownMenuItem(
-                        value: position,
-                        child: Text(position),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setDialogState(() {
-                        selectedPosition = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Name
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Name*',
-                      hintText: 'Enter member name',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2),
-                      ),
+      barrierLabel: 'Edit Member',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return ScaleTransition(
+              scale: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              ),
+              child: FadeTransition(
+                opacity: animation,
+                child: AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    side: BorderSide(
+                      color: kGreenMain.withValues(alpha: 0.3),
+                      width: 2,
                     ),
                   ),
-                  const SizedBox(height: 16),
-
-                  // Department
-                  TextField(
-                    controller: departmentController,
-                    decoration: InputDecoration(
-                      labelText: 'Department*',
-                      hintText: 'e.g., CSE',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  backgroundColor: Colors.white,
+                  elevation: 24,
+                  contentPadding: EdgeInsets.zero,
+                  titlePadding: EdgeInsets.zero,
+                  title: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [kGreenDark, kGreenMain],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: kGreenMain.withValues(alpha: 0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Designation
-                  TextField(
-                    controller: designationController,
-                    decoration: InputDecoration(
-                      labelText: 'Designation*',
-                      hintText: 'e.g., Student',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Email
-                  TextField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'member@example.com',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Facebook
-                  TextField(
-                    controller: facebookController,
-                    decoration: InputDecoration(
-                      labelText: 'Facebook URL',
-                      hintText: 'https://facebook.com/...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // LinkedIn
-                  TextField(
-                    controller: linkedinController,
-                    decoration: InputDecoration(
-                      labelText: 'LinkedIn URL',
-                      hintText: 'https://linkedin.com/in/...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Order
-                  TextField(
-                    controller: orderController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Order*',
-                      hintText: 'Display order (e.g., 1, 2, 3...)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Image Upload
-                  const Text(
-                    'Profile Image*',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  if (imageUrl != null && imageUrl!.isNotEmpty) ...[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        imageUrl!,
-                        height: 100,
-                        width: 100,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  ElevatedButton.icon(
-                    onPressed: isUploading
-                        ? null
-                        : () async {
-                            setDialogState(() => isUploading = true);
-                            final picker = ImagePicker();
-                            final pickedFile = await picker.pickImage(
-                              source: ImageSource.gallery,
-                              imageQuality: 85,
-                            );
-
-                            if (pickedFile != null) {
-                              try {
-                                final url = await _uploadImageToCloudinary(
-                                  pickedFile.path,
-                                );
-                                setDialogState(() {
-                                  imageUrl = url;
-                                  isUploading = false;
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Image uploaded successfully!'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              } catch (e) {
-                                setDialogState(() => isUploading = false);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Upload failed: $e'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            } else {
-                              setDialogState(() => isUploading = false);
-                            }
-                          },
-                    icon: isUploading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              width: 2,
                             ),
-                          )
-                        : const Icon(Icons.upload_file),
-                    label: Text(isUploading
-                        ? 'Uploading...'
-                        : 'Change Image'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.edit_rounded,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Edit Panel Member',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Update the details below',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  content: Container(
+                    width: MediaQuery.of(context).size.width * 0.85,
+                    constraints: const BoxConstraints(maxHeight: 480),
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Position Dropdown
+                          const Text(
+                            'Select Position*',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            value: selectedPosition,
+                            decoration: InputDecoration(
+                              hintText: 'Choose position',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                            items: positions.map((position) {
+                              return DropdownMenuItem(
+                                value: position,
+                                child: Text(position),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setDialogState(() {
+                                selectedPosition = value;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Name
+                          TextField(
+                            controller: nameController,
+                            decoration: InputDecoration(
+                              labelText: 'Name*',
+                              hintText: 'Enter member name',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Department
+                          TextField(
+                            controller: departmentController,
+                            decoration: InputDecoration(
+                              labelText: 'Department*',
+                              hintText: 'e.g., CSE',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Designation
+                          TextField(
+                            controller: designationController,
+                            decoration: InputDecoration(
+                              labelText: 'Designation*',
+                              hintText: 'e.g., Student',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Email
+                          TextField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              hintText: 'member@example.com',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Facebook
+                          TextField(
+                            controller: facebookController,
+                            decoration: InputDecoration(
+                              labelText: 'Facebook URL',
+                              hintText: 'https://facebook.com/...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // LinkedIn
+                          TextField(
+                            controller: linkedinController,
+                            decoration: InputDecoration(
+                              labelText: 'LinkedIn URL',
+                              hintText: 'https://linkedin.com/in/...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Order
+                          TextField(
+                            controller: orderController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Order*',
+                              hintText: 'Display order (e.g., 1, 2, 3...)',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: kGreenMain, width: 2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Image Upload
+                          const Text(
+                            'Profile Image*',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 8),
+                          if (imageUrl != null && imageUrl!.isNotEmpty) ...[
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                imageUrl!,
+                                height: 100,
+                                width: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                          ElevatedButton.icon(
+                            onPressed: isUploading
+                                ? null
+                                : () async {
+                              setDialogState(() => isUploading = true);
+                              final picker = ImagePicker();
+                              final pickedFile = await picker.pickImage(
+                                source: ImageSource.gallery,
+                                imageQuality: 85,
+                              );
+
+                              if (pickedFile != null) {
+                                try {
+                                  final url = await _uploadImageToCloudinary(
+                                    pickedFile.path,
+                                  );
+                                  setDialogState(() {
+                                    imageUrl = url;
+                                    isUploading = false;
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Image uploaded successfully!'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                } catch (e) {
+                                  setDialogState(() => isUploading = false);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Upload failed: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              } else {
+                                setDialogState(() => isUploading = false);
+                              }
+                            },
+                            icon: isUploading
+                                ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                                : const Icon(Icons.upload_file),
+                            label: Text(isUploading
+                                ? 'Uploading...'
+                                : 'Change Image'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: kGreenMain,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-              ),
-              ElevatedButton(
-                onPressed: isUploading
-                    ? null
-                    : () async {
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                    ),
+                    ElevatedButton(
+                      onPressed: isUploading
+                          ? null
+                          : () async {
                         if (selectedPosition == null ||
                             nameController.text.trim().isEmpty ||
                             departmentController.text.trim().isEmpty ||
@@ -799,19 +954,22 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                           );
                         }
                       },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kGreenMain,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Update Member'),
+                    ),
+                  ],
                 ),
-                child: const Text('Update'),
               ),
-            ],
-          );
-        },
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -951,7 +1109,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                        (context, index) {
                       final member = members[index];
                       final data = member.data() as Map<String, dynamic>;
 
@@ -991,14 +1149,14 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
       ),
       floatingActionButton: widget.collectionName == 'Executive_Panel'
           ? FloatingActionButton.extended(
-              onPressed: _showAddMemberDialog,
-              backgroundColor: kGreenMain,
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
-                'Add Member',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            )
+        onPressed: _showAddMemberDialog,
+        backgroundColor: kGreenMain,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'Add Member',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      )
           : null,
     );
   }
@@ -1099,25 +1257,25 @@ class _MemberCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               child: imageUrl.isNotEmpty
                   ? Image.network(
-                      imageUrl,
-                      width: 70,
-                      height: 70,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 70,
-                          height: 70,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.person, size: 40),
-                        );
-                      },
-                    )
+                imageUrl,
+                width: 70,
+                height: 70,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: 70,
+                    height: 70,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.person, size: 40),
+                  );
+                },
+              )
                   : Container(
-                      width: 70,
-                      height: 70,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.person, size: 40),
-                    ),
+                width: 70,
+                height: 70,
+                color: Colors.grey[300],
+                child: const Icon(Icons.person, size: 40),
+              ),
             ),
             const SizedBox(width: 16),
 
@@ -1201,4 +1359,3 @@ class _MemberCard extends StatelessWidget {
     );
   }
 }
-
