@@ -118,6 +118,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       pinned: true,
       elevation: 0,
       backgroundColor: kGreenDark,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+        onPressed: () => Navigator.pop(context),
+      ),
       flexibleSpace: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
