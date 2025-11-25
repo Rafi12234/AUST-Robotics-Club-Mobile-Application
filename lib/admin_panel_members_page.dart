@@ -1043,15 +1043,17 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAddMemberDialog,
-        backgroundColor: brandStart,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Add Member',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
+      floatingActionButton: widget.collectionName == 'Executive_Panel'
+          ? FloatingActionButton.extended(
+              onPressed: _showAddMemberDialog,
+              backgroundColor: brandStart,
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text(
+                'Add Member',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            )
+          : null,
     );
   }
 }
