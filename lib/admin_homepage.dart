@@ -7,6 +7,7 @@ import 'achievement.dart';
 import 'admin_research_projects_management_page.dart';
 import 'admin_proposal_approval_page.dart';
 import 'admin_achievement_management_page.dart';
+import 'admin_member_id_management_page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -135,7 +136,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
           ),
         ),
         child: FlexibleSpaceBar(
-          titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+          titlePadding: const EdgeInsets.only(left: 50, bottom: 16),
           title: FadeTransition(
             opacity: _headerFadeAnimation,
             child: const Text(
@@ -474,7 +475,25 @@ class _DashboardStatsGrid extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        _GoverningPanelCard(index: 6),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                title: 'Member IDs',
+                icon: Icons.badge_rounded,
+                gradient: [const Color(0xFF06B6D4), const Color(0xFF0891B2)],
+                collectionPath: 'All_Data/Students_AUSTRC_ID',
+                index: 6,
+                destinationPage: const AdminMemberIdManagementPage(),
+                isSpecialCard: true,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(child: Container()), // Empty space for symmetry
+          ],
+        ),
+        const SizedBox(height: 16),
+        _GoverningPanelCard(index: 7),
       ],
     );
   }
@@ -487,6 +506,7 @@ class _StatCard extends StatefulWidget {
   final String collectionPath;
   final int index;
   final Widget destinationPage;
+  final bool isSpecialCard;
 
   const _StatCard({
     required this.title,
@@ -495,6 +515,7 @@ class _StatCard extends StatefulWidget {
     required this.collectionPath,
     required this.index,
     required this.destinationPage,
+    this.isSpecialCard = false,
   });
 
   @override
@@ -565,12 +586,15 @@ class _StatCardState extends State<_StatCard>
 
   @override
   Widget build(BuildContext context) {
-    // Parse collection path
-    final pathParts = widget.collectionPath.split('/');
-    final collectionRef = FirebaseFirestore.instance
-        .collection(pathParts[0])
-        .doc(pathParts[1])
-        .collection(pathParts[2]);
+    // Parse collection path (only for non-special cards)
+    CollectionReference? collectionRef;
+    if (!widget.isSpecialCard) {
+      final pathParts = widget.collectionPath.split('/');
+      collectionRef = FirebaseFirestore.instance
+          .collection(pathParts[0])
+          .doc(pathParts[1])
+          .collection(pathParts[2]);
+    }
 
     return FadeTransition(
       opacity: _fadeAnimation,
@@ -815,8 +839,97 @@ class _StatCardState extends State<_StatCard>
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 12),
-                                  StreamBuilder<QuerySnapshot>(
-                                    stream: collectionRef.snapshots(),
+                                  widget.isSpecialCard
+                                      ? StreamBuilder<DocumentSnapshot>(
+                                          stream: FirebaseFirestore.instance
+                                              .collection('All_Data')
+                                              .doc('Student_AUSTRC_ID')
+                                              .snapshots(),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return SizedBox(
+                                                height: 32,
+                                                width: 32,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 3,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation(
+                                                    Colors.white.withOpacity(0.9),
+                                                  ),
+                                                ),
+                                              );
+                                            }
+
+                                            if (snapshot.hasError) {
+                                              return Text(
+                                                'Error',
+                                                style: TextStyle(
+                                                  color: Colors.white
+                                                      .withOpacity(0.9),
+                                                  fontSize: 28,
+                                                  fontWeight: FontWeight.w900,
+                                                ),
+                                              );
+                                            }
+
+                                            // Count Member_X fields
+                                            final data = snapshot.data?.data()
+                                                as Map<String, dynamic>?;
+                                            int count = 0;
+                                            if (data != null) {
+                                              data.forEach((key, value) {
+                                                if (key.startsWith('Member_')) {
+                                                  count++;
+                                                }
+                                              });
+                                            }
+
+                                            return TweenAnimationBuilder<int>(
+                                              tween: IntTween(begin: 0, end: count),
+                                              duration: const Duration(
+                                                  milliseconds: 1500),
+                                              curve: Curves.easeOutCubic,
+                                              builder: (context, value, child) {
+                                                return Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                      value.toString(),
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 42,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        letterSpacing: -0.5,
+                                                        height: 1,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              bottom: 6),
+                                                      child: Text(
+                                                        'total',
+                                                        style: TextStyle(
+                                                          color: Colors.white
+                                                              .withOpacity(0.85),
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          },
+                                        )
+                                      : StreamBuilder<QuerySnapshot>(
+                                    stream: collectionRef!.snapshots(),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState == ConnectionState.waiting) {
                                         return SizedBox(
