@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'admin_panel_members_page.dart';
 
 class AdminSemesterPanelsPage extends StatelessWidget {
   final String semesterId;
@@ -190,14 +191,13 @@ class _PanelCardState extends State<_PanelCard> {
             color: Colors.transparent,
             child: InkWell(
               onTap: () {
-                // TODO: Navigate to panel members management page
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Opening ${widget.title} management...'),
-                    backgroundColor: widget.gradient[0],
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AdminPanelMembersPage(
+                      semesterId: widget.semesterId,
+                      panelTitle: widget.title,
+                      collectionName: widget.collectionName,
                     ),
                   ),
                 );
