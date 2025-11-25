@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 import 'admin_event_management_page.dart';
 import 'educational_mentorship_training_programs_page.dart';
-import 'achievement.dart';
 import 'admin_research_projects_management_page.dart';
 import 'admin_proposal_approval_page.dart';
 import 'admin_achievement_management_page.dart';
@@ -438,12 +437,12 @@ class _DashboardStatsGrid extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: _StatCard(
-                title: 'Achievements',
-                icon: Icons.emoji_events_rounded,
-                gradient: [const Color(0xFFF59E0B), const Color(0xFFEF4444)],
-                collectionPath: 'All_Data/Achievement/achievement',
+                title: 'Member IDs',
+                icon: Icons.badge_rounded,
+                gradient: [const Color(0xFF06B6D4), const Color(0xFF0891B2)],
+                collectionPath: 'All_Data/Student_AUSTRC_ID/dummy',
                 index: 3,
-                destinationPage: const AchievementPage(),
+                destinationPage: const AdminMemberIdManagementPage(),
               ),
             ),
           ],
@@ -475,25 +474,7 @@ class _DashboardStatsGrid extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                title: 'Member IDs',
-                icon: Icons.badge_rounded,
-                gradient: [const Color(0xFF06B6D4), const Color(0xFF0891B2)],
-                collectionPath: 'All_Data/Students_AUSTRC_ID',
-                index: 6,
-                destinationPage: const AdminMemberIdManagementPage(),
-                isSpecialCard: true,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(child: Container()), // Empty space for symmetry
-          ],
-        ),
-        const SizedBox(height: 16),
-        _GoverningPanelCard(index: 7),
+        _GoverningPanelCard(index: 6),
       ],
     );
   }
@@ -506,7 +487,9 @@ class _StatCard extends StatefulWidget {
   final String collectionPath;
   final int index;
   final Widget destinationPage;
-  final bool isSpecialCard;
+
+  // Static timestamp for shimmer synchronization
+  static final int _shimmerStartTime = DateTime.now().millisecondsSinceEpoch;
 
   const _StatCard({
     required this.title,
@@ -515,7 +498,6 @@ class _StatCard extends StatefulWidget {
     required this.collectionPath,
     required this.index,
     required this.destinationPage,
-    this.isSpecialCard = false,
   });
 
   @override
@@ -545,7 +527,7 @@ class _StatCardState extends State<_StatCard>
     _shimmerController = AnimationController(
       duration: const Duration(milliseconds: 2500),
       vsync: this,
-    )..repeat();
+    );
 
     _hoverController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -571,6 +553,17 @@ class _StatCardState extends State<_StatCard>
       CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
     );
 
+    // Synchronize shimmer across all cards using static timestamp
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final now = DateTime.now().millisecondsSinceEpoch;
+        final elapsed = now - _StatCard._shimmerStartTime;
+        final offset = (elapsed % 2500) / 2500.0;
+        _shimmerController.value = offset;
+        _shimmerController.repeat();
+      }
+    });
+
     Future.delayed(Duration(milliseconds: 100 + (widget.index * 150)), () {
       if (mounted) _controller.forward();
     });
@@ -586,15 +579,12 @@ class _StatCardState extends State<_StatCard>
 
   @override
   Widget build(BuildContext context) {
-    // Parse collection path (only for non-special cards)
-    CollectionReference? collectionRef;
-    if (!widget.isSpecialCard) {
-      final pathParts = widget.collectionPath.split('/');
-      collectionRef = FirebaseFirestore.instance
-          .collection(pathParts[0])
-          .doc(pathParts[1])
-          .collection(pathParts[2]);
-    }
+    // Parse collection path
+    final pathParts = widget.collectionPath.split('/');
+    final collectionRef = FirebaseFirestore.instance
+        .collection(pathParts[0])
+        .doc(pathParts[1])
+        .collection(pathParts[2]);
 
     return FadeTransition(
       opacity: _fadeAnimation,
@@ -839,22 +829,21 @@ class _StatCardState extends State<_StatCard>
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 12),
-                                  widget.isSpecialCard
+                                  // Special handling for Member IDs
+                                  widget.title == 'Member IDs'
                                       ? StreamBuilder<DocumentSnapshot>(
                                           stream: FirebaseFirestore.instance
                                               .collection('All_Data')
                                               .doc('Student_AUSTRC_ID')
                                               .snapshots(),
                                           builder: (context, snapshot) {
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.waiting) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
                                               return SizedBox(
                                                 height: 32,
                                                 width: 32,
                                                 child: CircularProgressIndicator(
                                                   strokeWidth: 3,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation(
+                                                  valueColor: AlwaysStoppedAnimation(
                                                     Colors.white.withOpacity(0.9),
                                                   ),
                                                 ),
@@ -865,8 +854,7 @@ class _StatCardState extends State<_StatCard>
                                               return Text(
                                                 'Error',
                                                 style: TextStyle(
-                                                  color: Colors.white
-                                                      .withOpacity(0.9),
+                                                  color: Colors.white.withOpacity(0.9),
                                                   fontSize: 28,
                                                   fontWeight: FontWeight.w900,
                                                 ),
@@ -874,8 +862,7 @@ class _StatCardState extends State<_StatCard>
                                             }
 
                                             // Count Member_X fields
-                                            final data = snapshot.data?.data()
-                                                as Map<String, dynamic>?;
+                                            final data = snapshot.data?.data() as Map<String, dynamic>?;
                                             int count = 0;
                                             if (data != null) {
                                               data.forEach((key, value) {
@@ -887,38 +874,31 @@ class _StatCardState extends State<_StatCard>
 
                                             return TweenAnimationBuilder<int>(
                                               tween: IntTween(begin: 0, end: count),
-                                              duration: const Duration(
-                                                  milliseconds: 1500),
+                                              duration: const Duration(milliseconds: 1500),
                                               curve: Curves.easeOutCubic,
                                               builder: (context, value, child) {
                                                 return Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
+                                                  crossAxisAlignment: CrossAxisAlignment.end,
                                                   children: [
                                                     Text(
                                                       value.toString(),
                                                       style: const TextStyle(
                                                         color: Colors.white,
                                                         fontSize: 42,
-                                                        fontWeight:
-                                                            FontWeight.w900,
+                                                        fontWeight: FontWeight.w900,
                                                         letterSpacing: -0.5,
                                                         height: 1,
                                                       ),
                                                     ),
                                                     const SizedBox(width: 8),
                                                     Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              bottom: 6),
+                                                      padding: const EdgeInsets.only(bottom: 6),
                                                       child: Text(
                                                         'total',
                                                         style: TextStyle(
-                                                          color: Colors.white
-                                                              .withOpacity(0.85),
+                                                          color: Colors.white.withOpacity(0.85),
                                                           fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w600,
+                                                          fontWeight: FontWeight.w600,
                                                         ),
                                                       ),
                                                     ),
@@ -929,7 +909,7 @@ class _StatCardState extends State<_StatCard>
                                           },
                                         )
                                       : StreamBuilder<QuerySnapshot>(
-                                    stream: collectionRef!.snapshots(),
+                                    stream: collectionRef.snapshots(),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState == ConnectionState.waiting) {
                                         return SizedBox(
