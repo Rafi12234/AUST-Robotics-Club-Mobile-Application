@@ -14,11 +14,10 @@ class _AdminGoverningPanelPageState extends State<AdminGoverningPanelPage>
   late AnimationController _animationController;
   bool _isLoading = false;
 
-  // Brand colors matching the user's governing panel page
-  static const Color brandStart = Color(0xFF0B6B3A);
-  static const Color brandEnd = Color(0xFF16A34A);
-  static const Color bgGradientStart = Color(0xFFE8F5E9);
-  static const Color bgGradientEnd = Color(0xFFF1F8E9);
+  // Theme colors - matching other admin pages
+  static const Color kGreenDark = Color(0xFF0F3D2E);
+  static const Color kGreenMain = Color(0xFF2D6A4F);
+  static const Color kGreenLight = Color(0xFF52B788);
 
   @override
   void initState() {
@@ -61,10 +60,10 @@ class _AdminGoverningPanelPageState extends State<AdminGoverningPanelPage>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: brandStart.withOpacity(0.1),
+                color: kGreenMain.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.add_circle_outline, color: brandStart),
+              child: const Icon(Icons.add_circle_outline, color: kGreenMain),
             ),
             const SizedBox(width: 12),
             const Text(
@@ -99,7 +98,7 @@ class _AdminGoverningPanelPageState extends State<AdminGoverningPanelPage>
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: brandStart, width: 2),
+                  borderSide: const BorderSide(color: kGreenMain, width: 2),
                 ),
               ),
               textCapitalization: TextCapitalization.words,
@@ -122,7 +121,7 @@ class _AdminGoverningPanelPageState extends State<AdminGoverningPanelPage>
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: brandStart,
+              backgroundColor: kGreenMain,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -223,7 +222,7 @@ class _AdminGoverningPanelPageState extends State<AdminGoverningPanelPage>
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Semester "$result" added successfully with all panel collections!'),
-                backgroundColor: brandStart,
+                backgroundColor: kGreenMain,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -347,192 +346,164 @@ class _AdminGoverningPanelPageState extends State<AdminGoverningPanelPage>
 
   @override
   Widget build(BuildContext context) {
-    final double topInset = MediaQuery.of(context).padding.top;
-
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [bgGradientStart, bgGradientEnd],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [brandStart, brandEnd],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: brandStart.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+      backgroundColor: const Color(0xFFF8FAFB),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // Custom App Bar
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: false,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: kGreenDark,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [kGreenDark, kGreenMain, kGreenLight],
                 ),
-                child: Column(
-                  children: [
-                    Row(
+              ),
+              child: FlexibleSpaceBar(
+                titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
+                title: FadeTransition(
+                  opacity: _animationController,
+                  child: const Text(
+                    'Manage Governing Panel',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Content
+          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance
+                .collection('All_Data')
+                .doc('Governing_Panel')
+                .collection('Semesters')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(kGreenMain),
+                    ),
+                  ),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back_ios_new,
-                            color: Colors.white,
-                          ),
-                          onPressed: () => Navigator.pop(context),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.redAccent,
                         ),
-                        const Expanded(
-                          child: Text(
-                            'Manage Governing Panel',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 0.5,
-                            ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error: ${snapshot.error}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.red,
                           ),
                         ),
-                        const SizedBox(width: 48),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Add, edit or delete semesters',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.95),
-                        fontWeight: FontWeight.w400,
-                      ),
+                  ),
+                );
+              }
+
+              final docs = snapshot.data?.docs ?? [];
+
+              // Sort semesters
+              final sortedDocs = [...docs];
+              sortedDocs.sort((a, b) {
+                final ay = _extractYear(a.id) ?? -1;
+                final by = _extractYear(b.id) ?? -1;
+                if (ay != by) return by.compareTo(ay);
+                final sa = _seasonPriority(a.id);
+                final sb = _seasonPriority(b.id);
+                return sb.compareTo(sa);
+              });
+
+              if (sortedDocs.isEmpty) {
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.folder_open,
+                          size: 80,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'No semesters yet',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tap the + button to add a semester',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                );
+              }
+
+              return SliverPadding(
+                padding: const EdgeInsets.all(24),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final doc = sortedDocs[index];
+                      final semesterId = doc.id;
+
+                      return _SemesterCard(
+                        semesterId: semesterId,
+                        index: index,
+                        onDelete: () => _deleteSemester(semesterId),
+                      );
+                    },
+                    childCount: sortedDocs.length,
+                  ),
                 ),
-              ),
-
-              // Content
-              Expanded(
-                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: FirebaseFirestore.instance
-                      .collection('All_Data')
-                      .doc('Governing_Panel')
-                      .collection('Semesters')
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(brandStart),
-                        ),
-                      );
-                    }
-
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              size: 64,
-                              color: Colors.redAccent,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Error: ${snapshot.error}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.red,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    final docs = snapshot.data?.docs ?? [];
-
-                    // Sort semesters
-                    final sortedDocs = [...docs];
-                    sortedDocs.sort((a, b) {
-                      final ay = _extractYear(a.id) ?? -1;
-                      final by = _extractYear(b.id) ?? -1;
-                      if (ay != by) return by.compareTo(ay);
-                      final sa = _seasonPriority(a.id);
-                      final sb = _seasonPriority(b.id);
-                      return sb.compareTo(sa);
-                    });
-
-                    if (sortedDocs.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.folder_open,
-                              size: 80,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              'No semesters yet',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Tap the + button to add a semester',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.all(24),
-                      itemCount: sortedDocs.length,
-                      itemBuilder: (context, index) {
-                        final doc = sortedDocs[index];
-                        final semesterId = doc.id;
-
-                        return _SemesterCard(
-                          semesterId: semesterId,
-                          index: index,
-                          onDelete: () => _deleteSemester(semesterId),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+              );
+            },
           ),
-        ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isLoading ? null : _addNewSemester,
-        backgroundColor: brandStart,
+        backgroundColor: kGreenMain,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text(
           'Add Semester',
@@ -560,8 +531,8 @@ class _SemesterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gradients = [
-      const [Color(0xFF0B6B3A), Color(0xFF16A34A)],
-      const [Color(0xFF0BAB64), Color(0xFF3BB78F)],
+      const [Color(0xFF0F3D2E), Color(0xFF2D6A4F)],
+      const [Color(0xFF1B5E20), Color(0xFF388E3C)],
     ];
     final colorPair = gradients[index % gradients.length];
 

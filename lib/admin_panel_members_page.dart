@@ -19,12 +19,14 @@ class AdminPanelMembersPage extends StatefulWidget {
   State<AdminPanelMembersPage> createState() => _AdminPanelMembersPageState();
 }
 
-class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
-  // Brand colors
-  static const Color brandStart = Color(0xFF0B6B3A);
-  static const Color brandEnd = Color(0xFF16A34A);
-  static const Color bgGradientStart = Color(0xFFE8F5E9);
-  static const Color bgGradientEnd = Color(0xFFF1F8E9);
+class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
+    with SingleTickerProviderStateMixin {
+  // Theme colors - matching other admin pages
+  static const Color kGreenDark = Color(0xFF0F3D2E);
+  static const Color kGreenMain = Color(0xFF2D6A4F);
+  static const Color kGreenLight = Color(0xFF52B788);
+
+  late AnimationController _headerController;
 
   final List<String> positions = [
     'Advisor',
@@ -44,6 +46,21 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
     'Assistant Director - Web',
     'Bootcamp Co-Ordinator',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _headerController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _headerController.dispose();
+    super.dispose();
+  }
 
   Future<void> _showAddMemberDialog() async {
     String? selectedPosition;
@@ -69,10 +86,10 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: brandStart.withOpacity(0.1),
+                    color: kGreenMain.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.person_add, color: brandStart),
+                  child: const Icon(Icons.person_add, color: kGreenMain),
                 ),
                 const SizedBox(width: 12),
                 const Text(
@@ -101,7 +118,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: brandStart, width: 2),
+                        borderSide: const BorderSide(color: kGreenMain, width: 2),
                       ),
                     ),
                     items: positions.map((position) {
@@ -129,7 +146,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: brandStart, width: 2),
+                        borderSide: const BorderSide(color: kGreenMain, width: 2),
                       ),
                     ),
                   ),
@@ -146,7 +163,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: brandStart, width: 2),
+                        borderSide: const BorderSide(color: kGreenMain, width: 2),
                       ),
                     ),
                   ),
@@ -163,7 +180,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: brandStart, width: 2),
+                        borderSide: const BorderSide(color: kGreenMain, width: 2),
                       ),
                     ),
                   ),
@@ -181,7 +198,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: brandStart, width: 2),
+                        borderSide: const BorderSide(color: kGreenMain, width: 2),
                       ),
                     ),
                   ),
@@ -198,7 +215,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: brandStart, width: 2),
+                        borderSide: const BorderSide(color: kGreenMain, width: 2),
                       ),
                     ),
                   ),
@@ -215,7 +232,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: brandStart, width: 2),
+                        borderSide: const BorderSide(color: kGreenMain, width: 2),
                       ),
                     ),
                   ),
@@ -233,7 +250,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: brandStart, width: 2),
+                        borderSide: const BorderSide(color: kGreenMain, width: 2),
                       ),
                     ),
                   ),
@@ -298,7 +315,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                         ? 'Uploading...'
                         : (imageUrl != null ? 'Image Uploaded ✓' : 'Upload Image')),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: imageUrl != null ? Colors.green : brandStart,
+                      backgroundColor: imageUrl != null ? Colors.green : kGreenMain,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -372,7 +389,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('$selectedPosition added successfully!'),
-                              backgroundColor: brandStart,
+                              backgroundColor: kGreenMain,
                             ),
                           );
                         } catch (e) {
@@ -385,7 +402,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: brandStart,
+                  backgroundColor: kGreenMain,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -852,201 +869,130 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double topInset = MediaQuery.of(context).padding.top;
-
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [bgGradientStart, bgGradientEnd],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [brandStart, brandEnd],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: brandStart.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
+      backgroundColor: const Color(0xFFF8FAFB),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // Custom App Bar
+          _buildSliverAppBar(),
+
+          // Content - Members List
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('All_Data')
+                .doc('Governing_Panel')
+                .collection('Semesters')
+                .doc(widget.semesterId)
+                .collection(widget.collectionName)
+                .orderBy('Order')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(kGreenMain),
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Row(
+                  ),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  ),
+                );
+              }
+
+              final docs = snapshot.data?.docs ?? [];
+
+              // Filter out placeholder documents
+              final members = docs.where((doc) => doc.id != '_placeholder').toList();
+
+              if (members.isEmpty) {
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back_ios_new,
-                            color: Colors.white,
-                          ),
-                          onPressed: () => Navigator.pop(context),
+                        Icon(
+                          Icons.people_outline,
+                          size: 80,
+                          color: Colors.grey[400],
                         ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                widget.panelTitle,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              Text(
-                                widget.semesterId,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white.withOpacity(0.9),
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 20),
+                        Text(
+                          'No members yet',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
                           ),
                         ),
-                        const SizedBox(width: 48),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.collectionName == 'Executive_Panel'
+                              ? 'Tap the + button to add members'
+                              : 'No members added yet',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[500],
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Manage panel members',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.95),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              }
 
-              // Content - Members List
-              Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('All_Data')
-                      .doc('Governing_Panel')
-                      .collection('Semesters')
-                      .doc(widget.semesterId)
-                      .collection(widget.collectionName)
-                      .orderBy('Order')
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(brandStart),
-                        ),
-                      );
-                    }
+              return SliverPadding(
+                padding: const EdgeInsets.all(20),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final member = members[index];
+                      final data = member.data() as Map<String, dynamic>;
 
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text('Error: ${snapshot.error}'),
-                      );
-                    }
-
-                    final docs = snapshot.data?.docs ?? [];
-
-                    // Filter out placeholder documents
-                    final members = docs.where((doc) => doc.id != '_placeholder').toList();
-
-                    if (members.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.people_outline,
-                              size: 80,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              'No members yet',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Tap the + button to add members',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.all(20),
-                      itemCount: members.length,
-                      itemBuilder: (context, index) {
-                        final member = members[index];
-                        final data = member.data() as Map<String, dynamic>;
-
-                        // Handle Order field - can be String or int
-                        int order = 0;
-                        if (data['Order'] != null) {
-                          if (data['Order'] is int) {
-                            order = data['Order'];
-                          } else if (data['Order'] is String) {
-                            order = int.tryParse(data['Order']) ?? 0;
-                          }
+                      // Handle Order field - can be String or int
+                      int order = 0;
+                      if (data['Order'] != null) {
+                        if (data['Order'] is int) {
+                          order = data['Order'];
+                        } else if (data['Order'] is String) {
+                          order = int.tryParse(data['Order']) ?? 0;
                         }
+                      }
 
-                        return _MemberCard(
-                          docId: member.id,
-                          name: data['Name'] ?? '',
-                          position: data['Position'] ?? member.id,
-                          department: data['Department'] ?? '',
-                          designation: data['Designation'] ?? '',
-                          email: data['Email'] ?? '',
-                          imageUrl: data['Image'] ?? '',
-                          order: order,
-                          memberData: data,
-                          onEdit: () => _showEditMemberDialog(member.id, data),
-                          onDelete: () => _deleteMember(member.id),
-                        );
-                      },
-                    );
-                  },
+                      return _MemberCard(
+                        docId: member.id,
+                        name: data['Name'] ?? '',
+                        position: data['Position'] ?? member.id,
+                        department: data['Department'] ?? '',
+                        designation: data['Designation'] ?? '',
+                        email: data['Email'] ?? '',
+                        imageUrl: data['Image'] ?? '',
+                        order: order,
+                        memberData: data,
+                        onEdit: () => _showEditMemberDialog(member.id, data),
+                        onDelete: () => _deleteMember(member.id),
+                      );
+                    },
+                    childCount: members.length,
+                  ),
                 ),
-              ),
-            ],
+              );
+            },
           ),
-        ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        ],
       ),
       floatingActionButton: widget.collectionName == 'Executive_Panel'
           ? FloatingActionButton.extended(
               onPressed: _showAddMemberDialog,
-              backgroundColor: brandStart,
+              backgroundColor: kGreenMain,
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'Add Member',
@@ -1054,6 +1000,57 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage> {
               ),
             )
           : null,
+    );
+  }
+
+  Widget _buildSliverAppBar() {
+    return SliverAppBar(
+      expandedHeight: 140,
+      floating: false,
+      pinned: true,
+      elevation: 0,
+      backgroundColor: kGreenDark,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+        onPressed: () => Navigator.pop(context),
+      ),
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [kGreenDark, kGreenMain, kGreenLight],
+          ),
+        ),
+        child: FlexibleSpaceBar(
+          titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
+          title: FadeTransition(
+            opacity: _headerController,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.panelTitle,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  widget.semesterId,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'admin_panel_members_page.dart';
 
-class AdminSemesterPanelsPage extends StatelessWidget {
+class AdminSemesterPanelsPage extends StatefulWidget {
   final String semesterId;
 
   const AdminSemesterPanelsPage({
@@ -9,139 +9,127 @@ class AdminSemesterPanelsPage extends StatelessWidget {
     required this.semesterId,
   }) : super(key: key);
 
-  // Brand colors
-  static const Color brandStart = Color(0xFF0B6B3A);
-  static const Color brandEnd = Color(0xFF16A34A);
-  static const Color bgGradientStart = Color(0xFFE8F5E9);
-  static const Color bgGradientEnd = Color(0xFFF1F8E9);
+  @override
+  State<AdminSemesterPanelsPage> createState() => _AdminSemesterPanelsPageState();
+}
+
+class _AdminSemesterPanelsPageState extends State<AdminSemesterPanelsPage>
+    with SingleTickerProviderStateMixin {
+  // Theme colors - matching other admin pages
+  static const Color kGreenDark = Color(0xFF0F3D2E);
+  static const Color kGreenMain = Color(0xFF2D6A4F);
+  static const Color kGreenLight = Color(0xFF52B788);
+
+  late AnimationController _headerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _headerController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _headerController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final double topInset = MediaQuery.of(context).padding.top;
-
     final panels = [
       {
         'title': 'Executive Panel',
         'collection': 'Executive_Panel',
         'icon': Icons.stars_rounded,
-        'gradient': [const Color(0xFF0B6B3A), const Color(0xFF16A34A)],
+        'gradient': [const Color(0xFF0F3D2E), const Color(0xFF2D6A4F)],
       },
       {
         'title': 'Deputy Executive Panel',
         'collection': 'Deputy_Executive_Panel',
         'icon': Icons.workspace_premium_rounded,
-        'gradient': [const Color(0xFF0BAB64), const Color(0xFF3BB78F)],
+        'gradient': [const Color(0xFF1B5E20), const Color(0xFF388E3C)],
       },
       {
         'title': 'Senior Sub Executive Panel',
         'collection': 'Senior_Sub_Executive_Panel',
         'icon': Icons.military_tech_rounded,
-        'gradient': [const Color(0xFF0D7C66), const Color(0xFF41B8A7)],
+        'gradient': [const Color(0xFF0D7C66), const Color(0xFF2D9A74)],
       },
       {
         'title': 'Sub Executive Panel',
         'collection': 'Sub_Executive_Panel',
         'icon': Icons.badge_rounded,
-        'gradient': [const Color(0xFF1B5E20), const Color(0xFF4CAF50)],
+        'gradient': [const Color(0xFF2E7D32), const Color(0xFF52B788)],
       },
     ];
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [bgGradientStart, bgGradientEnd],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [brandStart, brandEnd],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: brandStart.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back_ios_new,
-                            color: Colors.white,
-                          ),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        Expanded(
-                          child: Text(
-                            semesterId,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 48),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Select a panel to manage members',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.95),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
+      backgroundColor: const Color(0xFFF8FAFB),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // Custom App Bar
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: false,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: kGreenDark,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [kGreenDark, kGreenMain, kGreenLight],
                 ),
               ),
+              child: FlexibleSpaceBar(
+                titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
+                title: FadeTransition(
+                  opacity: _headerController,
+                  child: Text(
+                    widget.semesterId,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
 
-              // Content - Panel Options
-              Expanded(
-                child: ListView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.all(24),
-                  itemCount: panels.length,
-                  itemBuilder: (context, index) {
-                    final panel = panels[index];
-                    return _PanelCard(
-                      title: panel['title'] as String,
-                      collectionName: panel['collection'] as String,
-                      icon: panel['icon'] as IconData,
-                      gradient: panel['gradient'] as List<Color>,
-                      index: index,
-                      semesterId: semesterId,
-                    );
-                  },
-                ),
+          // Content - Panel Options
+          SliverPadding(
+            padding: const EdgeInsets.all(24),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final panel = panels[index];
+                  return _PanelCard(
+                    title: panel['title'] as String,
+                    collectionName: panel['collection'] as String,
+                    icon: panel['icon'] as IconData,
+                    gradient: panel['gradient'] as List<Color>,
+                    index: index,
+                    semesterId: widget.semesterId,
+                  );
+                },
+                childCount: panels.length,
               ),
-            ],
+            ),
           ),
-        ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        ],
       ),
     );
   }
