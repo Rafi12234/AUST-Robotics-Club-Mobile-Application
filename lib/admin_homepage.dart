@@ -7,6 +7,7 @@ import 'admin_research_projects_management_page.dart';
 import 'admin_proposal_approval_page.dart';
 import 'admin_achievement_management_page.dart';
 import 'admin_member_id_management_page.dart';
+import 'admin_governing_panel_page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -1083,28 +1084,10 @@ class _GoverningPanelCardState extends State<_GoverningPanelCard>
               onTapDown: (_) => setState(() => _isPressed = true),
               onTapUp: (_) {
                 setState(() => _isPressed = false);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Row(
-                      children: [
-                        Icon(Icons.info_outline, color: Colors.white),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Navigate to Governing Panel Management',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                    behavior: SnackBarBehavior.floating,
-                    backgroundColor: kGreenMain,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    margin: const EdgeInsets.all(16),
-                    elevation: 8,
-                    duration: const Duration(seconds: 2),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdminGoverningPanelPage(),
                   ),
                 );
               },
