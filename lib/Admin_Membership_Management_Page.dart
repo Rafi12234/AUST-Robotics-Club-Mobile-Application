@@ -122,15 +122,6 @@ class _AdminMembershipManagementPageState
           ),
         ),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-          onPressed: () {
-            setState(() {});
-          },
-          tooltip: 'Refresh',
-        ),
-      ],
     );
   }
 }
@@ -451,28 +442,28 @@ class _ViewApplicantsButtonState extends State<_ViewApplicantsButton>
                             transform: Matrix4.identity()
                               ..scale(_isHovered ? 1.02 : 1.0),
                             child: Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    kAccentPurple,
-                                    kAccentBlue,
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(24),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: kAccentPurple.withOpacity(
-                                        _isHovered ? 0.5 : 0.3),
-                                    blurRadius: _isHovered ? 30 : 20,
-                                    offset: Offset(0, _isHovered ? 12 : 8),
-                                  ),
-                                ],
-                              ),
                               child: Expanded(
                                 child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF0C1C0C),  // Blackish green
+                                        Color(0xFF1A3A1A),  // Hunter green
+                                        Color(0xFF234D23),  // Deep hunter
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF1B5E20).withOpacity(0.4),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
                                   child: Row(
                                     children: [
                                       Container(
@@ -529,7 +520,7 @@ class _ViewApplicantsButtonState extends State<_ViewApplicantsButton>
                                     ],
                                   ),
                                 ),
-                              ),
+                              )
                             ),
                           ),
                         ),
@@ -1544,23 +1535,23 @@ class _AdminMembershipApplicantsPageState
                     ),
                   ),
                 ),
-                if (_selectedSemester != null)
-                  IconButton(
-                    icon: const Icon(Icons.filter_list_rounded,
-                        color: Colors.white),
-                    onPressed: () {
-                      setState(() => _selectedSemester = null);
-                    },
-                    tooltip: 'Change Semester',
-                  ),
-                IconButton(
-                  icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                  onPressed: () {
-                    _loadAvailableSemesters();
-                    setState(() {});
-                  },
-                  tooltip: 'Refresh',
-                ),
+                // if (_selectedSemester != null)
+                //   IconButton(
+                //     icon: const Icon(Icons.filter_list_rounded,
+                //         color: Colors.white),
+                //     onPressed: () {
+                //       setState(() => _selectedSemester = null);
+                //     },
+                //     tooltip: 'Change Semester',
+                //   ),
+                // IconButton(
+                //   icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                //   onPressed: () {
+                //     _loadAvailableSemesters();
+                //     setState(() {});
+                //   },
+                //   tooltip: 'Refresh',
+                // ),
               ],
             ),
           ),
