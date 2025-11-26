@@ -183,7 +183,6 @@ class _AdminEducationalProgramsPageState
   String _getFirstImage(Map<String, dynamic>? data) {
     if (data == null) return '';
 
-    // Check for Image_1, Image_2, etc.
     for (int i = 1; i <= 20; i++) {
       final imageKey = 'Image_$i';
       if (data.containsKey(imageKey) && data[imageKey] != null && data[imageKey].toString().isNotEmpty) {
@@ -919,7 +918,6 @@ class _AddProgramButtonState extends State<_AddProgramButton>
 
     if (result != null && result['name']!.isNotEmpty && context.mounted) {
       try {
-        // Create document with program name as ID
         final docId = result['name']!;
 
         await _programsCollection.doc(docId).set({
@@ -946,7 +944,6 @@ class _AddProgramButtonState extends State<_AddProgramButton>
             ),
           );
 
-          // Navigate to edit page
           widget.onProgramCreated(docId);
         }
       } catch (e) {
@@ -984,18 +981,23 @@ class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
   final ImagePicker _imagePicker = ImagePicker();
   late AnimationController _headerController;
 
+  // Track current program ID (can change when name changes)
+  late String _currentProgramId;
+
   // Cloudinary configuration
   final cloudinary = CloudinaryPublic('dxyhzgrul', 'austrc-club');
 
-  DocumentReference get _programDoc => FirebaseFirestore.instance
+  CollectionReference get _programsCollection => FirebaseFirestore.instance
       .collection('All_Data')
       .doc('Educational, Mentorship & Training Programs')
-      .collection('educational, mentorship & training programs')
-      .doc(widget.programId);
+      .collection('educational, mentorship & training programs');
+
+  DocumentReference get _programDoc => _programsCollection.doc(_currentProgramId);
 
   @override
   void initState() {
     super.initState();
+    _currentProgramId = widget.programId;
     _headerController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -1042,17 +1044,23 @@ class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
             physics: const BouncingScrollPhysics(),
             slivers: [
               // App Bar
-              _buildAppBar(data['Name'] ?? widget.programId),
+              _buildAppBar(data['Name'] ?? _currentProgramId),
 
-              // Program Name Section
+              // Program Name Section - WITH DOCUMENT RENAME SUPPORT
               SliverToBoxAdapter(
-                child: _EditableField(
+                child: _ProgramNameField(
                   label: 'Program Name',
                   value: data['Name'] ?? '',
-                  fieldName: 'Name',
-                  programDoc: _programDoc,
+                  currentProgramId: _currentProgramId,
+                  programsCollection: _programsCollection,
                   icon: Icons.school_rounded,
                   hint: 'Enter program name',
+                  onProgramRenamed: (newProgramId) {
+                    // Update the current program ID and rebuild
+                    setState(() {
+                      _currentProgramId = newProgramId;
+                    });
+                  },
                 ),
               ),
 
@@ -1186,7 +1194,6 @@ class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
 
       if (image == null) return null;
 
-      // Show loading indicator
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1211,7 +1218,6 @@ class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
         );
       }
 
-      // Upload to Cloudinary
       final response = await cloudinary.uploadFile(
         CloudinaryFile.fromFile(
           image.path,
@@ -1219,7 +1225,6 @@ class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
         ),
       );
 
-      // Hide loading indicator
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1353,7 +1358,417 @@ class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
 }
 
 // ============================================
-// EDITABLE FIELD WIDGET
+// PROGRAM NAME FIELD - WITH DOCUMENT RENAME
+// ============================================
+class _ProgramNameField extends StatefulWidget {
+  final String label;
+  final String value;
+  final String currentProgramId;
+  final CollectionReference programsCollection;
+  final IconData icon;
+  final String hint;
+  final Function(String newProgramId) onProgramRenamed;
+
+  const _ProgramNameField({
+    required this.label,
+    required this.value,
+    required this.currentProgramId,
+    required this.programsCollection,
+    required this.icon,
+    required this.hint,
+    required this.onProgramRenamed,
+  });
+
+  @override
+  State<_ProgramNameField> createState() => _ProgramNameFieldState();
+}
+
+class _ProgramNameFieldState extends State<_ProgramNameField>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late TextEditingController _textController;
+  bool _isEditing = false;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    )..forward();
+    _textController = TextEditingController(text: widget.value);
+  }
+
+  @override
+  void didUpdateWidget(_ProgramNameField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value && !_isEditing) {
+      _textController.text = widget.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.2),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(
+          parent: _controller,
+          curve: Curves.easeOutCubic,
+        )),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: kGreenMain.withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: kGreenLight.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(widget.icon, color: kGreenMain, size: 22),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.label,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: kGreenDark,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Changing name will update document ID',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[500],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_isSaving)
+                      const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: kGreenMain,
+                        ),
+                      )
+                    else
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: IconButton(
+                          key: ValueKey(_isEditing),
+                          icon: Icon(
+                            _isEditing
+                                ? Icons.check_circle_rounded
+                                : Icons.edit_rounded,
+                            color: _isEditing ? Colors.green : kGreenMain,
+                          ),
+                          onPressed: _isEditing ? _saveAndRename : _enableEditing,
+                        ),
+                      ),
+                    if (_isEditing)
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, color: Colors.red),
+                        onPressed: _cancelEditing,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    color: _isEditing ? Colors.grey[50] : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: _isEditing
+                        ? Border.all(color: kGreenMain, width: 2)
+                        : null,
+                  ),
+                  child: TextField(
+                    controller: _textController,
+                    enabled: _isEditing,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: _isEditing ? kGreenDark : Colors.grey[700],
+                      height: 1.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: widget.hint,
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.all(_isEditing ? 16 : 0),
+                    ),
+                  ),
+                ),
+
+                // Warning message when editing
+                if (_isEditing) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Changing the name will create a new document and delete the old one. All data will be preserved.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.orange[800],
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _enableEditing() {
+    setState(() => _isEditing = true);
+  }
+
+  void _cancelEditing() {
+    _textController.text = widget.value;
+    setState(() => _isEditing = false);
+  }
+
+  Future<void> _saveAndRename() async {
+    final newName = _textController.text.trim();
+
+    // Validation
+    if (newName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Program name cannot be empty'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // If name hasn't changed, just update the field
+    if (newName == widget.currentProgramId) {
+      setState(() => _isEditing = false);
+      return;
+    }
+
+    // Check if new name already exists
+    final existingDoc = await widget.programsCollection.doc(newName).get();
+    if (existingDoc.exists) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('A program with name "$newName" already exists'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Show confirmation dialog
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.drive_file_rename_outline, color: kGreenMain, size: 28),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('Rename Program')),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 15, color: Colors.black87, height: 1.5),
+                children: [
+                  const TextSpan(text: 'Rename from '),
+                  TextSpan(
+                    text: '"${widget.currentProgramId}"',
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                  ),
+                  const TextSpan(text: ' to '),
+                  TextSpan(
+                    text: '"$newName"',
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: kGreenMain),
+                  ),
+                  const TextSpan(text: '?'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: kGreenLight.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: kGreenLight.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle_outline, color: kGreenMain, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'All images and data will be preserved.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: kGreenDark,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.check_rounded, size: 20),
+            label: const Text('Rename'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kGreenMain,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      // Step 1: Get all data from old document
+      final oldDocSnapshot = await widget.programsCollection.doc(widget.currentProgramId).get();
+      final oldData = oldDocSnapshot.data() as Map<String, dynamic>? ?? {};
+
+      // Step 2: Create new document with new name
+      final newData = Map<String, dynamic>.from(oldData);
+      newData['Name'] = newName; // Update the Name field
+      newData['renamedAt'] = FieldValue.serverTimestamp();
+      newData['previousName'] = widget.currentProgramId;
+
+      await widget.programsCollection.doc(newName).set(newData);
+
+      // Step 3: Delete old document
+      await widget.programsCollection.doc(widget.currentProgramId).delete();
+
+      // Step 4: Notify parent to update the program ID
+      widget.onProgramRenamed(newName);
+
+      setState(() {
+        _isEditing = false;
+        _isSaving = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text('Program renamed to "$newName" successfully!'),
+                ),
+              ],
+            ),
+            backgroundColor: kGreenMain,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isSaving = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error renaming program: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+}
+
+// ============================================
+// EDITABLE FIELD WIDGET (For Description)
 // ============================================
 class _EditableField extends StatefulWidget {
   final String label;
@@ -1481,8 +1896,7 @@ class _EditableFieldState extends State<_EditableField>
                                 : Icons.edit_rounded,
                             color: _isEditing ? Colors.green : kGreenMain,
                           ),
-                          onPressed:
-                          _isEditing ? _saveChanges : _enableEditing,
+                          onPressed: _isEditing ? _saveChanges : _enableEditing,
                         ),
                       ),
                     if (_isEditing)
@@ -1538,17 +1952,6 @@ class _EditableFieldState extends State<_EditableField>
 
   Future<void> _saveChanges() async {
     final newValue = _textController.text.trim();
-
-    if (newValue.isEmpty && widget.fieldName == 'Name') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Program name cannot be empty'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
 
     setState(() => _isSaving = true);
 
