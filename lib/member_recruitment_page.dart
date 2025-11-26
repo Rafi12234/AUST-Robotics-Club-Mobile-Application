@@ -113,24 +113,28 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
         }
       }
 
-      // Load available semesters by listing all documents in New_Member_Recruitment collection
+      // Load available semesters from New_Members_Informations collection
       final semesterSnapshot = await FirebaseFirestore.instance
-          .collection('New_Member_Recruitment')
+          .collection('New_Members_Informations')
           .get();
 
       List<String> semesters = [];
       for (var doc in semesterSnapshot.docs) {
-        // Exclude the Payment Number document from the semester list
-        if (doc.id != 'Form ON_OFF and Payment Number') {
-          semesters.add(doc.id);
-        }
+        semesters.add(doc.id);
+      }
+
+      // If no semesters exist, create default ones or show empty
+      if (semesters.isEmpty) {
+        // You can optionally create default semester documents here
+        // For now, we'll just show empty
+        print('No semesters found in New_Members_Informations');
       }
 
       // Sort semesters if needed (optional)
       semesters.sort();
 
       setState(() {
-        _availableSemesters = semesters.isNotEmpty ? semesters : [];
+        _availableSemesters = semesters;
         _isLoading = false;
       });
     } catch (e) {
@@ -220,6 +224,23 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
     );
   }
 
+  Future<int> _getNextMemberNumber(String semester) async {
+    try {
+      // Get all members in the selected semester's Members collection
+      final membersSnapshot = await FirebaseFirestore.instance
+          .collection('New_Members_Informations')
+          .doc(semester)
+          .collection('Members')
+          .get();
+
+      // Count existing members and add 1 for the new member
+      return membersSnapshot.docs.length + 1;
+    } catch (e) {
+      print('Error getting member number: $e');
+      return 1; // Default to 1 if error occurs
+    }
+  }
+
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -236,14 +257,22 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
     setState(() => _isSubmitting = true);
 
     try {
-      // Create document reference using Edu-Mail as collection and Name as document
-      final docRef = FirebaseFirestore.instance
-          .collection('New_Member_Recruitment')
-          .doc(_selectedCurrentSemester!)
-          .collection(_eduMailController.text.trim())
-          .doc(_nameController.text.trim());
+      // Get the next member number
+      final memberNumber = await _getNextMemberNumber(_selectedCurrentSemester!);
+      final memberDocName = 'Member_$memberNumber';
 
-      await docRef.set({
+      print('Creating member: $memberDocName in semester: $_selectedCurrentSemester');
+
+      // Create document reference in new structure
+      // New_Members_Informations/{semester}/Members/{Member_X}
+      final docRef = FirebaseFirestore.instance
+          .collection('New_Members_Informations')
+          .doc(_selectedCurrentSemester!)
+          .collection('Members')
+          .doc(memberDocName);
+
+      // Prepare data to save
+      final memberData = {
         'Name': _nameController.text.trim(),
         'Department': _departmentController.text.trim(),
         'Semester': _selectedSemester,
@@ -254,14 +283,21 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
         'Image_Drive_Link': _imageLinkController.text.trim(),
         'Payment_By': _selectedPaymentMethod,
         'Transaction_ID': _transactionIdController.text.trim(),
+        'Member_Number': memberNumber,
         'Submitted_At': FieldValue.serverTimestamp(),
-      });
+      };
+
+      // Save to Firestore
+      await docRef.set(memberData);
+
+      print('Member successfully added: $memberDocName');
 
       setState(() => _isSubmitting = false);
 
-      // Show success dialog
-      _showSuccessDialog();
+      // Show success dialog with member number
+      _showSuccessDialog(memberNumber);
     } catch (e) {
+      print('Error submitting form: $e');
       setState(() => _isSubmitting = false);
       _showErrorSnackBar('Submission failed: $e');
     }
@@ -277,7 +313,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
     );
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog(int memberNumber) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -309,9 +345,10 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                 color: Color(0xFF1B5E20),
               ),
             ),
-            const SizedBox(height: 12),
+
+            const SizedBox(height: 16),
             Text(
-              'Welcome to the club! Your application has been submitted successfully.',
+              'Welcome to the club! Your application has been submitted successfully for $_selectedCurrentSemester.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -450,15 +487,17 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Personal Information Section
-                      _buildSectionTitle('Personal Information', Icons.person_outline),
+                      _buildSectionTitle(
+                          'Personal Information', Icons.person_outline),
                       const SizedBox(height: 16),
                       _buildAnimatedTextField(
                         controller: _nameController,
                         label: 'Full Name',
                         icon: Icons.person,
                         delay: 100,
-                        validator: (value) =>
-                        value?.isEmpty ?? true ? 'Name is required' : null,
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'Name is required'
+                            : null,
                       ),
                       const SizedBox(height: 16),
                       _buildAnimatedTextField(
@@ -466,8 +505,9 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         label: 'Department',
                         icon: Icons.school,
                         delay: 150,
-                        validator: (value) =>
-                        value?.isEmpty ?? true ? 'Department is required' : null,
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'Department is required'
+                            : null,
                       ),
                       const SizedBox(height: 16),
                       _buildAnimatedTextField(
@@ -476,13 +516,15 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         icon: Icons.phone,
                         keyboardType: TextInputType.phone,
                         delay: 200,
-                        validator: (value) =>
-                        value?.isEmpty ?? true ? 'Phone number is required' : null,
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'Phone number is required'
+                            : null,
                       ),
 
                       // Academic Information Section
                       const SizedBox(height: 32),
-                      _buildSectionTitle('Academic Information', Icons.menu_book),
+                      _buildSectionTitle(
+                          'Academic Information', Icons.menu_book),
                       const SizedBox(height: 16),
 
                       // Semester Selection
@@ -504,13 +546,15 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                               spacing: 8,
                               runSpacing: 8,
                               children: _semesterOptions.map((semester) {
-                                final isSelected = _selectedSemester == semester;
+                                final isSelected =
+                                    _selectedSemester == semester;
                                 return ChoiceChip(
                                   label: Text(semester),
                                   selected: isSelected,
                                   onSelected: (selected) {
                                     setState(() {
-                                      _selectedSemester = selected ? semester : null;
+                                      _selectedSemester =
+                                      selected ? semester : null;
                                     });
                                   },
                                   selectedColor: const Color(0xFF2E7D32),
@@ -540,38 +584,120 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
 
                       const SizedBox(height: 16),
 
-                      // Current Semester Dropdown
+                      // Current Semester Dropdown (Registration Semester)
                       _buildAnimatedCard(
                         delay: 300,
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedCurrentSemester,
-                          decoration: InputDecoration(
-                            labelText: 'Current Semester',
-                            prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFF2E7D32)),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.calendar_today,
+                                  color: Color(0xFF2E7D32),
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Registration Semester',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1B5E20),
+                                  ),
+                                ),
+                              ],
                             ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                          ),
-                          items: _availableSemesters.map((semester) {
-                            return DropdownMenuItem(
-                              value: semester,
-                              child: Text(semester),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() => _selectedCurrentSemester = value);
-                          },
-                          validator: (value) =>
-                          value == null ? 'Please select current semester' : null,
+                            const SizedBox(height: 12),
+                            if (_availableSemesters.isEmpty)
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange[50],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.orange,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.warning_rounded,
+                                      color: Colors.orange,
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        'No semesters available. Please contact admin.',
+                                        style: TextStyle(
+                                          color: Colors.orange[900],
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              DropdownButtonFormField<String>(
+                                value: _selectedCurrentSemester,
+                                decoration: InputDecoration(
+                                  labelText: 'Select Registration Semester',
+                                  prefixIcon: const Icon(
+                                    Icons.event_available_rounded,
+                                    color: Color(0xFF2E7D32),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.grey[50],
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                ),
+                                items: _availableSemesters.map((semester) {
+                                  return DropdownMenuItem(
+                                    value: semester,
+                                    child: Text(
+                                      semester,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(
+                                          () => _selectedCurrentSemester = value);
+                                },
+                                validator: (value) => value == null
+                                    ? 'Please select registration semester'
+                                    : null,
+                              ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Select the semester you are registering for',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
                       // Contact Information Section
                       const SizedBox(height: 32),
-                      _buildSectionTitle('Contact Information', Icons.email_outlined),
+                      _buildSectionTitle(
+                          'Contact Information', Icons.email_outlined),
                       const SizedBox(height: 16),
                       _buildAnimatedTextField(
                         controller: _personalEmailController,
@@ -580,8 +706,10 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         keyboardType: TextInputType.emailAddress,
                         delay: 350,
                         validator: (value) {
-                          if (value?.isEmpty ?? true) return 'Email is required';
-                          if (!value!.contains('@')) return 'Invalid email format';
+                          if (value?.isEmpty ?? true)
+                            return 'Email is required';
+                          if (!value!.contains('@'))
+                            return 'Invalid email format';
                           return null;
                         },
                       ),
@@ -593,8 +721,10 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         keyboardType: TextInputType.emailAddress,
                         delay: 400,
                         validator: (value) {
-                          if (value?.isEmpty ?? true) return 'Educational email is required';
-                          if (!value!.contains('@')) return 'Invalid email format';
+                          if (value?.isEmpty ?? true)
+                            return 'Educational email is required';
+                          if (!value!.contains('@'))
+                            return 'Invalid email format';
                           return null;
                         },
                       ),
@@ -604,13 +734,15 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         label: 'Image Drive Link',
                         icon: Icons.link,
                         delay: 450,
-                        validator: (value) =>
-                        value?.isEmpty ?? true ? 'Image link is required' : null,
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'Image link is required'
+                            : null,
                       ),
 
                       // Payment Section
                       const SizedBox(height: 32),
-                      _buildSectionTitle('Payment Information', Icons.payment),
+                      _buildSectionTitle(
+                          'Payment Information', Icons.payment),
                       const SizedBox(height: 16),
 
                       // Must Send Money Notice
@@ -707,11 +839,13 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                             Row(
                               children: [
                                 Expanded(
-                                  child: _buildPaymentOption('Bkash', Colors.pink),
+                                  child: _buildPaymentOption(
+                                      'Bkash', Colors.pink),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: _buildPaymentOption('Nagad', Colors.orange),
+                                  child: _buildPaymentOption(
+                                      'Nagad', Colors.orange),
                                 ),
                               ],
                             ),
@@ -725,8 +859,9 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         label: 'Transaction ID',
                         icon: Icons.receipt_long,
                         delay: 700,
-                        validator: (value) =>
-                        value?.isEmpty ?? true ? 'Transaction ID is required' : null,
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'Transaction ID is required'
+                            : null,
                       ),
 
                       // Submit Button
@@ -762,9 +897,11 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                               ),
                             )
                                 : const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment:
+                              MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.send_rounded, color: Colors.white),
+                                Icon(Icons.send_rounded,
+                                    color: Colors.white),
                                 SizedBox(width: 8),
                                 Text(
                                   'Submit Application',
@@ -862,7 +999,8 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           ),
         ),
       ),

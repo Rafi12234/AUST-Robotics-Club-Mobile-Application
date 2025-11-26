@@ -8,6 +8,7 @@ import 'admin_proposal_approval_page.dart';
 import 'admin_achievement_management_page.dart';
 import 'admin_member_id_management_page.dart';
 import 'admin_governing_panel_page.dart';
+import 'Admin_Membership_Management_Page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -465,6 +466,33 @@ class _DashboardStatsGrid extends StatelessWidget {
             Expanded(
               child: _StatCard(
                 title: 'Manage Achievements',
+                icon: Icons.workspace_premium_rounded,
+                gradient: [const Color(0xFFFF6B35), const Color(0xFFF7931E)],
+                collectionPath: 'All_Data/Achievement/achievement',
+                index: 5,
+                destinationPage: const AdminAchievementPage(),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                title: 'Membership Management',
+                icon: Icons.approval_rounded,
+                gradient: [ Color(0xFF064E3B), // deep green
+                  Color(0xFF10B981),],
+                collectionPath: 'All_Data/Student_Proposal_for_R&P/student_proposal_for_R&P',
+                index: 4,
+                destinationPage: const AdminMembershipManagementPage(),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _StatCard(
+                title: 'Demo',
                 icon: Icons.workspace_premium_rounded,
                 gradient: [const Color(0xFFFF6B35), const Color(0xFFF7931E)],
                 collectionPath: 'All_Data/Achievement/achievement',
