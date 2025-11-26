@@ -171,12 +171,6 @@ class _AdminEducationalProgramsPageState
           ),
         ),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.school_rounded, color: Colors.white),
-          onPressed: () {},
-        ),
-      ],
     );
   }
 
@@ -901,7 +895,7 @@ class _AddProgramButtonState extends State<_AddProgramButton>
                 });
               }
             },
-            icon: const Icon(Icons.add_rounded, size: 20),
+            icon: const Icon(Icons.add_rounded, size: 20,color: Colors.white,),
             label: const Text('Create'),
             style: ElevatedButton.styleFrom(
               backgroundColor: kGreenMain,
@@ -1133,13 +1127,6 @@ class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
         icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
         onPressed: () => Navigator.pop(context),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-          onPressed: () => setState(() {}),
-          tooltip: 'Refresh',
-        ),
-      ],
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -2052,7 +2039,7 @@ class _ImagesSectionHeader extends StatelessWidget {
           ),
           ElevatedButton.icon(
             onPressed: onAddImage,
-            icon: const Icon(Icons.add_photo_alternate_rounded, size: 20),
+            icon: const Icon(Icons.add_photo_alternate_rounded, size: 20,color: Colors.white),
             label: const Text('Add'),
             style: ElevatedButton.styleFrom(
               backgroundColor: kGreenMain,
@@ -2465,14 +2452,6 @@ class _AddImageFABState extends State<_AddImageFAB>
     return ScaleTransition(
       scale: Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-      ),
-      child: FloatingActionButton(
-        onPressed: widget.onPressed,
-        backgroundColor: kAccentGold,
-        child: const Icon(
-          Icons.add_photo_alternate_rounded,
-          color: Colors.white,
-        ),
       ),
     );
   }
