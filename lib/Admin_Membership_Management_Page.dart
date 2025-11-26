@@ -471,182 +471,64 @@ class _ViewApplicantsButtonState extends State<_ViewApplicantsButton>
                                   ),
                                 ],
                               ),
-                              child: Row(
-                                children: [
-                                  // Icon with pulse animation
-                                  AnimatedBuilder(
-                                    animation: _pulseController,
-                                    builder: (context, child) {
-                                      return Container(
-                                        padding: const EdgeInsets.all(20),
+                              child: Expanded(
+                                child: Container(
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.25),
-                                          borderRadius: BorderRadius.circular(20),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.white.withOpacity(
-                                                  0.3 * _pulseController.value),
-                                              blurRadius:
-                                              20 * _pulseController.value,
-                                              spreadRadius:
-                                              5 * _pulseController.value,
-                                            ),
-                                          ],
+                                          color: Colors.white.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: const Icon(
                                           Icons.people_alt_rounded,
                                           color: Colors.white,
-                                          size: 36,
+                                          size: 28,
                                         ),
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(width: 20),
-
-                                  // Content
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'View All Applicants',
-                                          style: TextStyle(
-                                            color:
-                                            Colors.white.withOpacity(0.9),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            TweenAnimationBuilder<int>(
-                                              tween: IntTween(
-                                                  begin: 0, end: totalCount),
-                                              duration: const Duration(
-                                                  milliseconds: 1500),
-                                              curve: Curves.easeOutCubic,
-                                              builder: (context, value, child) {
-                                                return Text(
-                                                  value.toString(),
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 36,
-                                                    fontWeight: FontWeight.w900,
-                                                    letterSpacing: -0.5,
-                                                    height: 1,
-                                                  ),
-                                                );
-                                              },
+                                            Text(
+                                              'View All Applicants',
+                                              style: TextStyle(
+                                                color: Colors.white.withOpacity(0.95),
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w700,
+                                                letterSpacing: 0.3,
+                                              ),
                                             ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Total',
-                                                    style: TextStyle(
-                                                      color: Colors.white
-                                                          .withOpacity(0.85),
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                      FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Container(
-                                                        padding:
-                                                        const EdgeInsets
-                                                            .symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 2,
-                                                        ),
-                                                        decoration:
-                                                        BoxDecoration(
-                                                          color: Colors.white
-                                                              .withOpacity(0.2),
-                                                          borderRadius:
-                                                          BorderRadius
-                                                              .circular(6),
-                                                        ),
-                                                        child: Text(
-                                                          'Spring: $springCount',
-                                                          style: TextStyle(
-                                                            color: Colors.white
-                                                                .withOpacity(
-                                                                0.9),
-                                                            fontSize: 10,
-                                                            fontWeight:
-                                                            FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 6),
-                                                      Container(
-                                                        padding:
-                                                        const EdgeInsets
-                                                            .symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 2,
-                                                        ),
-                                                        decoration:
-                                                        BoxDecoration(
-                                                          color: Colors.white
-                                                              .withOpacity(0.2),
-                                                          borderRadius:
-                                                          BorderRadius
-                                                              .circular(6),
-                                                        ),
-                                                        child: Text(
-                                                          'Fall: $fallCount',
-                                                          style: TextStyle(
-                                                            color: Colors.white
-                                                                .withOpacity(
-                                                                0.9),
-                                                            fontSize: 10,
-                                                            fontWeight:
-                                                            FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Review and manage applications',
+                                              style: TextStyle(
+                                                color: Colors.white.withOpacity(0.7),
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w400,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // Arrow icon with animation
-                                  AnimatedContainer(
-                                    duration: const Duration(milliseconds: 300),
-                                    transform: Matrix4.identity()
-                                      ..translate(_isHovered ? 5.0 : 0.0, 0.0),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.25),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: Colors.white.withOpacity(0.3),
-                                          width: 2,
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.15),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          color: Colors.white,
+                                          size: 16,
                                         ),
                                       ),
-                                      child: const Icon(
-                                        Icons.arrow_forward_rounded,
-                                        color: Colors.white,
-                                        size: 24,
-                                      ),
-                                    ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
