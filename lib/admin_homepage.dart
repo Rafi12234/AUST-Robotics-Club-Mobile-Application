@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 import 'admin_event_management_page.dart';
-import 'educational_mentorship_training_programs_page.dart';
+import 'Admin_Educational_Programs_Management_Page.dart';
 import 'admin_research_projects_management_page.dart';
 import 'admin_proposal_approval_page.dart';
 import 'admin_achievement_management_page.dart';
@@ -432,7 +432,7 @@ class _DashboardStatsGrid extends StatelessWidget {
                 collectionPath:
                 'All_Data/Educational, Mentorship & Training Programs/educational, mentorship & training programs',
                 index: 2,
-                destinationPage: const EducationalProgramsPage(),
+                destinationPage: const AdminEducationalProgramsPage(),
               ),
             ),
             const SizedBox(width: 16),
@@ -1341,16 +1341,3 @@ class _GoverningPanelCardState extends State<_GoverningPanelCard>
 ); // Closes FadeTransition (return statement)
 }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
