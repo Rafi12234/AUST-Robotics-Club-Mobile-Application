@@ -1400,6 +1400,7 @@ class _AdminMembershipApplicantsPageState
     extends State<AdminMembershipApplicantsPage>
     with TickerProviderStateMixin {
   late AnimationController _headerController;
+  late AnimationController _fabController;
   String? _selectedSemester;
   List<String> _availableSemesters = [];
   bool _isLoadingSemesters = true;
@@ -1408,17 +1409,21 @@ class _AdminMembershipApplicantsPageState
   void initState() {
     super.initState();
 
-    // Make status bar transparent so the gradient shows behind it
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark, // for iOS
+      statusBarBrightness: Brightness.dark,
     ));
 
     _headerController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     )..forward();
+
+    _fabController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
 
     _loadAvailableSemesters();
   }
@@ -1432,6 +1437,11 @@ class _AdminMembershipApplicantsPageState
       setState(() {
         _availableSemesters = snapshot.docs.map((doc) => doc.id).toList();
         _isLoadingSemesters = false;
+      });
+
+      // Start FAB animation after semesters load
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) _fabController.forward();
       });
     } catch (e) {
       setState(() {
@@ -1451,6 +1461,7 @@ class _AdminMembershipApplicantsPageState
   @override
   void dispose() {
     _headerController.dispose();
+    _fabController.dispose();
     super.dispose();
   }
 
@@ -1459,7 +1470,6 @@ class _AdminMembershipApplicantsPageState
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
-        // allow content to extend under the status bar so gradient can fill it
         top: false,
         child: Column(
           children: [
@@ -1471,6 +1481,20 @@ class _AdminMembershipApplicantsPageState
             ),
           ],
         ),
+      ),
+      // Add Semester FAB - Only show when no semester is selected
+      floatingActionButton: _selectedSemester == null
+          ? _AddSemesterFAB(
+        controller: _fabController,
+        onSemesterCreated: () {
+          _loadAvailableSemesters();
+        },
+      )
+          : _BackToSemestersFAB(
+        controller: _fabController,
+        onTap: () {
+          setState(() => _selectedSemester = null);
+        },
       ),
     );
   }
@@ -1496,7 +1520,6 @@ class _AdminMembershipApplicantsPageState
       ),
       child: Column(
         children: [
-          // Top Bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             child: Row(
@@ -1504,7 +1527,13 @@ class _AdminMembershipApplicantsPageState
                 IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new,
                       color: Colors.white, size: 20),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    if (_selectedSemester != null) {
+                      setState(() => _selectedSemester = null);
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
                 ),
                 Expanded(
                   child: FadeTransition(
@@ -1535,28 +1564,9 @@ class _AdminMembershipApplicantsPageState
                     ),
                   ),
                 ),
-                // if (_selectedSemester != null)
-                //   IconButton(
-                //     icon: const Icon(Icons.filter_list_rounded,
-                //         color: Colors.white),
-                //     onPressed: () {
-                //       setState(() => _selectedSemester = null);
-                //     },
-                //     tooltip: 'Change Semester',
-                //   ),
-                // IconButton(
-                //   icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                //   onPressed: () {
-                //     _loadAvailableSemesters();
-                //     setState(() {});
-                //   },
-                //   tooltip: 'Refresh',
-                // ),
               ],
             ),
           ),
-
-          // Stats Bar
           if (_selectedSemester != null)
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1623,28 +1633,62 @@ class _AdminMembershipApplicantsPageState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: kGreenLight.withOpacity(0.1),
-                  shape: BoxShape.circle,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(scale: value, child: child);
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: kGreenLight.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.calendar_today_rounded,
+                      size: 80, color: Colors.grey[400]),
                 ),
-                child: Icon(Icons.calendar_today_rounded,
-                    size: 64, color: Colors.grey[400]),
               ),
               const SizedBox(height: 24),
               const Text(
-                'No Semesters Available',
+                'No Semesters Yet',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: FontWeight.w800,
                   color: kGreenDark,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Create semester documents to start',
+                'Tap the + button to create your first semester',
+                textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 32),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: kAccentGold.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: kAccentGold.withOpacity(0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.lightbulb_outline_rounded,
+                        color: kAccentGold, size: 20),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Example: "Spring 2025" or "Fall 2024"',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1656,13 +1700,33 @@ class _AdminMembershipApplicantsPageState
       padding: const EdgeInsets.all(16),
       children: [
         const SizedBox(height: 8),
-        const Text(
-          'Select Semester',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: kGreenDark,
-          ),
+        Row(
+          children: [
+            const Text(
+              'Select Semester',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: kGreenDark,
+              ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: kGreenLight.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${_availableSemesters.length} Total',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: kGreenMain,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         ..._availableSemesters.asMap().entries.map((entry) {
@@ -1672,10 +1736,61 @@ class _AdminMembershipApplicantsPageState
             semester: semester,
             index: index,
             onTap: () => setState(() => _selectedSemester = semester),
+            onDelete: () => _deleteSemester(semester),
           );
         }).toList(),
+        const SizedBox(height: 100), // Space for FAB
       ],
     );
+  }
+
+  Future<void> _deleteSemester(String semester) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => _DeleteSemesterDialog(semester: semester),
+    );
+
+    if (confirm == true) {
+      try {
+        // Delete the semester document
+        await FirebaseFirestore.instance
+            .collection('New_Members_Informations')
+            .doc(semester)
+            .delete();
+
+        // Reload semesters
+        _loadAvailableSemesters();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text('$semester deleted successfully'),
+                ],
+              ),
+              backgroundColor: kGreenMain,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error deleting semester: $e'),
+              backgroundColor: kAccentRed,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildMembersList() {
@@ -1782,17 +1897,737 @@ class _AdminMembershipApplicantsPageState
 }
 
 // ============================================
-// SEMESTER TILE
+// ADD SEMESTER FAB
+// ============================================
+class _AddSemesterFAB extends StatefulWidget {
+  final AnimationController controller;
+  final VoidCallback onSemesterCreated;
+
+  const _AddSemesterFAB({
+    required this.controller,
+    required this.onSemesterCreated,
+  });
+
+  @override
+  State<_AddSemesterFAB> createState() => _AddSemesterFABState();
+}
+
+class _AddSemesterFABState extends State<_AddSemesterFAB>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(
+          parent: widget.controller,
+          curve: Curves.elasticOut,
+        ),
+      ),
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: kGreenMain.withOpacity(0.3 + (_pulseController.value * 0.2)),
+                  blurRadius: 16 + (_pulseController.value * 8),
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: child,
+          );
+        },
+        child: FloatingActionButton.extended(
+          onPressed: () => _showAddSemesterDialog(context),
+          backgroundColor: kGreenMain,
+          elevation: 0,
+          icon: const Icon(Icons.add_rounded, size: 24),
+          label: const Text(
+            'Add Semester',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAddSemesterDialog(BuildContext context) async {
+    final result = await showGeneralDialog<String>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return const SizedBox.shrink();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack,
+          reverseCurve: Curves.easeInBack,
+        );
+
+        return ScaleTransition(
+          scale: Tween<double>(begin: 0.8, end: 1.0).animate(curvedAnimation),
+          child: FadeTransition(
+            opacity: curvedAnimation,
+            child: _AddSemesterDialog(),
+          ),
+        );
+      },
+    );
+
+    if (result != null && result.isNotEmpty) {
+      await _createSemester(result);
+      widget.onSemesterCreated();
+    }
+  }
+
+  Future<void> _createSemester(String semesterName) async {
+    try {
+      // Check if semester already exists
+      final doc = await FirebaseFirestore.instance
+          .collection('New_Members_Informations')
+          .doc(semesterName)
+          .get();
+
+      if (doc.exists) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.warning_rounded, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text('"$semesterName" already exists!'),
+                ],
+              ),
+              backgroundColor: kAccentGold,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Create the semester document
+      await FirebaseFirestore.instance
+          .collection('New_Members_Informations')
+          .doc(semesterName)
+          .set({
+        'Created_At': FieldValue.serverTimestamp(),
+        'Semester_Name': semesterName,
+        'Total_Members': 0,
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '"$semesterName" created successfully!',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: kGreenMain,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error creating semester: $e'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+}
+
+// ============================================
+// ADD SEMESTER DIALOG
+// ============================================
+class _AddSemesterDialog extends StatefulWidget {
+  @override
+  State<_AddSemesterDialog> createState() => _AddSemesterDialogState();
+}
+
+class _AddSemesterDialogState extends State<_AddSemesterDialog> {
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+  String? _selectedPreset;
+  bool _isValid = false;
+
+  final List<Map<String, dynamic>> _presets = [
+    {'name': 'Spring', 'icon': Icons.eco_rounded, 'color': Color(0xFF10B981)},
+    {'name': 'Fall', 'icon': Icons.park_rounded, 'color': Color(0xFFFF6B35)},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_validateInput);
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) _focusNode.requestFocus();
+    });
+  }
+
+  void _validateInput() {
+    setState(() {
+      _isValid = _controller.text.trim().isNotEmpty;
+    });
+  }
+
+  void _selectPreset(String presetName) {
+    final currentYear = DateTime.now().year;
+    setState(() {
+      _selectedPreset = presetName;
+      _controller.text = '$presetName $currentYear';
+      _isValid = true;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [kGreenMain, kGreenLight],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.calendar_month_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Create New Semester',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: kGreenDark,
+                            ),
+                          ),
+                          Text(
+                            'Add a semester for member registration',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Quick Select Presets
+                const Text(
+                  'Quick Select',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: kGreenDark,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _presets.map((preset) {
+                    final isSelected = _selectedPreset == preset['name'];
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      child: InkWell(
+                        onTap: () => _selectPreset(preset['name']),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? (preset['color'] as Color).withOpacity(0.15)
+                                : Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? preset['color'] as Color
+                                  : Colors.grey[300]!,
+                              width: isSelected ? 2 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                preset['icon'] as IconData,
+                                size: 18,
+                                color: isSelected
+                                    ? preset['color'] as Color
+                                    : Colors.grey[600],
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                preset['name'] as String,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected
+                                      ? preset['color'] as Color
+                                      : Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+
+                // Divider
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.grey[300])),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Colors.grey[300])),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Custom Input
+                const Text(
+                  'Custom Semester Name',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: kGreenDark,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  textCapitalization: TextCapitalization.words,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: kGreenDark,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'e.g., Spring 2025',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.w400,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.edit_calendar_rounded,
+                      color: kGreenMain,
+                    ),
+                    suffixIcon: _isValid
+                        ? const Icon(
+                      Icons.check_circle_rounded,
+                      color: kGreenMain,
+                    )
+                        : null,
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: kGreenMain, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
+                  ),
+                  onSubmitted: (value) {
+                    if (_isValid) {
+                      Navigator.pop(context, _controller.text.trim());
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // Helper Text
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: kAccentBlue.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: kAccentBlue.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline_rounded,
+                          color: kAccentBlue, size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'This will create a new document in Firestore where members can register.',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[700],
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        child: ElevatedButton(
+                          onPressed: _isValid
+                              ? () => Navigator.pop(
+                              context, _controller.text.trim())
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kGreenMain,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor: Colors.grey[300],
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: _isValid ? 4 : 0,
+                            shadowColor: kGreenMain.withOpacity(0.4),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_rounded,
+                                size: 20,
+                                color: _isValid ? Colors.white : Colors.grey[500],
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Create Semester',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: _isValid ? Colors.white : Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// BACK TO SEMESTERS FAB
+// ============================================
+class _BackToSemestersFAB extends StatelessWidget {
+  final AnimationController controller;
+  final VoidCallback onTap;
+
+  const _BackToSemestersFAB({
+    required this.controller,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(
+          parent: controller,
+          curve: Curves.elasticOut,
+        ),
+      ),
+      child: FloatingActionButton.extended(
+        onPressed: onTap,
+        backgroundColor: kAccentPurple,
+        elevation: 8,
+        icon: const Icon(Icons.list_rounded, size: 22),
+        label: const Text(
+          'All Semesters',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// DELETE SEMESTER DIALOG
+// ============================================
+class _DeleteSemesterDialog extends StatelessWidget {
+  final String semester;
+
+  const _DeleteSemesterDialog({required this.semester});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      contentPadding: const EdgeInsets.all(24),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: kAccentRed.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.warning_rounded,
+              color: kAccentRed,
+              size: 40,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Delete Semester?',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: kGreenDark,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Are you sure you want to delete "$semester"?',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: kAccentRed.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: kAccentRed.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, color: kAccentRed, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'This will delete all member data in this semester permanently!',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.red[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kAccentRed,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Delete',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================
+// SEMESTER TILE (Updated with delete option)
 // ============================================
 class _SemesterTile extends StatefulWidget {
   final String semester;
   final int index;
   final VoidCallback onTap;
+  final VoidCallback onDelete;
 
   const _SemesterTile({
     required this.semester,
     required this.index,
     required this.onTap,
+    required this.onDelete,
   });
 
   @override
@@ -1918,6 +2753,16 @@ class _SemesterTileState extends State<_SemesterTile>
                         ],
                       ),
                     ),
+                    // Delete Button
+                    IconButton(
+                      onPressed: widget.onDelete,
+                      icon: Icon(
+                        Icons.delete_outline_rounded,
+                        color: Colors.grey[400],
+                        size: 22,
+                      ),
+                      tooltip: 'Delete Semester',
+                    ),
                     Icon(Icons.arrow_forward_ios_rounded,
                         color: color, size: 20),
                   ],
@@ -1945,7 +2790,7 @@ class _SemesterTileState extends State<_SemesterTile>
 }
 
 // ============================================
-// MEMBER CARD
+// MEMBER CARD (Keep your existing implementation)
 // ============================================
 class _MemberCard extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -2273,7 +3118,8 @@ class _InfoItem extends StatelessWidget {
                   value,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: isHighlighted ? FontWeight.w700 : FontWeight.w600,
+                    fontWeight:
+                    isHighlighted ? FontWeight.w700 : FontWeight.w600,
                     color: isHighlighted ? color : kGreenDark,
                   ),
                   maxLines: 2,
@@ -2400,8 +3246,11 @@ class _IconBtn extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _IconBtn(
-      {required this.icon, required this.color, required this.onTap});
+  const _IconBtn({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
