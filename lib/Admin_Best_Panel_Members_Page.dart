@@ -248,12 +248,6 @@ class _AdminBestPanelMembersPageState extends State<AdminBestPanelMembersPage>
                     ),
                   ),
                 ),
-                if (_selectedSemester != null)
-                  IconButton(
-                    icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                    onPressed: () => setState(() {}),
-                    tooltip: 'Refresh',
-                  ),
               ],
             ),
           ),
@@ -1414,10 +1408,10 @@ class _AddSemesterFABState extends State<_AddSemesterFAB>
           onPressed: () => _showAddSemesterDialog(context),
           backgroundColor: kGreenMain,
           elevation: 0,
-          icon: const Icon(Icons.add_rounded, size: 24),
+          icon: const Icon(Icons.add_rounded, size: 24,color: Colors.white,),
           label: const Text(
             'Add Semester',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15,color: Colors.white),
           ),
         ),
       ),
