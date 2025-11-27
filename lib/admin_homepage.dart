@@ -9,6 +9,7 @@ import 'admin_achievement_management_page.dart';
 import 'admin_member_id_management_page.dart';
 import 'admin_governing_panel_page.dart';
 import 'Admin_Membership_Management_Page.dart';
+import 'Admin_Best_Panel_Members_Page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -497,7 +498,7 @@ class _DashboardStatsGrid extends StatelessWidget {
                 gradient: [const Color(0xFFFF6B35), const Color(0xFFF7931E)],
                 collectionPath: 'All_Data/Achievement/achievement',
                 index: 5,
-                destinationPage: const AdminAchievementPage(),
+                destinationPage: const AdminBestPanelMembersPage(),
               ),
             ),
           ],
