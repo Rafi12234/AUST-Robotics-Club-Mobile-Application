@@ -169,7 +169,34 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                 );
               }
 
-              final programs = snapshot.data!.docs;
+              // Sort programs by Order field
+              final programs = snapshot.data!.docs.toList();
+              programs.sort((a, b) {
+                final aData = a.data() as Map<String, dynamic>;
+                final bData = b.data() as Map<String, dynamic>;
+
+                // Get Order values, default to a large number if not present
+                final aOrder = aData['Order'] ?? 999999;
+                final bOrder = bData['Order'] ?? 999999;
+
+                // Convert to int if they're stored as strings or other types
+                int aOrderInt;
+                int bOrderInt;
+
+                try {
+                  aOrderInt = aOrder is int ? aOrder : int.parse(aOrder.toString());
+                } catch (e) {
+                  aOrderInt = 999999;
+                }
+
+                try {
+                  bOrderInt = bOrder is int ? bOrder : int.parse(bOrder.toString());
+                } catch (e) {
+                  bOrderInt = 999999;
+                }
+
+                return aOrderInt.compareTo(bOrderInt);
+              });
 
               return SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
@@ -762,11 +789,11 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                     title: Text(
                       name,
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 23 - (4 * collapseRatio), // Shrinks from 20 to 16
-                        fontWeight: FontWeight.bold,
-                        fontFamily: "font1"
-                      ),
+                          color: Colors.white,
+                          fontSize:
+                          23 - (4 * collapseRatio), // Shrinks from 20 to 16
+                          fontWeight: FontWeight.bold,
+                          fontFamily: "font1"),
                       // maxLines: 1,
                       // overflow: TextOverflow.ellipsis,
                     ),
@@ -824,11 +851,13 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                               double value = 1.0;
                               if (_pageController.position.haveDimensions) {
                                 value = _pageController.page! - index;
-                                value = (1 - (value.abs() * 0.3)).clamp(0.7, 1.0);
+                                value =
+                                    (1 - (value.abs() * 0.3)).clamp(0.7, 1.0);
                               }
                               return Center(
                                 child: SizedBox(
-                                  height: Curves.easeInOut.transform(value) * 400,
+                                  height:
+                                  Curves.easeInOut.transform(value) * 400,
                                   child: child,
                                 ),
                               );
@@ -909,11 +938,12 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                                         ),
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius:
+                                          BorderRadius.circular(20),
                                           boxShadow: [
                                             BoxShadow(
-                                              color:
-                                              Colors.black.withOpacity(0.2),
+                                              color: Colors.black
+                                                  .withOpacity(0.2),
                                               blurRadius: 10,
                                             ),
                                           ],
@@ -1014,7 +1044,8 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(24),
                               border: Border.all(
-                                color: const Color(0xFF1B5E20).withOpacity(0.1),
+                                color:
+                                const Color(0xFF1B5E20).withOpacity(0.1),
                                 width: 2,
                               ),
                               boxShadow: [
