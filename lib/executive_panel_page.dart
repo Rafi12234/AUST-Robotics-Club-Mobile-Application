@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:math' as math;
 
-class ExecutivePanelPage extends StatelessWidget {
+class ExecutivePanelPage extends StatefulWidget {
   final String semesterId;
 
   const ExecutivePanelPage({
@@ -10,10 +12,38 @@ class ExecutivePanelPage extends StatelessWidget {
     required this.semesterId,
   }) : super(key: key);
 
+  @override
+  State<ExecutivePanelPage> createState() => _ExecutivePanelPageState();
+}
+
+class _ExecutivePanelPageState extends State<ExecutivePanelPage>
+    with SingleTickerProviderStateMixin {
   static const Color brandStart = Color(0xFF0B6B3A);
   static const Color brandEnd = Color(0xFF16A34A);
   static const Color bgGradientStart = Color(0xFFE8F5E9);
   static const Color bgGradientEnd = Color(0xFFF1F8E9);
+
+  late AnimationController _floatingController;
+
+  @override
+  void initState() {
+    super.initState();
+    _floatingController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    )..repeat(reverse: true);
+
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _floatingController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +51,7 @@ class ExecutivePanelPage extends StatelessWidget {
         .collection('All_Data')
         .doc('Governing_Panel')
         .collection('Semesters')
-        .doc(semesterId)
+        .doc(widget.semesterId)
         .collection('Executive_Panel')
         .orderBy('Order');
 
@@ -38,7 +68,10 @@ class ExecutivePanelPage extends StatelessWidget {
           top: false,
           child: Column(
             children: [
-              _Header(semesterId: semesterId),
+              _Header(
+                semesterId: widget.semesterId,
+                floatingController: _floatingController,
+              ),
               Expanded(
                 child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: query.snapshots(),
@@ -49,7 +82,8 @@ class ExecutivePanelPage extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(brandStart),
+                              valueColor:
+                              AlwaysStoppedAnimation<Color>(brandStart),
                               strokeWidth: 3,
                             ),
                             const SizedBox(height: 16),
@@ -83,8 +117,10 @@ class ExecutivePanelPage extends StatelessWidget {
                         final data = docs[i].data();
 
                         final name = (data['Name'] ?? '').toString();
-                        final designation = (data['Designation'] ?? '').toString();
-                        final department = (data['Department'] ?? '').toString();
+                        final designation =
+                        (data['Designation'] ?? '').toString();
+                        final department =
+                        (data['Department'] ?? '').toString();
                         final email = (data['Email'] ?? '').toString();
                         final imageUrl = (data['Image'] ?? '').toString();
                         final facebook = (data['Facebook'] ?? '').toString();
@@ -115,77 +151,255 @@ class ExecutivePanelPage extends StatelessWidget {
 
 class _Header extends StatelessWidget {
   final String semesterId;
-  const _Header({required this.semesterId});
+  final AnimationController floatingController;
+
+  const _Header({
+    required this.semesterId,
+    required this.floatingController,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final topInset = MediaQuery.of(context).padding.top;
+
     return Container(
-      height: 160,
-      decoration: BoxDecoration(
+      height: 140 + topInset,
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [ExecutivePanelPage.brandStart, ExecutivePanelPage.brandEnd],
+          colors: [
+            Color(0xFF064E3B),
+            Color(0xFF0B6B3A),
+            Color(0xFF16A34A),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
-        boxShadow: [
-          BoxShadow(
-            color: ExecutivePanelPage.brandStart.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(40),
+          bottomRight: Radius.circular(40),
+        ),
       ),
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
-      child: Row(
+      child: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-              onPressed: () => Navigator.pop(context),
+          // Header Pattern
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(40),
+                bottomRight: Radius.circular(40),
+              ),
+              child: CustomPaint(
+                painter: _HeaderPatternPainter(
+                  animation: floatingController,
+                ),
+              ),
             ),
           ),
-          Expanded(
+
+          // Header Content
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 20),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 40),
-                const Text(
-                  'Executive Panel',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    semesterId,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.3,
+                Row(
+                  children: [
+                    // Back Button
+                    _AnimatedBackButton(
+                      onTap: () => Navigator.pop(context),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+
+                    // Title
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: 1),
+                            duration: const Duration(milliseconds: 800),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, value, child) {
+                              return Transform.translate(
+                                offset: Offset(30 * (1 - value), 0),
+                                child: Opacity(
+                                  opacity: value,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'Executive Panel',
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: 1),
+                            duration: const Duration(milliseconds: 900),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, value, child) {
+                              return Transform.translate(
+                                offset: Offset(30 * (1 - value), 0),
+                                child: Opacity(
+                                  opacity: value,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Text(
+                              semesterId,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Decorative Badge
+                    _HeaderBadge(animation: floatingController),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 48),
         ],
       ),
+    );
+  }
+}
+
+// ============================================
+// HEADER PATTERN PAINTER
+// ============================================
+class _HeaderPatternPainter extends CustomPainter {
+  final AnimationController animation;
+
+  _HeaderPatternPainter({required this.animation}) : super(repaint: animation);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.05)
+      ..style = PaintingStyle.fill;
+
+    // Animated circles
+    for (var i = 0; i < 6; i++) {
+      final progress = (animation.value + i * 0.15) % 1.0;
+      final x = size.width * (0.1 + i * 0.18);
+      final y = size.height * (0.3 + math.sin(progress * math.pi * 2) * 0.1);
+      final radius = 20.0 + i * 8;
+
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+
+    // Grid lines
+    final linePaint = Paint()
+      ..color = Colors.white.withOpacity(0.03)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    for (var i = 0; i < 8; i++) {
+      final y = size.height * i / 8;
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HeaderPatternPainter oldDelegate) => true;
+}
+
+// ============================================
+// ANIMATED BACK BUTTON
+// ============================================
+class _AnimatedBackButton extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _AnimatedBackButton({required this.onTap});
+
+  @override
+  State<_AnimatedBackButton> createState() => _AnimatedBackButtonState();
+}
+
+class _AnimatedBackButtonState extends State<_AnimatedBackButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        transform: Matrix4.identity()..scale(_isPressed ? 0.9 : 1.0),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(_isPressed ? 0.3 : 0.2),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+            width: 2,
+          ),
+        ),
+        child: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// HEADER BADGE
+// ============================================
+class _HeaderBadge extends StatelessWidget {
+  final AnimationController animation;
+
+  const _HeaderBadge({required this.animation});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15 + animation.value * 0.1),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withOpacity(0.3 + animation.value * 0.2),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.1 * animation.value),
+                blurRadius: 15 * animation.value,
+                spreadRadius: 3 * animation.value,
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.groups_rounded,
+            color: Colors.white,
+            size: 24,
+          ),
+        );
+      },
     );
   }
 }
@@ -216,7 +430,8 @@ class _ProfileCard extends StatefulWidget {
   State<_ProfileCard> createState() => _ProfileCardState();
 }
 
-class _ProfileCardState extends State<_ProfileCard> with SingleTickerProviderStateMixin {
+class _ProfileCardState extends State<_ProfileCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -236,7 +451,8 @@ class _ProfileCardState extends State<_ProfileCard> with SingleTickerProviderSta
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.15),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    ).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     Future.delayed(Duration(milliseconds: 100 * widget.index), () {
       if (mounted) _controller.forward();
@@ -308,7 +524,7 @@ class _ProfileCardState extends State<_ProfileCard> with SingleTickerProviderSta
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: ExecutivePanelPage.brandStart.withOpacity(0.08),
+              color: _ExecutivePanelPageState.brandStart.withOpacity(0.08),
               width: 1.5,
             ),
             boxShadow: [
@@ -321,7 +537,7 @@ class _ProfileCardState extends State<_ProfileCard> with SingleTickerProviderSta
               BoxShadow(
                 blurRadius: 8,
                 spreadRadius: -4,
-                color: ExecutivePanelPage.brandStart.withOpacity(0.05),
+                color: _ExecutivePanelPageState.brandStart.withOpacity(0.05),
                 offset: const Offset(0, 4),
               ),
             ],
@@ -344,7 +560,7 @@ class _ProfileCardState extends State<_ProfileCard> with SingleTickerProviderSta
                         return Center(
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
-                                ExecutivePanelPage.brandStart),
+                                _ExecutivePanelPageState.brandStart),
                             strokeWidth: 2.5,
                           ),
                         );
@@ -396,9 +612,11 @@ class _ProfileCardState extends State<_ProfileCard> with SingleTickerProviderSta
                     if (widget.designation.trim().isNotEmpty)
                       Container(
                         margin: const EdgeInsets.only(bottom: 6),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: ExecutivePanelPage.brandStart.withOpacity(0.1),
+                          color: _ExecutivePanelPageState.brandStart
+                              .withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -406,7 +624,7 @@ class _ProfileCardState extends State<_ProfileCard> with SingleTickerProviderSta
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: ExecutivePanelPage.brandStart,
+                            color: _ExecutivePanelPageState.brandStart,
                             letterSpacing: 0.2,
                           ),
                         ),
@@ -449,7 +667,7 @@ class _ProfileCardState extends State<_ProfileCard> with SingleTickerProviderSta
                           _SocialButton(
                             icon: Icons.email_outlined,
                             label: widget.email,
-                            color: ExecutivePanelPage.brandStart,
+                            color: _ExecutivePanelPageState.brandStart,
                             onTap: () => _mailto(widget.email),
                           ),
                         if (widget.facebook.trim().isNotEmpty)
@@ -573,8 +791,8 @@ class _ImageFallback extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            ExecutivePanelPage.brandStart.withOpacity(0.1),
-            ExecutivePanelPage.brandEnd.withOpacity(0.05),
+            _ExecutivePanelPageState.brandStart.withOpacity(0.1),
+            _ExecutivePanelPageState.brandEnd.withOpacity(0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -590,7 +808,7 @@ class _ImageFallback extends StatelessWidget {
           child: Icon(
             Icons.person_outline_rounded,
             size: 64,
-            color: ExecutivePanelPage.brandStart.withOpacity(0.6),
+            color: _ExecutivePanelPageState.brandStart.withOpacity(0.6),
           ),
         ),
       ),
@@ -661,12 +879,12 @@ class _EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: ExecutivePanelPage.brandStart.withOpacity(0.08),
+                color: _ExecutivePanelPageState.brandStart.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.people_outline_rounded,
-                color: ExecutivePanelPage.brandStart,
+                color: _ExecutivePanelPageState.brandStart,
                 size: 64,
               ),
             ),
