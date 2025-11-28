@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -83,29 +84,59 @@ class _AdminEducationalProgramsPageState
                 );
               }
 
+              // Sort programs by Order field
+              final sortedPrograms = programs.toList();
+              sortedPrograms.sort((a, b) {
+                final aData = a.data() as Map<String, dynamic>;
+                final bData = b.data() as Map<String, dynamic>;
+
+                final aOrder = aData['Order'] ?? 999999;
+                final bOrder = bData['Order'] ?? 999999;
+
+                int aOrderInt;
+                int bOrderInt;
+
+                try {
+                  aOrderInt = aOrder is int ? aOrder : int.parse(aOrder.toString());
+                } catch (e) {
+                  aOrderInt = 999999;
+                }
+
+                try {
+                  bOrderInt = bOrder is int ? bOrder : int.parse(bOrder.toString());
+                } catch (e) {
+                  bOrderInt = 999999;
+                }
+
+                return aOrderInt.compareTo(bOrderInt);
+              });
+
               return SliverPadding(
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                      final programDoc = programs[index];
+                      final programDoc = sortedPrograms[index];
                       final programId = programDoc.id;
                       final data = programDoc.data() as Map<String, dynamic>?;
                       final programName = data?['Name'] ?? programId;
                       final description = data?['Description'] ?? '';
+                      final order = data?['Order'];
                       final firstImage = _getFirstImage(data);
 
                       return _ProgramCard(
                         programId: programId,
                         programName: programName,
                         description: description,
+                        order: order,
                         imageUrl: firstImage,
                         index: index,
                         onTap: () => _navigateToEditPage(programId),
-                        onDelete: () => _deleteProgram(context, programId, programName),
+                        onDelete: () =>
+                            _deleteProgram(context, programId, programName),
                       );
                     },
-                    childCount: programs.length,
+                    childCount: sortedPrograms.length,
                   ),
                 ),
               );
@@ -179,7 +210,9 @@ class _AdminEducationalProgramsPageState
 
     for (int i = 1; i <= 20; i++) {
       final imageKey = 'Image_$i';
-      if (data.containsKey(imageKey) && data[imageKey] != null && data[imageKey].toString().isNotEmpty) {
+      if (data.containsKey(imageKey) &&
+          data[imageKey] != null &&
+          data[imageKey].toString().isNotEmpty) {
         return data[imageKey].toString();
       }
     }
@@ -320,6 +353,7 @@ class _ProgramCard extends StatefulWidget {
   final String programId;
   final String programName;
   final String description;
+  final dynamic order;
   final String imageUrl;
   final int index;
   final VoidCallback onTap;
@@ -329,6 +363,7 @@ class _ProgramCard extends StatefulWidget {
     required this.programId,
     required this.programName,
     required this.description,
+    required this.order,
     required this.imageUrl,
     required this.index,
     required this.onTap,
@@ -475,6 +510,50 @@ class _ProgramCardState extends State<_ProgramCard>
                           ),
                         ),
                       ),
+                      // Order Badge (Top Left)
+                      if (widget.order != null)
+                        Positioned(
+                          top: 12,
+                          left: 12,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [kAccentGold, Color(0xFFFF9500)],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: kAccentGold.withOpacity(0.4),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.filter_list_rounded,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Order: ${widget.order}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       // Action buttons
                       Positioned(
                         top: 12,
@@ -809,8 +888,9 @@ class _AddProgramButtonState extends State<_AddProgramButton>
   Future<void> _showAddProgramDialog(BuildContext context) async {
     final nameController = TextEditingController();
     final descriptionController = TextEditingController();
+    final orderController = TextEditingController(text: '1');
 
-    final result = await showDialog<Map<String, String>>(
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -873,6 +953,25 @@ class _AddProgramButtonState extends State<_AddProgramButton>
                 maxLines: 3,
                 textCapitalization: TextCapitalization.sentences,
               ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: orderController,
+                decoration: InputDecoration(
+                  labelText: 'Display Order',
+                  hintText: 'Enter display order (e.g., 1, 2, 3)',
+                  prefixIcon: const Icon(Icons.filter_list_rounded),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: kGreenMain, width: 2),
+                  ),
+                  helperText: 'Lower numbers appear first',
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
             ],
           ),
         ),
@@ -888,14 +987,22 @@ class _AddProgramButtonState extends State<_AddProgramButton>
             onPressed: () {
               final name = nameController.text.trim();
               final description = descriptionController.text.trim();
+              final orderText = orderController.text.trim();
+
               if (name.isNotEmpty) {
+                int? order;
+                if (orderText.isNotEmpty) {
+                  order = int.tryParse(orderText);
+                }
+
                 Navigator.pop(context, {
                   'name': name,
                   'description': description,
+                  'order': order ?? 1,
                 });
               }
             },
-            icon: const Icon(Icons.add_rounded, size: 20,color: Colors.white,),
+            icon: const Icon(Icons.add_rounded, size: 20, color: Colors.white),
             label: const Text('Create'),
             style: ElevatedButton.styleFrom(
               backgroundColor: kGreenMain,
@@ -910,13 +1017,14 @@ class _AddProgramButtonState extends State<_AddProgramButton>
       ),
     );
 
-    if (result != null && result['name']!.isNotEmpty && context.mounted) {
+    if (result != null && result['name'] != null && result['name'].toString().isNotEmpty && context.mounted) {
       try {
-        final docId = result['name']!;
+        final docId = result['name'].toString();
 
         await _programsCollection.doc(docId).set({
           'Name': result['name'],
           'Description': result['description'] ?? '',
+          'Order': result['order'] ?? 1,
           'createdAt': FieldValue.serverTimestamp(),
         });
 
@@ -927,7 +1035,8 @@ class _AddProgramButtonState extends State<_AddProgramButton>
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 12),
-                  Expanded(child: Text('"${result['name']}" created successfully!')),
+                  Expanded(
+                      child: Text('"${result['name']}" created successfully!')),
                 ],
               ),
               backgroundColor: kGreenMain,
@@ -969,7 +1078,8 @@ class EducationalProgramEditPage extends StatefulWidget {
       _EducationalProgramEditPageState();
 }
 
-class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
+class _EducationalProgramEditPageState
+    extends State<EducationalProgramEditPage>
     with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   final ImagePicker _imagePicker = ImagePicker();
@@ -986,7 +1096,8 @@ class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
       .doc('Educational, Mentorship & Training Programs')
       .collection('educational, mentorship & training programs');
 
-  DocumentReference get _programDoc => _programsCollection.doc(_currentProgramId);
+  DocumentReference get _programDoc =>
+      _programsCollection.doc(_currentProgramId);
 
   @override
   void initState() {
@@ -1055,6 +1166,17 @@ class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
                       _currentProgramId = newProgramId;
                     });
                   },
+                ),
+              ),
+
+              // Order Field - NEW!
+              SliverToBoxAdapter(
+                child: _OrderField(
+                  label: 'Display Order',
+                  value: data['Order'],
+                  programDoc: _programDoc,
+                  icon: Icons.filter_list_rounded,
+                  hint: 'Enter display order (e.g., 1, 2, 3)',
                 ),
               ),
 
@@ -1344,6 +1466,320 @@ class _EducationalProgramEditPageState extends State<EducationalProgramEditPage>
   }
 }
 
+// ============================================
+// ORDER FIELD - NEW WIDGET FOR ORDER MANAGEMENT
+// ============================================
+class _OrderField extends StatefulWidget {
+  final String label;
+  final dynamic value;
+  final DocumentReference programDoc;
+  final IconData icon;
+  final String hint;
+
+  const _OrderField({
+    required this.label,
+    required this.value,
+    required this.programDoc,
+    required this.icon,
+    required this.hint,
+  });
+
+  @override
+  State<_OrderField> createState() => _OrderFieldState();
+}
+
+class _OrderFieldState extends State<_OrderField>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late TextEditingController _textController;
+  bool _isEditing = false;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    )..forward();
+
+    // Convert value to string for text controller
+    final orderValue = widget.value?.toString() ?? '1';
+    _textController = TextEditingController(text: orderValue);
+  }
+
+  @override
+  void didUpdateWidget(_OrderField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value && !_isEditing) {
+      final orderValue = widget.value?.toString() ?? '1';
+      _textController.text = orderValue;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.2),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(
+          parent: _controller,
+          curve: Curves.easeOutCubic,
+        )),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: kAccentGold.withOpacity(0.3),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: kAccentGold.withOpacity(0.12),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            kAccentGold.withOpacity(0.2),
+                            kAccentGold.withOpacity(0.1),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(widget.icon, color: kAccentGold, size: 22),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.label,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: kGreenDark,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Lower numbers appear first in list',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[500],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_isSaving)
+                      const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: kAccentGold,
+                        ),
+                      )
+                    else
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: IconButton(
+                          key: ValueKey(_isEditing),
+                          icon: Icon(
+                            _isEditing
+                                ? Icons.check_circle_rounded
+                                : Icons.edit_rounded,
+                            color: _isEditing ? Colors.green : kAccentGold,
+                          ),
+                          onPressed: _isEditing ? _saveChanges : _enableEditing,
+                        ),
+                      ),
+                    if (_isEditing)
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, color: Colors.red),
+                        onPressed: _cancelEditing,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    color: _isEditing ? kAccentGold.withOpacity(0.05) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: _isEditing
+                        ? Border.all(color: kAccentGold, width: 2)
+                        : null,
+                  ),
+                  child: TextField(
+                    controller: _textController,
+                    enabled: _isEditing,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: _isEditing ? kGreenDark : Colors.grey[700],
+                      height: 1.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: widget.hint,
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.all(_isEditing ? 16 : 0),
+                      suffixIcon: _isEditing
+                          ? Icon(Icons.numbers_rounded, color: kAccentGold)
+                          : null,
+                    ),
+                  ),
+                ),
+
+                // Info message
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: kAccentGold.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: kAccentGold.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: kAccentGold, size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Programs are displayed in ascending order (1, 2, 3...)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: kGreenDark,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _enableEditing() {
+    setState(() => _isEditing = true);
+  }
+
+  void _cancelEditing() {
+    final orderValue = widget.value?.toString() ?? '1';
+    _textController.text = orderValue;
+    setState(() => _isEditing = false);
+  }
+
+  Future<void> _saveChanges() async {
+    final newValue = _textController.text.trim();
+
+    // Validation
+    if (newValue.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Order cannot be empty'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final orderInt = int.tryParse(newValue);
+    if (orderInt == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid number'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      await widget.programDoc.update({'Order': orderInt});
+
+      setState(() {
+        _isEditing = false;
+        _isSaving = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Text('Display order updated to $orderInt!'),
+              ],
+            ),
+            backgroundColor: kGreenMain,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isSaving = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating order: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+}
+
+// Keep all other widget classes (_ProgramNameField, _EditableField, _ImagesSectionHeader, _ImagesGrid, _ImageCard, etc.)
+// exactly as they were in your original code...
+
+// [REST OF THE CODE REMAINS THE SAME - I'm truncating here for length, but include all remaining widgets from your original code]
 // ============================================
 // PROGRAM NAME FIELD - WITH DOCUMENT RENAME
 // ============================================
@@ -2039,7 +2475,8 @@ class _ImagesSectionHeader extends StatelessWidget {
           ),
           ElevatedButton.icon(
             onPressed: onAddImage,
-            icon: const Icon(Icons.add_photo_alternate_rounded, size: 20,color: Colors.white),
+            icon: const Icon(Icons.add_photo_alternate_rounded,
+                size: 20, color: Colors.white),
             label: const Text('Add'),
             style: ElevatedButton.styleFrom(
               backgroundColor: kGreenMain,
@@ -2452,6 +2889,18 @@ class _AddImageFABState extends State<_AddImageFAB>
     return ScaleTransition(
       scale: Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+      ),
+      child: FloatingActionButton.extended(
+        onPressed: widget.onPressed,
+        backgroundColor: kGreenMain,
+        icon: const Icon(Icons.add_photo_alternate_rounded, color: Colors.white),
+        label: const Text(
+          'Add Image',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
