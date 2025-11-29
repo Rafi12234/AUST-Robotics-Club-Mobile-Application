@@ -11,6 +11,8 @@ import 'member_recruitment_page.dart';
 import 'educational_mentorship_training_programs_page.dart';
 import 'FancyFloatingButton.dart';
 import 'size_config.dart';
+import 'footer_page.dart'; // Footer import
+import 'dart:math' as math;
 
 /// AUST RC brand greens + white
 const kGreenDark = Color(0xFF0B6B3A);
@@ -76,13 +78,14 @@ class HomePage extends StatelessWidget {
         systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
           statusBarColor: Colors.transparent,
         ),
-        flexibleSpace: const DecoratedBox(
-          decoration: BoxDecoration(
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [kGreenDark, kGreenMain],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
           ),
         ),
         title: Row(
@@ -210,31 +213,36 @@ class _InfoButtonState extends State<_InfoButton>
       child: AnimatedScale(
         scale: _isPressed ? 0.9 : 1.0,
         duration: const Duration(milliseconds: 150),
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withOpacity(0.4),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.white.withOpacity(0.1),
-                blurRadius: 8,
-                spreadRadius: 2,
+        child: AnimatedBuilder(
+          animation: _pulseController,
+          builder: (context, child) {
+            return Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.4),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.1 + (0.1 * _pulseController.value)),
+                    blurRadius: 8 + (4 * _pulseController.value),
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: const Center(
-            child: Icon(
-              Icons.info_outline_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
+              child: const Center(
+                child: Icon(
+                  Icons.info_outline_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -721,26 +729,258 @@ class HomeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: EdgeInsets.zero,
+      physics: const BouncingScrollPhysics(),
       children: [
-        const _WelcomeCard(),
-        SizedBox(height: SizeConfig.screenHeight * 0.015),
-        const _RecentEventsCarousel(),
-        SizedBox(height: SizeConfig.screenHeight * 0.001),
-        Align(
-          alignment: Alignment.centerRight,
-          child: _ExploreEventsButton(),
+        // Main content with padding
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          child: Column(
+            children: [
+              const _WelcomeCard(),
+              SizedBox(height: SizeConfig.screenHeight * 0.015),
+              const _RecentEventsCarousel(),
+              SizedBox(height: SizeConfig.screenHeight * 0.001),
+              Align(
+                alignment: Alignment.centerRight,
+                child: _ExploreEventsButton(),
+              ),
+              SizedBox(height: SizeConfig.screenHeight * 0.005),
+              const _QuickActionsRow(),
+              SizedBox(height: SizeConfig.screenHeight * 0.005),
+              SizedBox(height: SizeConfig.screenHeight * 0.015),
+              const _EducationalMentorshipSection(),
+              SizedBox(height: SizeConfig.screenHeight * 0.03),
+              const VoiceOfAUSTRC(),
+            ],
+          ),
         ),
-        SizedBox(height: SizeConfig.screenHeight * 0.005),
-        _QuickActionsRow(),
-        SizedBox(height: SizeConfig.screenHeight * 0.005),
-        SizedBox(height: SizeConfig.screenHeight * 0.015),
-        _EducationalMentorshipSection(),
-        SizedBox(height: SizeConfig.screenHeight * 0.03),
-        VoiceOfAUSTRC(),
+
+        // Footer Transition Section
+        const _FooterTransitionSection(),
+
+        // Footer
+        const FooterPage(),
       ],
     );
   }
+}
+
+// ============================================
+// FOOTER TRANSITION SECTION
+// ============================================
+class _FooterTransitionSection extends StatefulWidget {
+  const _FooterTransitionSection();
+
+  @override
+  State<_FooterTransitionSection> createState() =>
+      _FooterTransitionSectionState();
+}
+
+class _FooterTransitionSectionState extends State<_FooterTransitionSection>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _waveController;
+
+  @override
+  void initState() {
+    super.initState();
+    _waveController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _waveController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 120,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white,
+            Color(0xFFE8F5E9),
+            Color(0xFFA5D6A7),
+            Color(0xFF0A2E1F),
+          ],
+          stops: [0.0, 0.3, 0.6, 1.0],
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Decorative pattern
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _TransitionPatternPainter(),
+            ),
+          ),
+
+          // Center content
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 1200),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, 15 * (1 - value)),
+                  child: child,
+                ),
+              );
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Animated wave dots
+                AnimatedBuilder(
+                  animation: _waveController,
+                  builder: (context, child) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (index) {
+                        final delay = index * 0.15;
+                        final animValue =
+                        ((_waveController.value + delay) % 1.0);
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Transform.translate(
+                            offset: Offset(0, -6 * animValue),
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: kGreenMain.withOpacity(0.6 + (0.4 * animValue)),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: kGreenMain.withOpacity(0.4 * animValue),
+                                    blurRadius: 8 * animValue,
+                                    spreadRadius: 2 * animValue,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                // Connect with us badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.arrow_downward_rounded,
+                          color: Colors.white.withOpacity(0.9),
+                          size: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Connect With Us',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.95),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Transition Pattern Painter
+class _TransitionPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.05)
+      ..style = PaintingStyle.fill;
+
+    // Draw subtle circles
+    for (int i = 0; i < 8; i++) {
+      final x = size.width * (0.1 + i * 0.12);
+      final y = size.height * (i.isEven ? 0.25 : 0.65);
+      canvas.drawCircle(Offset(x, y), 25 + (i % 3) * 10, paint);
+    }
+
+    // Draw curved wave line
+    final wavePaint = Paint()
+      ..color = Colors.white.withOpacity(0.08)
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+
+    final wavePath = Path()
+      ..moveTo(0, size.height * 0.5);
+
+    for (double x = 0; x <= size.width; x += 20) {
+      final y = size.height * 0.5 + 15 * math.sin(x / 50);
+      wavePath.lineTo(x, y);
+    }
+
+    canvas.drawPath(wavePath, wavePaint);
+
+    // Second wave
+    final wavePath2 = Path()
+      ..moveTo(0, size.height * 0.6);
+
+    for (double x = 0; x <= size.width; x += 20) {
+      final y = size.height * 0.6 + 10 * math.sin((x / 40) + 1);
+      wavePath2.lineTo(x, y);
+    }
+
+    canvas.drawPath(wavePath2, wavePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // ============================================
@@ -1027,14 +1267,6 @@ class _WelcomeShimmerPainter extends CustomPainter {
 // ============================================
 // RECENT EVENTS CAROUSEL
 // ============================================
-class _EventItem {
-  final int number;
-  final String imageUrl;
-  final String title;
-  const _EventItem(
-      {required this.number, required this.imageUrl, required this.title});
-}
-
 class _RecentEventsCarousel extends StatefulWidget {
   const _RecentEventsCarousel();
 
@@ -1848,7 +2080,7 @@ class _ShimmerPainter extends CustomPainter {
 }
 
 // ============================================
-// EDUCATIONAL & MENTORSHIP SECTION (NEW)
+// EDUCATIONAL & MENTORSHIP SECTION
 // ============================================
 class _EducationalProgramItem {
   final int order;
@@ -1901,215 +2133,213 @@ class _EducationalMentorshipSection extends StatelessWidget {
         .doc('Educational, Mentorship & Training Programs')
         .collection('educational, mentorship & training programs');
 
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              return Opacity(
-                opacity: value,
-                child: Transform.translate(
-                  offset: Offset(1, 20 * (1 - value)),
-                  child: child,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(1, 20 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: kGreenDark.withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
+              ],
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.support_agent_rounded,
+                    color: Colors.white, size: 28),
+                SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Educational & Mentorship',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Training Programs',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFFB8E6D5),
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // StreamBuilder for Collection
+        StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: collectionRef.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const _EMErrorBox(
+                  'Failed to load educational programs.');
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const _EMSkeletonList();
+            }
+
+            final docs = snapshot.data?.docs ?? [];
+
+            // Convert to items and filter
+            final allItems = docs
+                .map((doc) => _EducationalProgramItem.fromFirestore(doc))
+                .where((item) =>
+            item.order >= 1 &&
+                item.order <= 3 &&
+                item.imageUrl.isNotEmpty)
+                .toList();
+
+            // Sort by order
+            allItems.sort((a, b) => a.order.compareTo(b.order));
+
+            // Take only top 3
+            final displayItems = allItems.take(3).toList();
+
+            if (displayItems.isEmpty) {
+              return const _EMEmptyBox(
+                'No programs with Order 1, 2, or 3 found.\nSet Order to 1, 2, or 3 in Admin Panel.',
               );
-            },
+            }
+
+            return SizedBox(
+              height: 240,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: displayItems.length,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                itemBuilder: (context, index) {
+                  return _EducationalProgramCard(
+                    item: displayItems[index],
+                    index: index,
+                  );
+                },
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 20),
+
+        // Explore All Programs Button
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.scale(
+                scale: 0.95 + (0.05 * value),
+                child: child,
+              ),
+            );
+          },
+          child: Center(
             child: Container(
-              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
+                  colors: [Color(0xFF1A5C43), Color(0xFF0F3D2E)],
                 ),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color: kGreenDark.withOpacity(0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    color: kGreenMain.withOpacity(0.4),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
-              child: const Row(
-                children: [
-                  Icon(Icons.support_agent_rounded,
-                      color: Colors.white, size: 28),
-                  SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                        const EducationalProgramsPage(),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(30),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.screenWidth * 0.039,
+                      vertical: SizeConfig.screenHeight * 0.01,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Educational & Mentorship',
+                          'Explore All Programs',
                           style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
                             color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: SizeConfig.screenHeight * 0.014,
                             letterSpacing: 0.3,
                           ),
                         ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Training Programs',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFFB8E6D5),
-                            letterSpacing: 0.2,
+                        const SizedBox(width: 8),
+                        TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 1200),
+                          curve: Curves.easeInOut,
+                          builder: (context, value, child) {
+                            return Transform.translate(
+                              offset: Offset(4 * value, 0),
+                              child: child,
+                            );
+                          },
+                          child: const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 20,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // StreamBuilder for Collection
-          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            stream: collectionRef.snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const _EMErrorBox(
-                    'Failed to load educational programs.');
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const _EMSkeletonList();
-              }
-
-              final docs = snapshot.data?.docs ?? [];
-
-              // Convert to items and filter
-              final allItems = docs
-                  .map((doc) => _EducationalProgramItem.fromFirestore(doc))
-                  .where((item) =>
-              item.order >= 1 &&
-                  item.order <= 3 &&
-                  item.imageUrl.isNotEmpty)
-                  .toList();
-
-              // Sort by order
-              allItems.sort((a, b) => a.order.compareTo(b.order));
-
-              // Take only top 3
-              final displayItems = allItems.take(3).toList();
-
-              if (displayItems.isEmpty) {
-                return const _EMEmptyBox(
-                  'No programs with Order 1, 2, or 3 found.\nSet Order to 1, 2, or 3 in Admin Panel.',
-                );
-              }
-
-              return SizedBox(
-                height: 240,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: displayItems.length,
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  itemBuilder: (context, index) {
-                    return _EducationalProgramCard(
-                      item: displayItems[index],
-                      index: index,
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 20),
-
-          // Explore All Programs Button
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              return Opacity(
-                opacity: value,
-                child: Transform.scale(
-                  scale: 0.95 + (0.05 * value),
-                  child: child,
-                ),
-              );
-            },
-            child: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1A5C43), Color(0xFF0F3D2E)],
-                  ),
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: kGreenMain.withOpacity(0.4),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                          const EducationalProgramsPage(),
-                        ),
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(30),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: SizeConfig.screenWidth * 0.039,
-                        vertical: SizeConfig.screenHeight * 0.01,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Explore All Programs',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: SizeConfig.screenHeight * 0.014,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0, end: 1),
-                            duration: const Duration(milliseconds: 1200),
-                            curve: Curves.easeInOut,
-                            builder: (context, value, child) {
-                              return Transform.translate(
-                                offset: Offset(4 * value, 0),
-                                child: child,
-                              );
-                            },
-                            child: const Icon(
-                              Icons.arrow_forward_rounded,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -2235,7 +2465,7 @@ class _EducationalProgramCardState extends State<_EducationalProgramCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Program Name (Order badge removed)
+                      // Program Name
                       Text(
                         widget.item.name,
                         maxLines: 2,
@@ -2418,7 +2648,7 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
   static const _autoSlideEvery = Duration(seconds: 3);
   static const _animDuration = Duration(milliseconds: 500);
 
-  int _initialPageIndex = 5000; // large enough for "infinite" feel
+  int _initialPageIndex = 5000;
 
   @override
   void initState() {
@@ -2466,7 +2696,7 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
       }
     });
 
-    entries.sort((a, b) => a.key.compareTo(b.key)); // Voice_1 → Voice_2 …
+    entries.sort((a, b) => a.key.compareTo(b.key));
     return entries.map((e) => e.value).toList();
   }
 
