@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'FAQ_page.dart';
 
 /// ============================================
 /// AUST RC BRAND COLORS
@@ -120,7 +121,15 @@ class FooterPage extends StatelessWidget {
       ),
     );
   }
-
+  void _navigateToFAQPage(BuildContext context) {
+    HapticFeedback.mediumImpact();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const FAQFeedbackPage(),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final currentYear = DateTime.now().year;
@@ -149,7 +158,7 @@ class FooterPage extends StatelessWidget {
           // ======== QUICK LINKS ========
           _QuickLinksRow(
             onContactTap: () => _showComingSoon(context, 'Contact Us'),
-            onFaqTap: () => _showComingSoon(context, 'FAQ'),
+            onFaqTap: () => _navigateToFAQPage(context),
             onPolicyTap: () => _showComingSoon(context, 'Policies & Privacy'),
           ),
 
