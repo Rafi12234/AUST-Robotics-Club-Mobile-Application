@@ -18,8 +18,10 @@ const kOnPrimary = Colors.white;
 /// ============================================
 class SocialLinks {
   static const String facebook = 'https://www.facebook.com/AustRoboticsClub';
-  static const String instagram = 'https://www.instagram.com/aust_robotics_club/';
-  static const String linkedin = 'https://www.linkedin.com/company/aust-robotics-club/';
+  static const String instagram =
+      'https://www.instagram.com/aust_robotics_club/';
+  static const String linkedin =
+      'https://www.linkedin.com/company/aust-robotics-club/';
 }
 
 /// ============================================
@@ -51,12 +53,14 @@ class AppreciationMessage {
   final String position;
   final String imagePath;
   final String message;
+  final String semester;
 
   const AppreciationMessage({
     required this.name,
     required this.position,
     required this.imagePath,
     required this.message,
+    required this.semester,
   });
 }
 
@@ -90,7 +94,8 @@ class FooterPage extends StatelessWidget {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.construction_rounded, color: Colors.white, size: 18),
+            const Icon(Icons.construction_rounded,
+                color: Colors.white, size: 18),
             const SizedBox(width: 10),
             Text('$feature - Coming Soon!'),
           ],
@@ -150,9 +155,11 @@ class FooterPage extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // ======== SOCIAL MEDIA ========
-          _CompactSocialRow(
-            onTap: (url) => _launchUrl(context, url),
+          // ======== SOCIAL MEDIA - SIMPLE ICONS ========
+          _SimpleSocialRow(
+            onFacebookTap: () => _launchUrl(context, SocialLinks.facebook),
+            onInstagramTap: () => _launchUrl(context, SocialLinks.instagram),
+            onLinkedInTap: () => _launchUrl(context, SocialLinks.linkedin),
           ),
 
           const SizedBox(height: 16),
@@ -202,26 +209,13 @@ class _CompactHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Logo
         Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: kGreenMain.withOpacity(0.3),
-                blurRadius: 12,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
               'assets/images/logo2.png',
-              width: 36,
-              height: 36,
+              width: 46,
+              height: 46,
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => const Icon(
                 Icons.smart_toy_rounded,
@@ -231,10 +225,7 @@ class _CompactHeader extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(width: 14),
-
-        // Club name & tagline
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -356,9 +347,8 @@ class _FooterLinkButtonState extends State<_FooterLinkButton> {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: _isPressed
-              ? Colors.white.withOpacity(0.1)
-              : Colors.transparent,
+          color:
+          _isPressed ? Colors.white.withOpacity(0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -386,70 +376,63 @@ class _FooterLinkButtonState extends State<_FooterLinkButton> {
 }
 
 /// ============================================
-/// COMPACT SOCIAL MEDIA ROW WITH IMAGES
+/// SIMPLE SOCIAL MEDIA ROW - JUST ICONS
 /// ============================================
-class _CompactSocialRow extends StatelessWidget {
-  final Function(String) onTap;
+class _SimpleSocialRow extends StatelessWidget {
+  final VoidCallback onFacebookTap;
+  final VoidCallback onInstagramTap;
+  final VoidCallback onLinkedInTap;
 
-  const _CompactSocialRow({required this.onTap});
+  const _SimpleSocialRow({
+    required this.onFacebookTap,
+    required this.onInstagramTap,
+    required this.onLinkedInTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _CompactSocialButton(
+        // Facebook
+        _SimpleSocialIcon(
           imagePath: 'assets/images/facebook.png',
-          fallbackIcon: Icons.facebook_rounded,
-          color: const Color(0xFF1877F2),
-          url: SocialLinks.facebook,
-          onTap: onTap,
+          onTap: onFacebookTap,
         ),
-        const SizedBox(width: 16),
-        _CompactSocialButton(
+        const SizedBox(width: 32),
+        // Instagram
+        _SimpleSocialIcon(
           imagePath: 'assets/images/instagram.png',
-          fallbackIcon: Icons.camera_alt_rounded,
-          gradient: const LinearGradient(
-            colors: [Color(0xFFF58529), Color(0xFFDD2A7B), Color(0xFF8134AF)],
-          ),
-          url: SocialLinks.instagram,
-          onTap: onTap,
+          onTap: onInstagramTap,
         ),
-        const SizedBox(width: 16),
-        _CompactSocialButton(
+        const SizedBox(width: 32),
+        // LinkedIn
+        _SimpleSocialIcon(
           imagePath: 'assets/images/linkedin.png',
-          fallbackIcon: Icons.business_center_rounded,
-          color: const Color(0xFF0A66C2),
-          url: SocialLinks.linkedin,
-          onTap: onTap,
+          onTap: onLinkedInTap,
         ),
       ],
     );
   }
 }
 
-class _CompactSocialButton extends StatefulWidget {
+/// ============================================
+/// SIMPLE SOCIAL ICON - NO BACKGROUND/BORDER
+/// ============================================
+class _SimpleSocialIcon extends StatefulWidget {
   final String imagePath;
-  final IconData fallbackIcon;
-  final Color? color;
-  final Gradient? gradient;
-  final String url;
-  final Function(String) onTap;
+  final VoidCallback onTap;
 
-  const _CompactSocialButton({
+  const _SimpleSocialIcon({
     required this.imagePath,
-    required this.fallbackIcon,
-    this.color,
-    this.gradient,
-    required this.url,
     required this.onTap,
   });
 
   @override
-  State<_CompactSocialButton> createState() => _CompactSocialButtonState();
+  State<_SimpleSocialIcon> createState() => _SimpleSocialIconState();
 }
 
-class _CompactSocialButtonState extends State<_CompactSocialButton> {
+class _SimpleSocialIconState extends State<_SimpleSocialIcon> {
   bool _isPressed = false;
 
   @override
@@ -459,41 +442,24 @@ class _CompactSocialButtonState extends State<_CompactSocialButton> {
       onTapUp: (_) {
         setState(() => _isPressed = false);
         HapticFeedback.mediumImpact();
-        widget.onTap(widget.url);
+        widget.onTap();
       },
       onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedContainer(
+      child: AnimatedScale(
+        scale: _isPressed ? 0.85 : 1.0,
         duration: const Duration(milliseconds: 150),
-        width: 48,
-        height: 48,
-        transform: Matrix4.identity()..scale(_isPressed ? 0.9 : 1.0),
-        decoration: BoxDecoration(
-          gradient: widget.gradient ??
-              LinearGradient(
-                colors: [widget.color!, widget.color!.withOpacity(0.8)],
-              ),
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: (widget.color ?? Colors.purple).withOpacity(0.4),
-              blurRadius: _isPressed ? 8 : 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Image.asset(
-              widget.imagePath,
-              fit: BoxFit.contain,
+        child: AnimatedOpacity(
+          opacity: _isPressed ? 0.7 : 1.0,
+          duration: const Duration(milliseconds: 150),
+          child: Image.asset(
+            widget.imagePath,
+            width: 36,
+            height: 36,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.link,
               color: Colors.white,
-              errorBuilder: (_, __, ___) => Icon(
-                widget.fallbackIcon,
-                color: Colors.white,
-                size: 24,
-              ),
+              size: 36,
             ),
           ),
         ),
@@ -503,7 +469,7 @@ class _CompactSocialButtonState extends State<_CompactSocialButton> {
 }
 
 /// ============================================
-/// DEVELOPERS SECTION (MODIFIED)
+/// DEVELOPERS SECTION
 /// ============================================
 class _DevelopersSection extends StatelessWidget {
   final VoidCallback onInfoTap;
@@ -514,7 +480,7 @@ class _DevelopersSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -528,9 +494,7 @@ class _DevelopersSection extends StatelessWidget {
         ),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          // "Developed by"
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -540,139 +504,79 @@ class _DevelopersSection extends StatelessWidget {
                 color: kGreenLight.withOpacity(0.8),
               ),
               const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  'Developed by',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: kGreenLight.withOpacity(0.9),
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 6),
-
-          // AUST Robotics Club + info button on the same row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'AUST Robotics Club',
+              Text(
+                'Developed by',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: kGreenLight.withOpacity(0.9),
+                  letterSpacing: 0.3,
                 ),
               ),
-              const SizedBox(width: 8),
-              // i button just beside the club name
-              _InfoButton(onTap: onInfoTap),
             ],
           ),
-
-          const SizedBox(height: 2),
-
-          // Subtitle
+          const SizedBox(height: 8),
+          const Text(
+            'AUST Robotics Club',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
           Text(
             'Web Development Team',
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
               color: Colors.white.withOpacity(0.6),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-
-class _InfoButton extends StatefulWidget {
-  final VoidCallback onTap;
-
-  const _InfoButton({required this.onTap});
-
-  @override
-  State<_InfoButton> createState() => _InfoButtonState();
-}
-
-class _InfoButtonState extends State<_InfoButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  bool _isPressed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _isPressed ? 0.9 : _scaleAnimation.value,
+          const SizedBox(height: 14),
+          GestureDetector(
+            onTap: onInfoTap,
             child: Container(
-              width: 40,
-              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    kGreenMain,
-                    kGreenDark,
-                  ],
+                  colors: [kGreenMain, kGreenDark],
                 ),
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(25),
                 boxShadow: [
                   BoxShadow(
                     color: kGreenMain.withOpacity(0.4),
-                    blurRadius: 12,
-                    spreadRadius: 2,
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 4),
                   ),
                 ],
-                border: Border.all(
-                  color: kGreenLight.withOpacity(0.3),
-                  width: 2,
-                ),
               ),
-              child: const Icon(
-                Icons.info_outline_rounded,
-                color: Colors.white,
-                size: 22,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Meet the Developers',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -690,7 +594,6 @@ class _CompactCopyright extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Made with love
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -710,10 +613,7 @@ class _CompactCopyright extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 6),
-
-        // Copyright & University
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -772,22 +672,12 @@ class _CompactCopyright extends StatelessWidget {
 }
 
 /// ============================================
-/// DEVELOPER CREDITS PAGE
+/// DEVELOPER CREDITS PAGE - LIGHT THEME
 /// ============================================
-class DeveloperCreditsPage extends StatefulWidget {
+class DeveloperCreditsPage extends StatelessWidget {
   const DeveloperCreditsPage({super.key});
 
-  @override
-  State<DeveloperCreditsPage> createState() => _DeveloperCreditsPageState();
-}
-
-class _DeveloperCreditsPageState extends State<DeveloperCreditsPage>
-    with TickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-
-  // Developer Information
-  final List<DeveloperInfo> developers = const [
+  static const List<DeveloperInfo> developers = [
     DeveloperInfo(
       name: 'Shajedul Kabir Rafi',
       role: 'Head Developer',
@@ -806,48 +696,29 @@ class _DeveloperCreditsPageState extends State<DeveloperCreditsPage>
     ),
   ];
 
-  // Appreciation Messages
-  final List<AppreciationMessage> appreciations = const [
+  static const List<AppreciationMessage> appreciations = [
     AppreciationMessage(
-      name: 'Director',
-      position: 'Director, AUST Robotics Club',
+      name: 'Ahnaf Amer',
+      position: 'Director',
       imagePath: 'assets/images/Director.jpg',
+      semester: 'Fall 2024',
       message:
       'On behalf of the AUST Robotics Club, I extend my heartfelt appreciation to our talented developers for successfully creating the official mobile application of ARC. This achievement reflects your dedication, creativity, and commitment to delivering a platform that strengthens communication and enhances the club experience for all members. Your hard work has turned a long-standing vision into reality, and we are immensely proud of the professionalism and passion you showed throughout the development journey. Thank you for your remarkable contribution and for setting a new benchmark for digital innovation within our club.',
     ),
     AppreciationMessage(
-      name: 'Assistant Director',
-      position: 'Assistant Director, AUST Robotics Club',
+      name: 'Saobia Tinni',
+      position: 'Assistant Director',
       imagePath: 'assets/images/Assistant Director.jpeg',
+      semester: 'Fall 2024',
       message:
       'Congratulations to the developers behind the new ARC mobile app for achieving a milestone that will benefit our entire community. Your collaborative spirit, consistent effort, and problem-solving mindset have resulted in a polished and user-friendly application that truly represents the identity of AUST Robotics Club. This project showcases not only your technical expertise but also your dedication to helping the club grow digitally. We deeply appreciate your initiative and the countless hours you invested. Thank you for raising the standard of what we can accomplish together.',
     ),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
-    );
-    _fadeController.forward();
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _launchUrl(String url) async {
+  Future<void> _launchUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Could not open link'),
@@ -865,181 +736,380 @@ class _DeveloperCreditsPageState extends State<DeveloperCreditsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0A2E1F),
-              Color(0xFF0F3D2E),
-              Color(0xFF0B6B3A),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                // App Bar
-                SliverAppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  pinned: true,
-                  expandedHeight: 120,
-                  leading: IconButton(
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
+      backgroundColor: const Color(0xFFF5F7FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // App Bar
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: kGreenMain.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
                         Icons.arrow_back_ios_rounded,
-                        color: Colors.white,
+                        color: kGreenDark,
                         size: 20,
                       ),
                     ),
-                    onPressed: () => Navigator.pop(context),
                   ),
-                  flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: true,
-                    title: ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [Colors.white, kGreenLight],
-                      ).createShader(bounds),
-                      child: const Text(
-                        'Development Team',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                        ),
+                  const SizedBox(width: 16),
+                  const Expanded(
+                    child: Text(
+                      'Development Team',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: kGreenDark,
                       ),
                     ),
-                    background: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            kGreenDark.withOpacity(0.8),
-                            Colors.transparent,
+                  ),
+                  // Club Logo
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: kGreenMain.withOpacity(0.2),
+                      ),
+                    ),
+                    child: Image.asset(
+                      'assets/images/logo2.png',
+                      width: 28,
+                      height: 28,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.smart_toy_rounded,
+                        size: 24,
+                        color: kGreenDark,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+
+                    // Header
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [kGreenMain, kGreenDark],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: kGreenMain.withOpacity(0.3),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.code_rounded,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'AUST Robotics Club',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Web Development Team',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
-                  ),
-                ),
 
-                // Content
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        // Header Section
-                        _buildHeaderSection(),
+                    const SizedBox(height: 24),
 
-                        const SizedBox(height: 30),
-
-                        // Developers Section
-                        _buildSectionTitle(
-                          icon: Icons.code_rounded,
-                          title: 'Meet Our Developers',
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Developer Cards
-                        ...developers.map((dev) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _DeveloperCard(
-                            developer: dev,
-                            onSocialTap: _launchUrl,
+                    // Developers Section Title
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: kGreenMain.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.people_alt_rounded,
+                              color: kGreenMain,
+                              size: 20,
+                            ),
                           ),
-                        )),
-
-                        const SizedBox(height: 30),
-
-                        // Appreciation Section
-                        _buildSectionTitle(
-                          icon: Icons.favorite_rounded,
-                          title: 'Words of Appreciation',
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Appreciation Cards
-                        ...appreciations.map((appreciation) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _AppreciationCard(appreciation: appreciation),
-                        )),
-
-                        const SizedBox(height: 30),
-
-                        // Bottom Thank You
-                        _buildThankYouSection(),
-
-                        const SizedBox(height: 20),
-                      ],
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Our Developers',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF1F2937),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+
+                    const SizedBox(height: 16),
+
+                    // Developer Cards
+                    ...developers.map((dev) => Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
+                      child: _DeveloperCardLight(
+                        developer: dev,
+                        onGithubTap: () =>
+                            _launchUrl(context, dev.githubUrl!),
+                        onFacebookTap: () =>
+                            _launchUrl(context, dev.facebookUrl!),
+                      ),
+                    )),
+
+                    const SizedBox(height: 32),
+
+                    // Appreciation Section Title
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.emoji_events_rounded,
+                              color: Colors.amber,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Words of Appreciation',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF1F2937),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Directors Row
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: appreciations
+                            .map((appreciation) => Expanded(
+                          child: _DirectorAvatar(
+                            appreciation: appreciation,
+                          ),
+                        ))
+                            .toList(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Appreciation Messages
+                    ...appreciations.map((appreciation) => Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
+                      child: _AppreciationCardLight(
+                        appreciation: appreciation,
+                      ),
+                    )),
+
+                    const SizedBox(height: 32),
+
+                    // Thank You Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: kGreenMain.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: kGreenMain.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Text(
+                                '💚',
+                                style: TextStyle(fontSize: 28),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Thank you for using the AUST Robotics Club Official Mobile App',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: kGreenDark,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Built with passion and dedication',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildHeaderSection() {
+/// ============================================
+/// DEVELOPER CARD - LIGHT THEME
+/// ============================================
+class _DeveloperCardLight extends StatelessWidget {
+  final DeveloperInfo developer;
+  final VoidCallback onGithubTap;
+  final VoidCallback onFacebookTap;
+
+  const _DeveloperCardLight({
+    required this.developer,
+    required this.onGithubTap,
+    required this.onFacebookTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isLead = developer.role == 'Head Developer';
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            kGreenMain.withOpacity(0.2),
-            kGreenDark.withOpacity(0.15),
-          ],
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: kGreenMain.withOpacity(0.3),
+          color: isLead
+              ? kGreenMain.withOpacity(0.3)
+              : Colors.grey.withOpacity(0.15),
+          width: isLead ? 2 : 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: isLead
+                ? kGreenMain.withOpacity(0.1)
+                : Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          // Club Logo
+          // Profile Image - Larger
           Container(
-            padding: const EdgeInsets.all(12),
+            width: isLead ? 120 : 100,
+            height: isLead ? 120 : 100,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isLead ? kGreenMain : kGreenMain.withOpacity(0.5),
+                width: isLead ? 4 : 3,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: kGreenMain.withOpacity(0.3),
-                  blurRadius: 20,
-                  spreadRadius: 2,
+                  color: kGreenMain.withOpacity(0.2),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+            child: ClipOval(
               child: Image.asset(
-                'assets/images/logo2.png',
-                width: 60,
-                height: 60,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.smart_toy_rounded,
-                  size: 50,
-                  color: kGreenDark,
+                developer.imagePath,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: kGreenMain.withOpacity(0.1),
+                  child: Icon(
+                    Icons.person_rounded,
+                    size: isLead ? 60 : 50,
+                    color: kGreenMain.withOpacity(0.5),
+                  ),
                 ),
               ),
             ),
@@ -1047,522 +1117,220 @@ class _DeveloperCreditsPageState extends State<DeveloperCreditsPage>
 
           const SizedBox(height: 16),
 
-          ShaderMask(
-            shaderCallback: (bounds) => const LinearGradient(
-              colors: [Colors.white, kGreenLight],
-            ).createShader(bounds),
-            child: const Text(
-              'AUST ROBOTICS CLUB',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.5,
-                color: Colors.white,
+          // Role Badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              gradient: isLead
+                  ? const LinearGradient(
+                colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+              )
+                  : LinearGradient(
+                colors: [
+                  kGreenMain.withOpacity(0.15),
+                  kGreenMain.withOpacity(0.1),
+                ],
               ),
+              borderRadius: BorderRadius.circular(20),
             ),
-          ),
-
-          const SizedBox(height: 6),
-
-          Text(
-            'Web Development Team',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: kGreenLight.withOpacity(0.8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isLead ? Icons.star_rounded : Icons.code_rounded,
+                  size: 14,
+                  color: isLead ? Colors.black87 : kGreenMain,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  developer.role,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: isLead ? Colors.black87 : kGreenMain,
+                  ),
+                ),
+              ],
             ),
           ),
 
           const SizedBox(height: 12),
 
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: kGreenMain.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
+          // Name
+          Text(
+            developer.name,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1F2937),
             ),
-            child: Text(
-              '🚀 Building the Future of ARC',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white.withOpacity(0.8),
-                fontWeight: FontWeight.w500,
+          ),
+
+          const SizedBox(height: 4),
+
+          // Department
+          Text(
+            developer.department,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Social Links - Just Icons (No Background)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // GitHub
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onGithubTap();
+                },
+                child: Image.asset(
+                  'assets/images/github.png',
+                  width: 36,
+                  height: 36,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.code_rounded,
+                    size: 36,
+                    color: Color(0xFF333333),
+                  ),
+                ),
               ),
-            ),
+
+              const SizedBox(width: 32),
+
+              // Facebook
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onFacebookTap();
+                },
+                child: Image.asset(
+                  'assets/images/facebook.png',
+                  width: 36,
+                  height: 36,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.facebook_rounded,
+                    size: 36,
+                    color: Color(0xFF1877F2),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildSectionTitle({
-    required IconData icon,
-    required String title,
-  }) {
-    return Row(
+/// ============================================
+/// DIRECTOR AVATAR - SMALL ROUND
+/// ============================================
+class _DirectorAvatar extends StatelessWidget {
+  final AppreciationMessage appreciation;
+
+  const _DirectorAvatar({required this.appreciation});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       children: [
+        // Small Round Image
         Container(
-          padding: const EdgeInsets.all(10),
+          width: 70,
+          height: 70,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [kGreenMain, kGreenDark],
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.amber.withOpacity(0.5),
+              width: 3,
             ),
-            borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: kGreenMain.withOpacity(0.3),
-                blurRadius: 8,
+                color: Colors.amber.withOpacity(0.2),
+                blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 20,
+          child: ClipOval(
+            child: Image.asset(
+              appreciation.imagePath,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                color: Colors.amber.withOpacity(0.1),
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 35,
+                  color: Colors.amber.withOpacity(0.5),
+                ),
+              ),
+            ),
           ),
         ),
-        const SizedBox(width: 14),
+
+        const SizedBox(height: 10),
+
+        // Name
         Text(
-          title,
+          appreciation.name,
+          textAlign: TextAlign.center,
           style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
-            letterSpacing: 0.5,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1F2937),
+          ),
+        ),
+
+        const SizedBox(height: 2),
+
+        // Position
+        Text(
+          appreciation.position,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
+
+        const SizedBox(height: 2),
+
+        // Semester
+        Text(
+          '(${appreciation.semester})',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[500],
           ),
         ),
       ],
     );
   }
-
-  Widget _buildThankYouSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            kGreenMain.withOpacity(0.15),
-            kGreenDark.withOpacity(0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: kGreenLight.withOpacity(0.2),
-        ),
-      ),
-      child: Column(
-        children: [
-          const Text(
-            '💚',
-            style: TextStyle(fontSize: 32),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Thank you for using the ARC App!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.8),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Built with passion and dedication',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.white.withOpacity(0.5),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// ============================================
-/// DEVELOPER CARD WIDGET
+/// APPRECIATION CARD - LIGHT THEME
 /// ============================================
-class _DeveloperCard extends StatefulWidget {
-  final DeveloperInfo developer;
-  final Function(String) onSocialTap;
-
-  const _DeveloperCard({
-    required this.developer,
-    required this.onSocialTap,
-  });
-
-  @override
-  State<_DeveloperCard> createState() => _DeveloperCardState();
-}
-
-class _DeveloperCardState extends State<_DeveloperCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  bool _isExpanded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _toggleExpand() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-      if (_isExpanded) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
-      }
-    });
-    HapticFeedback.lightImpact();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isLead = widget.developer.role == 'Head Developer';
-
-    return GestureDetector(
-      onTap: _toggleExpand,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isLead
-                ? [
-              const Color(0xFF1A5C43).withOpacity(0.9),
-              kGreenDark.withOpacity(0.8),
-            ]
-                : [
-              Colors.white.withOpacity(0.08),
-              Colors.white.withOpacity(0.04),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isLead
-                ? kGreenMain.withOpacity(0.5)
-                : Colors.white.withOpacity(0.1),
-            width: isLead ? 2 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isLead
-                  ? kGreenMain.withOpacity(0.2)
-                  : Colors.black.withOpacity(0.1),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                // Profile Image
-                Hero(
-                  tag: 'dev_${widget.developer.name}',
-                  child: Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isLead ? kGreenMain : Colors.white.withOpacity(0.2),
-                        width: 3,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isLead
-                              ? kGreenMain.withOpacity(0.3)
-                              : Colors.black.withOpacity(0.2),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(13),
-                      child: Image.asset(
-                        widget.developer.imagePath,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: kGreenAccent,
-                          child: Icon(
-                            Icons.person_rounded,
-                            size: 35,
-                            color: Colors.white.withOpacity(0.7),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-
-                // Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Role Badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: isLead
-                              ? const LinearGradient(
-                            colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
-                          )
-                              : LinearGradient(
-                            colors: [
-                              kGreenMain.withOpacity(0.3),
-                              kGreenDark.withOpacity(0.2),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isLead ? Icons.star_rounded : Icons.code_rounded,
-                              size: 12,
-                              color: isLead ? Colors.black87 : kGreenLight,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              widget.developer.role,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: isLead ? Colors.black87 : kGreenLight,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // Name
-                      Text(
-                        widget.developer.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      // Department
-                      Text(
-                        widget.developer.department,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.6),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Expand Icon
-                AnimatedRotation(
-                  turns: _isExpanded ? 0.5 : 0,
-                  duration: const Duration(milliseconds: 300),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: Colors.white.withOpacity(0.7),
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Expanded Content
-            AnimatedCrossFade(
-              firstChild: const SizedBox.shrink(),
-              secondChild: Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 1,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.transparent,
-                            Colors.white.withOpacity(0.2),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Social Links
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (widget.developer.githubUrl != null)
-                          _SocialLinkButton(
-                            icon: 'assets/images/github.png',
-                            fallbackIcon: Icons.code_rounded,
-                            label: 'GitHub',
-                            color: const Color(0xFF333333),
-                            onTap: () =>
-                                widget.onSocialTap(widget.developer.githubUrl!),
-                          ),
-                        if (widget.developer.githubUrl != null &&
-                            widget.developer.facebookUrl != null)
-                          const SizedBox(width: 16),
-                        if (widget.developer.facebookUrl != null)
-                          _SocialLinkButton(
-                            icon: 'assets/images/facebook.png',
-                            fallbackIcon: Icons.facebook_rounded,
-                            label: 'Facebook',
-                            color: const Color(0xFF1877F2),
-                            onTap: () =>
-                                widget.onSocialTap(widget.developer.facebookUrl!),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              crossFadeState: _isExpanded
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              duration: const Duration(milliseconds: 300),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SocialLinkButton extends StatefulWidget {
-  final String icon;
-  final IconData fallbackIcon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _SocialLinkButton({
-    required this.icon,
-    required this.fallbackIcon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  State<_SocialLinkButton> createState() => _SocialLinkButtonState();
-}
-
-class _SocialLinkButtonState extends State<_SocialLinkButton> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
-        HapticFeedback.mediumImpact();
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        transform: Matrix4.identity()..scale(_isPressed ? 0.95 : 1.0),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: widget.color,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: widget.color.withOpacity(0.4),
-              blurRadius: _isPressed ? 4 : 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              widget.icon,
-              width: 18,
-              height: 18,
-              color: Colors.white,
-              errorBuilder: (_, __, ___) => Icon(
-                widget.fallbackIcon,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              widget.label,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// ============================================
-/// APPRECIATION CARD WIDGET
-/// ============================================
-class _AppreciationCard extends StatefulWidget {
+class _AppreciationCardLight extends StatefulWidget {
   final AppreciationMessage appreciation;
 
-  const _AppreciationCard({required this.appreciation});
+  const _AppreciationCardLight({required this.appreciation});
 
   @override
-  State<_AppreciationCard> createState() => _AppreciationCardState();
+  State<_AppreciationCardLight> createState() => _AppreciationCardLightState();
 }
 
-class _AppreciationCardState extends State<_AppreciationCard> {
+class _AppreciationCardLightState extends State<_AppreciationCardLight> {
   bool _isExpanded = false;
 
   @override
@@ -1572,227 +1340,178 @@ class _AppreciationCardState extends State<_AppreciationCard> {
         setState(() => _isExpanded = !_isExpanded);
         HapticFeedback.lightImpact();
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.all(20),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF2D1B4E).withOpacity(0.6),
-              const Color(0xFF1A1A2E).withOpacity(0.8),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.purple.withOpacity(0.3),
+            color: Colors.amber.withOpacity(0.2),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.purple.withOpacity(0.15),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header Row
             Row(
               children: [
-                // Profile Image
+                // Small Avatar
                 Container(
-                  width: 60,
-                  height: 60,
+                  width: 45,
+                  height: 45,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
+                    shape: BoxShape.circle,
                     border: Border.all(
-                      color: Colors.purple.withOpacity(0.5),
+                      color: Colors.amber.withOpacity(0.4),
                       width: 2,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.purple.withOpacity(0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+                  child: ClipOval(
                     child: Image.asset(
                       widget.appreciation.imagePath,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        color: Colors.purple.withOpacity(0.3),
-                        child: Icon(
+                        color: Colors.amber.withOpacity(0.1),
+                        child: const Icon(
                           Icons.person_rounded,
-                          size: 30,
-                          color: Colors.white.withOpacity(0.7),
+                          size: 25,
+                          color: Colors.amber,
                         ),
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
 
-                // Info
+                // Name & Position
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.purple.withOpacity(0.4),
-                              Colors.purple.withOpacity(0.2),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.verified_rounded,
-                              size: 12,
-                              color: Colors.purple[200],
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              widget.appreciation.name,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.purple[200],
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                          ],
+                      Text(
+                        widget.appreciation.name,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1F2937),
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        widget.appreciation.position,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.7),
-                          fontWeight: FontWeight.w500,
-                        ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Text(
+                            widget.appreciation.position,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          Text(
+                            ' (${widget.appreciation.semester})',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
 
-                // Quote Icon
+                // Expand Icon
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.amber.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    Icons.format_quote_rounded,
-                    color: Colors.purple[200],
-                    size: 20,
+                  child: AnimatedRotation(
+                    turns: _isExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 300),
+                    child: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+
+            // Quote Icon
+            Row(
+              children: [
+                Icon(
+                  Icons.format_quote_rounded,
+                  color: Colors.amber.withOpacity(0.5),
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Message',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.amber[700],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
 
             // Message
             AnimatedCrossFade(
-              firstChild: Column(
-                children: [
-                  Text(
-                    widget.appreciation.message,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white.withOpacity(0.8),
-                      height: 1.6,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Tap to read more',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.purple[200],
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 16,
-                        color: Colors.purple[200],
-                      ),
-                    ],
-                  ),
-                ],
+              firstChild: Text(
+                widget.appreciation.message,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[700],
+                  height: 1.6,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
-              secondChild: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.purple.withOpacity(0.2),
-                      ),
-                    ),
-                    child: Text(
-                      widget.appreciation.message,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.white.withOpacity(0.85),
-                        height: 1.7,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Tap to collapse',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.purple[200],
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.keyboard_arrow_up_rounded,
-                        size: 16,
-                        color: Colors.purple[200],
-                      ),
-                    ],
-                  ),
-                ],
+              secondChild: Text(
+                widget.appreciation.message,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[700],
+                  height: 1.6,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
               crossFadeState: _isExpanded
                   ? CrossFadeState.showSecond
                   : CrossFadeState.showFirst,
               duration: const Duration(milliseconds: 300),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Tap to expand/collapse hint
+            Center(
+              child: Text(
+                _isExpanded ? 'Tap to collapse' : 'Tap to read more',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.amber[600],
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),
