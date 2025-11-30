@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
-
+import 'Exclusive_Content_Page.dart';
 // Main Research Projects List Page
 class ResearchProjectsPage extends StatefulWidget {
   const ResearchProjectsPage({Key? key}) : super(key: key);
@@ -1237,22 +1237,57 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
   }
 
   void _proceedToExclusiveContent() {
-    Navigator.pop(context);
+    Navigator.pop(context); // Close the dialog first
+
+    // Show welcome snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
             const Icon(Icons.check_circle, color: Colors.white),
             const SizedBox(width: 12),
-            Text('Welcome $_verifiedId! Exclusive content coming soon...'),
+            Text('Welcome $_verifiedId! Accessing exclusive content...'),
           ],
         ),
-        backgroundColor: const Color(0xFF2E7D32),
+        backgroundColor: const Color(0xFF4A148C),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 2),
       ),
     );
+
+    // Navigate to Exclusive Content Page with smooth transition
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              ExclusiveContentPage(
+                verifiedId: _verifiedId,
+              ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final curvedAnimation = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            );
+
+            return FadeTransition(
+              opacity: curvedAnimation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.15),
+                  end: Offset.zero,
+                ).animate(curvedAnimation),
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 600),
+        ),
+      );
+    });
   }
 
   @override
