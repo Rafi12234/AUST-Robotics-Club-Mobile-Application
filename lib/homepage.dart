@@ -939,7 +939,7 @@ class _CarouselImageItem extends StatelessWidget {
       margin: EdgeInsets.only(right: spacing),
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        color: Colors.white,
+        color: const Color(0xFFE8E8E8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -1128,7 +1128,7 @@ class _OurSponsorsSection extends StatelessWidget {
                 ),
                 child: ContinuousMovingCarousel(
                   imageUrls: urls,
-                  height: 80,
+                  height: 100,
                   itemWidth: 140,
                   speed: 35,
                   itemSpacing: 20,
@@ -1271,12 +1271,12 @@ class _CollaboratedClubsSection extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF1E3A5F), Color(0xFF2563EB)],
+                colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF1E3A5F).withOpacity(0.25),
+                  color: kGreenDark.withOpacity(0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -1291,7 +1291,7 @@ class _CollaboratedClubsSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
-                    Icons.groups_3_rounded,
+                    Icons.handshake_rounded,
                     color: Colors.white,
                     size: 28,
                   ),
@@ -1324,8 +1324,8 @@ class _CollaboratedClubsSection extends StatelessWidget {
                   ),
                 ),
                 Icon(
-                  Icons.link_rounded,
-                  color: Colors.white.withOpacity(0.7),
+                  Icons.star_rounded,
+                  color: Colors.amber.withOpacity(0.8),
                   size: 24,
                 ),
               ],
