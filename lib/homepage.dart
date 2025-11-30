@@ -751,6 +751,14 @@ class HomeBody extends StatelessWidget {
               SizedBox(height: SizeConfig.screenHeight * 0.015),
               const _EducationalMentorshipSection(),
               SizedBox(height: SizeConfig.screenHeight * 0.03),
+
+              // ========== NEW SECTIONS ==========
+              const _OurSponsorsSection(),
+              SizedBox(height: SizeConfig.screenHeight * 0.03),
+              const _CollaboratedClubsSection(),
+              SizedBox(height: SizeConfig.screenHeight * 0.03),
+              // ====================================
+
               const VoiceOfAUSTRC(),
             ],
           ),
@@ -762,6 +770,724 @@ class HomeBody extends StatelessWidget {
         // Footer
         const FooterPage(),
       ],
+    );
+  }
+}
+
+// ============================================
+// CONTINUOUS MOVING CAROUSEL WIDGET
+// ============================================
+class ContinuousMovingCarousel extends StatefulWidget {
+  final List<String> imageUrls;
+  final double height;
+  final double itemWidth;
+  final double speed;
+  final double itemSpacing;
+  final BorderRadius? borderRadius;
+  final BoxFit imageFit;
+
+  const ContinuousMovingCarousel({
+    super.key,
+    required this.imageUrls,
+    this.height = 100,
+    this.itemWidth = 150,
+    this.speed = 30,
+    this.itemSpacing = 16,
+    this.borderRadius,
+    this.imageFit = BoxFit.contain,
+  });
+
+  @override
+  State<ContinuousMovingCarousel> createState() => _ContinuousMovingCarouselState();
+}
+
+class _ContinuousMovingCarouselState extends State<ContinuousMovingCarousel>
+    with SingleTickerProviderStateMixin {
+  late ScrollController _scrollController;
+  Timer? _scrollTimer;
+  double _currentOffset = 0;
+  bool _isPaused = false;
+
+  double get _itemTotalWidth => widget.itemWidth + widget.itemSpacing;
+  double get _totalContentWidth => widget.imageUrls.length * _itemTotalWidth;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.imageUrls.isNotEmpty) {
+        _startContinuousScroll();
+      }
+    });
+  }
+
+  void _startContinuousScroll() {
+    const frameRate = Duration(milliseconds: 16); // ~60 FPS
+    final pixelsPerFrame = widget.speed / 60;
+
+    _scrollTimer?.cancel();
+    _scrollTimer = Timer.periodic(frameRate, (timer) {
+      if (!_isPaused && _scrollController.hasClients && mounted) {
+        _currentOffset += pixelsPerFrame;
+
+        // Reset when we've scrolled through one complete set
+        if (_currentOffset >= _totalContentWidth) {
+          _currentOffset = _currentOffset % _totalContentWidth;
+        }
+
+        _scrollController.jumpTo(_currentOffset);
+      }
+    });
+  }
+
+  void _pauseScroll() {
+    setState(() => _isPaused = true);
+  }
+
+  void _resumeScroll() {
+    setState(() => _isPaused = false);
+  }
+
+  @override
+  void didUpdateWidget(ContinuousMovingCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.imageUrls != widget.imageUrls ||
+        oldWidget.speed != widget.speed) {
+      _scrollTimer?.cancel();
+      _currentOffset = 0;
+      if (widget.imageUrls.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _startContinuousScroll();
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.imageUrls.isEmpty) {
+      return SizedBox(height: widget.height);
+    }
+
+    // Create 4 copies for seamless infinite scroll
+    final List<String> extendedUrls = [
+      ...widget.imageUrls,
+      ...widget.imageUrls,
+      ...widget.imageUrls,
+      ...widget.imageUrls,
+    ];
+
+    return GestureDetector(
+      onPanDown: (_) => _pauseScroll(),
+      onPanEnd: (_) => _resumeScroll(),
+      onPanCancel: _resumeScroll,
+      child: SizedBox(
+        height: widget.height,
+        child: ListView.builder(
+          controller: _scrollController,
+          scrollDirection: Axis.horizontal,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: extendedUrls.length,
+          itemBuilder: (context, index) {
+            final url = extendedUrls[index];
+            return _CarouselImageItem(
+              imageUrl: url,
+              width: widget.itemWidth,
+              height: widget.height,
+              spacing: widget.itemSpacing,
+              borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
+              imageFit: widget.imageFit,
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _CarouselImageItem extends StatelessWidget {
+  final String imageUrl;
+  final double width;
+  final double height;
+  final double spacing;
+  final BorderRadius borderRadius;
+  final BoxFit imageFit;
+
+  const _CarouselImageItem({
+    required this.imageUrl,
+    required this.width,
+    required this.height,
+    required this.spacing,
+    required this.borderRadius,
+    required this.imageFit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      margin: EdgeInsets.only(right: spacing),
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Image.network(
+          imageUrl,
+          fit: imageFit,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Container(
+              color: const Color(0xFFF5F5F5),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                        : null,
+                    valueColor: const AlwaysStoppedAnimation(kGreenMain),
+                  ),
+                ),
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: const Color(0xFFF5F5F5),
+              child: Icon(
+                Icons.image_not_supported_outlined,
+                color: Colors.grey[400],
+                size: 30,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// OUR SPONSORS SECTION
+// ============================================
+class _OurSponsorsSection extends StatelessWidget {
+  const _OurSponsorsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final docRef = FirebaseFirestore.instance
+        .collection('All_Data')
+        .doc('Sponsor_Images');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section Header
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: kGreenDark.withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.handshake_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 15),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Our Sponsors',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Partners powering our innovation',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFFB8E6D5),
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.star_rounded,
+                  color: Colors.amber.withOpacity(0.8),
+                  size: 24,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Sponsors Carousel
+        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: docRef.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return _buildErrorBox('Failed to load sponsors');
+            }
+
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return _buildSkeletonCarousel();
+            }
+
+            final urls = _extractImageUrls(snapshot.data?.data());
+
+            if (urls.isEmpty) {
+              return _buildEmptyBox('No sponsor images available');
+            }
+
+            return TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.easeOut,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 20 * (1 - value)),
+                    child: child,
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFAFAFA),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.grey.withOpacity(0.15),
+                  ),
+                ),
+                child: ContinuousMovingCarousel(
+                  imageUrls: urls,
+                  height: 80,
+                  itemWidth: 140,
+                  speed: 35,
+                  itemSpacing: 20,
+                  borderRadius: BorderRadius.circular(12),
+                  imageFit: BoxFit.contain,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  List<String> _extractImageUrls(Map<String, dynamic>? data) {
+    if (data == null) return [];
+
+    final reg = RegExp(r'^Image_(\d+)$');
+    final entries = <MapEntry<int, String>>[];
+
+    data.forEach((key, value) {
+      final match = reg.firstMatch(key);
+      if (match != null && value is String && value.trim().isNotEmpty) {
+        final num = int.tryParse(match.group(1)!);
+        if (num != null) {
+          entries.add(MapEntry(num, value.trim()));
+        }
+      }
+    });
+
+    entries.sort((a, b) => a.key.compareTo(b.key));
+    return entries.map((e) => e.value).toList();
+  }
+
+  Widget _buildSkeletonCarousel() {
+    return Container(
+      height: 112,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation(kGreenMain),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyBox(String message) {
+    return Container(
+      height: 112,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAFAFA),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.image_outlined, color: Colors.grey[400], size: 32),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorBox(String message) {
+    return Container(
+      height: 112,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF5F5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.red.withOpacity(0.2)),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, color: Colors.red[300], size: 32),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: TextStyle(
+                color: Colors.red[400],
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// COLLABORATED CLUBS SECTION
+// ============================================
+class _CollaboratedClubsSection extends StatelessWidget {
+  const _CollaboratedClubsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final docRef = FirebaseFirestore.instance
+        .collection('All_Data')
+        .doc('Collaborated_Clubs');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section Header
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1E3A5F), Color(0xFF2563EB)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF1E3A5F).withOpacity(0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.groups_3_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 15),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Collaborated Clubs',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Building together with amazing teams',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFFBFDBFE),
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.link_rounded,
+                  color: Colors.white.withOpacity(0.7),
+                  size: 24,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Clubs Carousel
+        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: docRef.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return _buildErrorBox('Failed to load collaborated clubs');
+            }
+
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return _buildSkeletonCarousel();
+            }
+
+            final urls = _extractImageUrls(snapshot.data?.data());
+
+            if (urls.isEmpty) {
+              return _buildEmptyBox('No collaborated clubs images available');
+            }
+
+            return TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.easeOut,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 20 * (1 - value)),
+                    child: child,
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFFEFF6FF),
+                      const Color(0xFFF8FAFC),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF2563EB).withOpacity(0.1),
+                  ),
+                ),
+                child: ContinuousMovingCarousel(
+                  imageUrls: urls,
+                  height: 90,
+                  itemWidth: 90,
+                  speed: 40,
+                  itemSpacing: 16,
+                  borderRadius: BorderRadius.circular(45),
+                  imageFit: BoxFit.cover,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  List<String> _extractImageUrls(Map<String, dynamic>? data) {
+    if (data == null) return [];
+
+    final reg = RegExp(r'^Image_(\d+)$');
+    final entries = <MapEntry<int, String>>[];
+
+    data.forEach((key, value) {
+      final match = reg.firstMatch(key);
+      if (match != null && value is String && value.trim().isNotEmpty) {
+        final num = int.tryParse(match.group(1)!);
+        if (num != null) {
+          entries.add(MapEntry(num, value.trim()));
+        }
+      }
+    });
+
+    entries.sort((a, b) => a.key.compareTo(b.key));
+    return entries.map((e) => e.value).toList();
+  }
+
+  Widget _buildSkeletonCarousel() {
+    return Container(
+      height: 122,
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF6FF),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation(Color(0xFF2563EB)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyBox(String message) {
+    return Container(
+      height: 122,
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF6FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF2563EB).withOpacity(0.1)),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.groups_outlined, color: Colors.grey[400], size: 32),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorBox(String message) {
+    return Container(
+      height: 122,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF5F5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.red.withOpacity(0.2)),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, color: Colors.red[300], size: 32),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: TextStyle(
+                color: Colors.red[400],
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1632,7 +2358,7 @@ class _TypewriterTextState extends State<TypewriterText> {
 }
 
 // ============================================
-// EXPLORE EVENTS BUTTON
+// EXPLORE EVENTS BUTTON (continued)
 // ============================================
 class _ExploreEventsButton extends StatelessWidget {
   @override
@@ -2166,8 +2892,7 @@ class _EducationalMentorshipSection extends StatelessWidget {
             ),
             child: const Row(
               children: [
-                Icon(Icons.support_agent_rounded,
-                    color: Colors.white, size: 28),
+                Icon(Icons.support_agent_rounded, color: Colors.white, size: 28),
                 SizedBox(width: 15),
                 Expanded(
                   child: Column(
@@ -2206,8 +2931,7 @@ class _EducationalMentorshipSection extends StatelessWidget {
           stream: collectionRef.snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return const _EMErrorBox(
-                  'Failed to load educational programs.');
+              return const _EMErrorBox('Failed to load educational programs.');
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const _EMSkeletonList();
@@ -2291,8 +3015,7 @@ class _EducationalMentorshipSection extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                        const EducationalProgramsPage(),
+                        builder: (context) => const EducationalProgramsPage(),
                       ),
                     );
                   },
