@@ -26,7 +26,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
   void initState() {
     super.initState();
 
-    // Initialize the stream once
+    // Initialize the stream - fetch ALL projects, filter locally
     _projectsStream = FirebaseFirestore.instance
         .collection('All_Data')
         .doc('Research_Projects')
@@ -61,6 +61,32 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
     _fabController.dispose();
     _pulseController.dispose();
     super.dispose();
+  }
+
+  /// Check if Premium_Content field is truthy (handles all variations)
+  bool _isPremiumContent(Map<String, dynamic>? data) {
+    if (data == null) return false;
+
+    final value = data['Premium_Content'];
+
+    if (value == null) return false;
+
+    // Handle boolean
+    if (value is bool) return value;
+
+    // Handle string
+    if (value is String) {
+      final lowerValue = value.toLowerCase().trim();
+      return lowerValue == 'true' || lowerValue == 'yes' || lowerValue == '1';
+    }
+
+    // Handle int
+    if (value is int) return value == 1;
+
+    // Handle double
+    if (value is double) return value == 1.0;
+
+    return false;
   }
 
   void _toggleFabMenu() {
@@ -175,7 +201,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
                 ),
               ),
 
-              // Projects List - Using cached stream
+              // Projects List - Using cached stream with filtering
               _buildProjectsList(),
 
               // Bottom padding for FAB
@@ -289,7 +315,8 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.science, color: Colors.white, size: 16),
+                              Icon(Icons.science,
+                                  color: Colors.white, size: 16),
                               SizedBox(width: 6),
                               Text(
                                 'Innovation Hub',
@@ -337,8 +364,9 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
 
   Widget _buildProjectsList() {
     return StreamBuilder<QuerySnapshot>(
-      stream: _projectsStream, // Using cached stream
+      stream: _projectsStream,
       builder: (context, snapshot) {
+        // Loading State
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SliverFillRemaining(
             child: Center(
@@ -364,6 +392,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
           );
         }
 
+        // Error State
         if (snapshot.hasError) {
           return SliverFillRemaining(
             child: Center(
@@ -382,6 +411,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
           );
         }
 
+        // No Data State
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return SliverFillRemaining(
             child: Center(
@@ -422,14 +452,100 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
           );
         }
 
-        final projects = snapshot.data!.docs;
+        // ✅ FILTER: Show only NON-PREMIUM projects
+        final allDocs = snapshot.data!.docs;
 
+        final regularProjects = allDocs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>?;
+          // Show if NOT premium (Premium_Content is false, null, or not set)
+          return !_isPremiumContent(data);
+        }).toList();
+
+        // Empty Regular Projects State
+        if (regularProjects.isEmpty) {
+          return SliverFillRemaining(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(30),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1B5E20).withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.science_outlined,
+                      size: 80,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'No Projects Yet',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Check back soon for amazing projects!',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Hint about exclusive content
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 40),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4A148C).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFF4A148C).withOpacity(0.2),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.workspace_premium,
+                          color: Colors.amber[700],
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Flexible(
+                          child: Text(
+                            'Check out Exclusive Content for premium projects!',
+                            style: TextStyle(
+                              color: Color(0xFF4A148C),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Display Regular (Non-Premium) Projects
         return SliverPadding(
           padding: const EdgeInsets.all(20),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                final project = projects[index];
+                final project = regularProjects[index];
                 final projectName = project.id;
                 final data = project.data() as Map<String, dynamic>?;
 
@@ -456,7 +572,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
                   ),
                 );
               },
-              childCount: projects.length,
+              childCount: regularProjects.length,
             ),
           ),
         );
