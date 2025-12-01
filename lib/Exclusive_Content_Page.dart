@@ -36,7 +36,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
         .collection('All_Data')
         .doc('Research_Projects')
         .collection('research_projects')
-        .where('Premium_Content', isEqualTo: 'True')
+        .where('Premium_Content', isEqualTo: true)
         .snapshots();
 
     _headerController = AnimationController(

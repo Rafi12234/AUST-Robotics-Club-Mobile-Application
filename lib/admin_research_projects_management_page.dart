@@ -11,6 +11,10 @@ const kGreenLight = Color(0xFF52B788);
 const kAccentGold = Color(0xFFFFB703);
 const kAccentOrange = Color(0xFFF59E0B);
 
+// Premium theme colors
+const kPremiumPurple = Color(0xFF4A148C);
+const kPremiumPink = Color(0xFF880E4F);
+
 // ============================================
 // RESEARCH PROJECTS LIST PAGE
 // ============================================
@@ -38,6 +42,28 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
   void dispose() {
     _headerController.dispose();
     super.dispose();
+  }
+
+  // Helper function to check premium content
+  bool _isPremiumContent(Map<String, dynamic>? data) {
+    if (data == null) return false;
+
+    final value = data['Premium_Content'];
+
+    if (value == null) return false;
+
+    if (value is bool) return value;
+
+    if (value is String) {
+      final lowerValue = value.toLowerCase().trim();
+      return lowerValue == 'true' || lowerValue == 'yes' || lowerValue == '1';
+    }
+
+    if (value is int) return value == 1;
+
+    if (value is double) return value == 1.0;
+
+    return false;
   }
 
   @override
@@ -77,15 +103,17 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                        (context, index) {
                       final projectDoc = projects[index];
                       final projectName = projectDoc.id;
                       final data = projectDoc.data() as Map<String, dynamic>?;
                       final coverPicture = data?['Cover_Picture'] ?? '';
+                      final isPremium = _isPremiumContent(data);
 
                       return _ProjectCard(
                         projectName: projectName,
                         coverPicture: coverPicture,
+                        isPremium: isPremium,
                         index: index,
                         onTap: () {
                           Navigator.push(
@@ -96,20 +124,17 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
                               transitionDuration: const Duration(milliseconds: 500),
                               reverseTransitionDuration: const Duration(milliseconds: 400),
                               transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                // Create smooth curved animation
                                 final curvedAnimation = CurvedAnimation(
                                   parent: animation,
                                   curve: Curves.easeOutCubic,
                                   reverseCurve: Curves.easeInCubic,
                                 );
 
-                                // Slide from right with smooth easing
                                 final slideTween = Tween<Offset>(
                                   begin: const Offset(1.0, 0.0),
                                   end: Offset.zero,
                                 ).animate(curvedAnimation);
 
-                                // Fade in effect
                                 final fadeTween = Tween<double>(
                                   begin: 0.0,
                                   end: 1.0,
@@ -118,7 +143,6 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
                                   curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
                                 ));
 
-                                // Scale effect for depth
                                 final scaleTween = Tween<double>(
                                   begin: 0.92,
                                   end: 1.0,
@@ -127,7 +151,6 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
                                   curve: const Interval(0.0, 0.8, curve: Curves.easeOutCubic),
                                 ));
 
-                                // Previous page slide out (parallax effect)
                                 final previousPageTween = Tween<Offset>(
                                   begin: Offset.zero,
                                   end: const Offset(-0.3, 0.0),
@@ -135,15 +158,13 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
 
                                 return Stack(
                                   children: [
-                                    // Previous page with parallax effect
                                     SlideTransition(
                                       position: previousPageTween,
                                       child: FadeTransition(
                                         opacity: Tween<double>(begin: 1.0, end: 0.5).animate(curvedAnimation),
-                                        child: Container(), // Empty container, previous page handled by navigator
+                                        child: Container(),
                                       ),
                                     ),
-                                    // New page with combined effects
                                     SlideTransition(
                                       position: slideTween,
                                       child: FadeTransition(
@@ -203,7 +224,7 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
               'Manage Research & Projects',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: 18,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -255,6 +276,7 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
           .set({
         'Cover_Picture': '',
         'Introduction': '',
+        'Premium_Content': false,
       });
 
       if (context.mounted) {
@@ -272,7 +294,6 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
                 reverseCurve: Curves.easeInCubic,
               );
 
-              // Fade in with scale effect for new project
               final fadeTween = Tween<double>(begin: 0.0, end: 1.0).animate(
                 CurvedAnimation(
                   parent: animation,
@@ -287,7 +308,6 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
                 ),
               );
 
-              // Slide up effect
               final slideTween = Tween<Offset>(
                 begin: const Offset(0.0, 0.3),
                 end: Offset.zero,
@@ -355,7 +375,9 @@ class _AdminResearchProjectsPageState extends State<AdminResearchProjectsPage>
   }
 }
 
-// Empty State Widget
+// ============================================
+// EMPTY STATE WIDGET
+// ============================================
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -389,10 +411,13 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-// Project Card Widget
+// ============================================
+// PROJECT CARD WIDGET
+// ============================================
 class _ProjectCard extends StatefulWidget {
   final String projectName;
   final String coverPicture;
+  final bool isPremium;
   final int index;
   final VoidCallback onTap;
   final VoidCallback onDelete;
@@ -400,6 +425,7 @@ class _ProjectCard extends StatefulWidget {
   const _ProjectCard({
     required this.projectName,
     required this.coverPicture,
+    required this.isPremium,
     required this.index,
     required this.onTap,
     required this.onDelete,
@@ -458,106 +484,173 @@ class _ProjectCardState extends State<_ProjectCard> with SingleTickerProviderSta
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
+                border: widget.isPremium
+                    ? Border.all(
+                  color: kPremiumPurple.withOpacity(0.4),
+                  width: 2,
+                )
+                    : null,
                 boxShadow: [
                   BoxShadow(
-                    color: kGreenMain.withOpacity(0.15),
+                    color: widget.isPremium
+                        ? kPremiumPurple.withOpacity(0.2)
+                        : kGreenMain.withOpacity(0.15),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              child: Row(
+              child: Stack(
                 children: [
-                  // Cover Image
-                  Container(
-                    width: 120,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        bottomLeft: Radius.circular(20),
-                      ),
-                      gradient: LinearGradient(
-                        colors: [kGreenMain, kGreenLight],
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        bottomLeft: Radius.circular(20),
-                      ),
-                      child: widget.coverPicture.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: widget.coverPicture,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(color: Colors.white),
-                              ),
-                              errorWidget: (context, url, error) => const Icon(
-                                Icons.science_rounded,
-                                size: 40,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Center(
-                              child: Icon(
-                                Icons.science_rounded,
-                                size: 40,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                  // Content
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            widget.projectName,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: kGreenDark,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      // Cover Image
+                      Container(
+                        width: 120,
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            bottomLeft: Radius.circular(20),
                           ),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [kGreenMain.withOpacity(0.1), kGreenLight.withOpacity(0.1)],
-                              ),
-                              borderRadius: BorderRadius.circular(8),
+                          gradient: LinearGradient(
+                            colors: widget.isPremium
+                                ? [kPremiumPurple, kPremiumPink]
+                                : [kGreenMain, kGreenLight],
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            bottomLeft: Radius.circular(20),
+                          ),
+                          child: widget.coverPicture.isNotEmpty
+                              ? CachedNetworkImage(
+                            imageUrl: widget.coverPicture,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(color: Colors.white),
                             ),
-                            child: const Text(
-                              'Tap to edit',
+                            errorWidget: (context, url, error) => const Icon(
+                              Icons.science_rounded,
+                              size: 40,
+                              color: Colors.white,
+                            ),
+                          )
+                              : Center(
+                            child: Icon(
+                              widget.isPremium
+                                  ? Icons.workspace_premium
+                                  : Icons.science_rounded,
+                              size: 40,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Content
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                widget.projectName,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: kGreenDark,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: widget.isPremium
+                                        ? [
+                                      kPremiumPurple.withOpacity(0.1),
+                                      kPremiumPink.withOpacity(0.1),
+                                    ]
+                                        : [
+                                      kGreenMain.withOpacity(0.1),
+                                      kGreenLight.withOpacity(0.1),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'Tap to edit',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: widget.isPremium ? kPremiumPurple : kGreenMain,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Delete Button
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: IconButton(
+                          onPressed: widget.onDelete,
+                          icon: const Icon(Icons.delete_rounded, color: Colors.red),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.red.withOpacity(0.1),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Premium Badge
+                  if (widget.isPremium)
+                    Positioned(
+                      top: 8,
+                      right: 60,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [kPremiumPurple, kPremiumPink],
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: kPremiumPurple.withOpacity(0.3),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.workspace_premium,
+                              color: Colors.amber[300],
+                              size: 12,
+                            ),
+                            const SizedBox(width: 4),
+                            const Text(
+                              'PREMIUM',
                               style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: kGreenMain,
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  // Delete Button
-                  Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: IconButton(
-                      onPressed: widget.onDelete,
-                      icon: const Icon(Icons.delete_rounded, color: Colors.red),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.red.withOpacity(0.1),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -568,7 +661,9 @@ class _ProjectCardState extends State<_ProjectCard> with SingleTickerProviderSta
   }
 }
 
-// Add Project Button
+// ============================================
+// ADD PROJECT BUTTON
+// ============================================
 class _AddProjectButton extends StatefulWidget {
   final VoidCallback onPressed;
 
@@ -647,6 +742,28 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
     super.dispose();
   }
 
+  // Helper function to check premium content
+  bool _isPremiumContent(Map<String, dynamic>? data) {
+    if (data == null) return false;
+
+    final value = data['Premium_Content'];
+
+    if (value == null) return false;
+
+    if (value is bool) return value;
+
+    if (value is String) {
+      final lowerValue = value.toLowerCase().trim();
+      return lowerValue == 'true' || lowerValue == 'yes' || lowerValue == '1';
+    }
+
+    if (value is int) return value == 1;
+
+    if (value is double) return value == 1.0;
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -668,16 +785,24 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
           }
 
           final data = snapshot.data!.data() as Map<String, dynamic>? ?? {};
+          final isPremium = _isPremiumContent(data);
 
           return CustomScrollView(
             controller: _scrollController,
             physics: const BouncingScrollPhysics(),
             slivers: [
-              _buildAppBar(),
+              _buildAppBar(isPremium),
               SliverPadding(
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
+                    // Premium Content Switch Section
+                    _PremiumContentSection(
+                      projectName: widget.projectName,
+                      isPremium: isPremium,
+                    ),
+                    const SizedBox(height: 24),
+
                     // Cover Picture
                     _CoverPictureSection(
                       projectName: widget.projectName,
@@ -733,13 +858,13 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(bool isPremium) {
     return SliverAppBar(
       expandedHeight: 100,
       floating: false,
       pinned: true,
       elevation: 0,
-      backgroundColor: kGreenDark,
+      backgroundColor: isPremium ? kPremiumPurple : kGreenDark,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
         onPressed: () => Navigator.pop(context),
@@ -749,18 +874,52 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [kGreenDark, kGreenMain, kGreenLight],
+            colors: isPremium
+                ? [kPremiumPurple, kPremiumPink, kPremiumPurple]
+                : [kGreenDark, kGreenMain, kGreenLight],
           ),
         ),
         child: FlexibleSpaceBar(
           titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
-          title: Text(
-            widget.projectName,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  widget.projectName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (isPremium)
+                Container(
+                  margin: const EdgeInsets.only(right: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.workspace_premium, color: Colors.amber[300], size: 12),
+                      const SizedBox(width: 4),
+                      Text(
+                        'PREMIUM',
+                        style: TextStyle(
+                          color: Colors.amber[300],
+                          fontSize: 8,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -772,7 +931,6 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
     int sectionIndex = 1;
 
     while (data.containsKey('Section_${sectionIndex}_Name')) {
-      // Capture the current value of sectionIndex in a local variable
       final currentIndex = sectionIndex;
 
       sections.add(
@@ -816,7 +974,6 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
           .collection('research_projects')
           .doc(widget.projectName);
 
-      // Fetch fresh data to find the next available section index
       final doc = await docRef.get();
       final currentData = doc.data() ?? {};
 
@@ -825,14 +982,10 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
         newSectionIndex++;
       }
 
-      print('➕ Adding new section $newSectionIndex');
-
       await docRef.update({
         'Section_${newSectionIndex}_Name': 'New Section',
         'Section_${newSectionIndex}_Description': 'Section description here...',
       });
-
-      print('✅ Section $newSectionIndex added successfully');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -844,7 +997,6 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
         );
       }
     } catch (e) {
-      print('❌ Error adding section: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -890,7 +1042,6 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
           .collection('research_projects')
           .doc(widget.projectName);
 
-      // Get current document data
       final doc = await docRef.get();
 
       if (!doc.exists) {
@@ -908,25 +1059,9 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
 
       final currentData = doc.data() ?? {};
 
-      // Debug: Print ALL document fields
-      print('\n📄 FULL DOCUMENT DATA:');
-      print('   Project: ${widget.projectName}');
-      print('   All fields in document:');
-      currentData.forEach((key, value) {
-        if (key.startsWith('Section_')) {
-          print('   ✓ $key = ${value.toString().substring(0, value.toString().length > 50 ? 50 : value.toString().length)}...');
-        }
-      });
-      print('\n');
-
-      // Check if the section we're trying to delete actually exists
       bool sectionExists = currentData.containsKey('Section_${sectionIndex}_Name');
-      print('🔍 Checking Section $sectionIndex:');
-      print('   - Section_${sectionIndex}_Name exists? $sectionExists');
-      print('   - Section_${sectionIndex}_Description exists? ${currentData.containsKey('Section_${sectionIndex}_Description')}');
 
       if (!sectionExists) {
-        print('⚠️ WARNING: Section $sectionIndex does not exist in the document!');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -939,33 +1074,18 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
         return;
       }
 
-      // Create update map to delete all section-related fields
       final Map<String, dynamic> updateMap = {};
 
-      // Delete section name
       updateMap['Section_${sectionIndex}_Name'] = FieldValue.delete();
-
-      // Delete section description
       updateMap['Section_${sectionIndex}_Description'] = FieldValue.delete();
 
-      // Delete all images for this section
       int imageIndex = 1;
-      int deletedImageCount = 0;
       while (currentData.containsKey('Section_${sectionIndex}_Image_$imageIndex')) {
         updateMap['Section_${sectionIndex}_Image_$imageIndex'] = FieldValue.delete();
-        deletedImageCount++;
         imageIndex++;
       }
 
-      // Debug: Print what we're deleting
-      print('🗑️ Deleting Section $sectionIndex:');
-      print('   - Fields to delete: ${updateMap.keys.toList()}');
-      print('   - Total images: $deletedImageCount');
-
-      // Apply all deletions
       await docRef.update(updateMap);
-
-      print('✅ Section $sectionIndex deleted successfully from Firestore');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -976,10 +1096,7 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
           ),
         );
       }
-    } catch (e, stackTrace) {
-      print('❌ Error deleting section $sectionIndex: $e');
-      print('Stack trace: $stackTrace');
-
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1006,11 +1123,10 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
     }
 
     if (oldTitle == newTitle) {
-      return; // No change
+      return;
     }
 
     try {
-      // Show loading dialog
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -1019,17 +1135,15 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
         ),
       );
 
-      // Get reference to old document
       final oldDocRef = FirebaseFirestore.instance
           .collection('All_Data')
           .doc('Research_Projects')
           .collection('research_projects')
           .doc(oldTitle);
 
-      // Get all data from old document
       final oldDoc = await oldDocRef.get();
       if (!oldDoc.exists) {
-        Navigator.pop(context); // Close loading dialog
+        Navigator.pop(context);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -1044,7 +1158,6 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
 
       final data = oldDoc.data() ?? {};
 
-      // Create new document with new name and updated Title field
       data['Title'] = newTitle;
 
       final newDocRef = FirebaseFirestore.instance
@@ -1053,19 +1166,14 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
           .collection('research_projects')
           .doc(newTitle);
 
-      // Copy data to new document
       await newDocRef.set(data);
-
-      // Delete old document
       await oldDocRef.delete();
 
-      Navigator.pop(context); // Close loading dialog
+      Navigator.pop(context);
 
-      // Navigate back and then to the new project with smooth transition
       if (mounted) {
-        Navigator.pop(context); // Go back to list
+        Navigator.pop(context);
 
-        // Smooth transition to renamed project
         await Navigator.push(
           context,
           PageRouteBuilder(
@@ -1080,7 +1188,6 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
                 reverseCurve: Curves.easeInCubic,
               );
 
-              // Fade and scale effect for renamed project
               final fadeTween = Tween<double>(begin: 0.0, end: 1.0).animate(
                 CurvedAnimation(
                   parent: animation,
@@ -1115,7 +1222,7 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
         );
       }
     } catch (e) {
-      Navigator.pop(context); // Close loading dialog
+      Navigator.pop(context);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1159,6 +1266,661 @@ class _ResearchProjectEditPageState extends State<ResearchProjectEditPage> {
       );
       return null;
     }
+  }
+}
+
+// ============================================
+// PREMIUM CONTENT SWITCH SECTION
+// ============================================
+class _PremiumContentSection extends StatefulWidget {
+  final String projectName;
+  final bool isPremium;
+
+  const _PremiumContentSection({
+    required this.projectName,
+    required this.isPremium,
+  });
+
+  @override
+  State<_PremiumContentSection> createState() => _PremiumContentSectionState();
+}
+
+class _PremiumContentSectionState extends State<_PremiumContentSection>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _glowAnimation;
+  late bool _isPremium;
+  bool _isUpdating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isPremium = widget.isPremium;
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _glowAnimation = Tween<double>(begin: 0.2, end: 0.5).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    if (_isPremium) {
+      _animationController.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_PremiumContentSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isPremium != _isPremium) {
+      _isPremium = widget.isPremium;
+      if (_isPremium) {
+        _animationController.repeat(reverse: true);
+      } else {
+        _animationController.stop();
+        _animationController.reset();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _togglePremium(bool value) async {
+    if (_isUpdating) return;
+
+    setState(() {
+      _isUpdating = true;
+      _isPremium = value;
+    });
+
+    if (value) {
+      _animationController.repeat(reverse: true);
+    } else {
+      _animationController.stop();
+      _animationController.reset();
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('All_Data')
+          .doc('Research_Projects')
+          .collection('research_projects')
+          .doc(widget.projectName)
+          .update({'Premium_Content': value});
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  value ? Icons.workspace_premium : Icons.public,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    value
+                        ? 'Project marked as Premium Content!'
+                        : 'Project is now publicly accessible',
+                  ),
+                ),
+              ],
+            ),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: value ? kPremiumPurple : kGreenMain,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isPremium = !value;
+      });
+
+      if (value) {
+        _animationController.stop();
+        _animationController.reset();
+      } else {
+        _animationController.repeat(reverse: true);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating premium status: $e'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        _isUpdating = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _isPremium ? _scaleAnimation.value : 1.0,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: _isPremium
+                      ? kPremiumPurple.withOpacity(_glowAnimation.value)
+                      : kGreenMain.withOpacity(0.1),
+                  blurRadius: _isPremium ? 25 : 20,
+                  offset: const Offset(0, 8),
+                  spreadRadius: _isPremium ? 2 : 0,
+                ),
+              ],
+              border: _isPremium
+                  ? Border.all(
+                color: kPremiumPurple.withOpacity(0.3),
+                width: 2,
+              )
+                  : null,
+            ),
+            child: child,
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Row
+            Row(
+              children: [
+                TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 300),
+                  tween: Tween(begin: 0.0, end: _isPremium ? 1.0 : 0.0),
+                  builder: (context, value, child) {
+                    return Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color.lerp(kGreenMain, kPremiumPurple, value)!,
+                            Color.lerp(kGreenLight, kPremiumPink, value)!,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color.lerp(
+                              kGreenMain,
+                              kPremiumPurple,
+                              value,
+                            )!.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        _isPremium ? Icons.workspace_premium : Icons.public,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Content Access',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: kGreenDark,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: Text(
+                          _isPremium
+                              ? 'Exclusive for verified members'
+                              : 'Publicly accessible',
+                          key: ValueKey(_isPremium),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _isPremium ? kPremiumPurple : Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // Switch Container
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: _isPremium
+                      ? [
+                    kPremiumPurple.withOpacity(0.08),
+                    kPremiumPink.withOpacity(0.08),
+                  ]
+                      : [
+                    Colors.grey[50]!,
+                    Colors.grey[100]!,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _isPremium
+                      ? kPremiumPurple.withOpacity(0.2)
+                      : Colors.grey[200]!,
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // Public Icon
+                  _AccessTypeIndicator(
+                    icon: Icons.public,
+                    label: 'Public',
+                    isActive: !_isPremium,
+                    color: kGreenMain,
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  // Custom Animated Switch
+                  Expanded(
+                    child: Center(
+                      child: _CustomPremiumSwitch(
+                        value: _isPremium,
+                        onChanged: _isUpdating ? null : _togglePremium,
+                        isLoading: _isUpdating,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  // Premium Icon
+                  _AccessTypeIndicator(
+                    icon: Icons.workspace_premium,
+                    label: 'Premium',
+                    isActive: _isPremium,
+                    color: kPremiumPurple,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Info Box
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _isPremium
+                    ? kPremiumPurple.withOpacity(0.08)
+                    : kAccentOrange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _isPremium
+                      ? kPremiumPurple.withOpacity(0.2)
+                      : kAccentOrange.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _isPremium ? Icons.lock_rounded : Icons.info_outline_rounded,
+                    color: _isPremium ? kPremiumPurple : kAccentOrange,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: Text(
+                        _isPremium
+                            ? 'This content will only be visible to verified AUSTRC members in the Exclusive Content section.'
+                            : 'This content will be visible to everyone in the Research & Projects section.',
+                        key: ValueKey(_isPremium),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _isPremium
+                              ? kPremiumPurple.withOpacity(0.8)
+                              : kAccentOrange.withOpacity(0.9),
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// ACCESS TYPE INDICATOR
+// ============================================
+class _AccessTypeIndicator extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final Color color;
+
+  const _AccessTypeIndicator({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 300),
+      opacity: isActive ? 1.0 : 0.4,
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: isActive ? color.withOpacity(0.15) : Colors.grey[200],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isActive ? color.withOpacity(0.4) : Colors.transparent,
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: isActive ? color : Colors.grey[400],
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: isActive ? color : Colors.grey[400],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================
+// CUSTOM PREMIUM SWITCH
+// ============================================
+// ============================================
+// CUSTOM PREMIUM SWITCH (FIXED VERSION)
+// ============================================
+class _CustomPremiumSwitch extends StatefulWidget {
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+  final bool isLoading;
+
+  const _CustomPremiumSwitch({
+    required this.value,
+    required this.onChanged,
+    this.isLoading = false,
+  });
+
+  @override
+  State<_CustomPremiumSwitch> createState() => _CustomPremiumSwitchState();
+}
+
+class _CustomPremiumSwitchState extends State<_CustomPremiumSwitch>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _slideAnimation;
+  late Animation<double> _scaleAnimation;
+  late Animation<Color?> _colorAnimation;
+  late Animation<Color?> _thumbColorAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    // Initialize to current value
+    _controller.value = widget.value ? 1.0 : 0.0;
+
+    _setupAnimations();
+  }
+
+  void _setupAnimations() {
+    // Use a curve that doesn't overshoot
+    _slideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutCubic,
+      ),
+    );
+
+    // Safe scale animation without overshoot
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.15, end: 1.0), weight: 50),
+    ]).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _colorAnimation = ColorTween(
+      begin: Colors.grey[300],
+      end: kPremiumPurple,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _thumbColorAnimation = ColorTween(
+      begin: kGreenMain,
+      end: Colors.amber,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void didUpdateWidget(_CustomPremiumSwitch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value) {
+      if (widget.value) {
+        _controller.animateTo(1.0, duration: const Duration(milliseconds: 400));
+      } else {
+        _controller.animateTo(0.0, duration: const Duration(milliseconds: 400));
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTap() {
+    if (widget.onChanged != null && !widget.isLoading) {
+      widget.onChanged!(!widget.value);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _handleTap,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          const trackWidth = 80.0;
+          const trackHeight = 40.0;
+          const thumbSize = 32.0;
+          const thumbPadding = 4.0;
+          const maxSlide = trackWidth - thumbSize - (thumbPadding * 2);
+
+          // SAFE: Clamp the slide value
+          final slideValue = _slideAnimation.value.clamp(0.0, 1.0);
+
+          return Container(
+            width: trackWidth,
+            height: trackHeight,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(trackHeight / 2),
+              gradient: LinearGradient(
+                colors: [
+                  _colorAnimation.value ?? Colors.grey[300]!,
+                  Color.lerp(
+                    Colors.grey[400],
+                    kPremiumPink,
+                    slideValue,
+                  )!,
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: (_colorAnimation.value ?? Colors.grey[300]!)
+                      .withOpacity(0.4.clamp(0.0, 1.0)),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Track Icons
+                Positioned.fill(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Opacity(
+                          opacity: (1 - slideValue).clamp(0.0, 1.0),
+                          child: const Icon(
+                            Icons.public,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                        Opacity(
+                          opacity: slideValue.clamp(0.0, 1.0),
+                          child: const Icon(
+                            Icons.workspace_premium,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Thumb
+                Positioned(
+                  left: thumbPadding + (maxSlide * slideValue),
+                  top: thumbPadding,
+                  child: Transform.scale(
+                    scale: _scaleAnimation.value.clamp(0.0, 2.0), // SAFE: Clamp scale
+                    child: Container(
+                      width: thumbSize,
+                      height: thumbSize,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2.clamp(0.0, 1.0)),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: widget.isLoading
+                          ? Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(
+                            _thumbColorAnimation.value ?? kGreenMain,
+                          ),
+                        ),
+                      )
+                          : Icon(
+                        widget.value
+                            ? Icons.star_rounded
+                            : Icons.check_rounded,
+                        color: _thumbColorAnimation.value,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 
@@ -1250,27 +2012,27 @@ class _CoverPictureSectionState extends State<_CoverPictureSection> {
                       borderRadius: BorderRadius.circular(20),
                       child: widget.coverPicture.isNotEmpty
                           ? CachedNetworkImage(
-                              imageUrl: widget.coverPicture,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                color: Colors.grey[200],
-                                child: const Center(child: CircularProgressIndicator()),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                color: Colors.grey[200],
-                                child: const Icon(Icons.image_not_supported, size: 60),
-                              ),
-                            )
+                        imageUrl: widget.coverPicture,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(child: CircularProgressIndicator()),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.image_not_supported, size: 60),
+                        ),
+                      )
                           : Container(
-                              color: Colors.grey[200],
-                              child: const Center(
-                                child: Icon(
-                                  Icons.add_photo_alternate_rounded,
-                                  size: 60,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
+                        color: Colors.grey[200],
+                        child: const Center(
+                          child: Icon(
+                            Icons.add_photo_alternate_rounded,
+                            size: 60,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   Positioned(
@@ -1291,13 +2053,13 @@ class _CoverPictureSectionState extends State<_CoverPictureSection> {
                       ),
                       child: _isUploading
                           ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                           : const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
                     ),
                   ),
@@ -1337,9 +2099,6 @@ class _CoverPictureSectionState extends State<_CoverPictureSection> {
   }
 }
 
-// ============================================
-// INTRODUCTION SECTION
-// ============================================
 // ============================================
 // TITLE SECTION
 // ============================================
@@ -1512,7 +2271,6 @@ class _TitleSectionState extends State<_TitleSection> {
       return;
     }
 
-    // Confirm the change with enhanced animated dialog
     final confirm = await showGeneralDialog<bool>(
       context: context,
       barrierDismissible: true,
