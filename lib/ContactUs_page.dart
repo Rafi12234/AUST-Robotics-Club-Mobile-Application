@@ -656,37 +656,6 @@ class _ContactUsPageState extends State<ContactUsPage>
                 ),
 
                 const SizedBox(height: 20),
-
-                // Stats Row
-                Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildStatItem(
-                        icon: Icons.people_alt_rounded,
-                        value: contactCount.toString(),
-                        label: 'Team Members',
-                      ),
-                      Container(
-                        width: 1,
-                        height: 40,
-                        color: Colors.white.withOpacity(0.3),
-                        margin: const EdgeInsets.symmetric(horizontal: 24),
-                      ),
-                      _buildStatItem(
-                        icon: Icons.access_time_rounded,
-                        value: '24/7',
-                        label: 'Available',
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
@@ -794,7 +763,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                   label: 'Website',
                   color: Colors.teal,
                   delay: const Duration(milliseconds: 400),
-                  onTap: () => _launchUrl('https://aust.edu'),
+                  onTap: () => _launchUrl('https://www.austrc.com/'),
                 ),
               ),
             ],
