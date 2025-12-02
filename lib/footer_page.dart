@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'FAQ_page.dart';
+import 'ContactUs_page.dart';
 
 /// ============================================
 /// AUST RC BRAND COLORS
@@ -157,7 +158,13 @@ class FooterPage extends StatelessWidget {
 
           // ======== QUICK LINKS ========
           _QuickLinksRow(
-            onContactTap: () => _showComingSoon(context, 'Contact Us'),
+            onContactTap: () {
+              HapticFeedback.mediumImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ContactUsPage()),
+              );
+            },
             onFaqTap: () => _navigateToFAQPage(context),
             onPolicyTap: () => _showComingSoon(context, 'Policies & Privacy'),
           ),
@@ -1528,3 +1535,4 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
     );
   }
 }
+
