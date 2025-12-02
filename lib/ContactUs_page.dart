@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
-import 'dart:math' as math;
 
 // ============================================
 // AUST RC BRAND COLORS
@@ -35,25 +34,22 @@ class _ContactUsPageState extends State<ContactUsPage>
     with TickerProviderStateMixin {
   // Animation Controllers
   late AnimationController _headerController;
-  late AnimationController _fabController;
-  late AnimationController _pulseController;
+  late AnimationController _sheetController; // For smooth bottom sheet
   late Animation<double> _headerAnimation;
-  late Animation<double> _fabScaleAnimation;
-  late Animation<double> _pulseAnimation;
+  late Animation<Offset> _sheetSlideAnimation;
+  late Animation<double> _sheetFadeAnimation;
 
   // Scroll Controller
   final ScrollController _scrollController = ScrollController();
-  bool _showFloatingHeader = false;
 
   // Selected contact for detail view
   Map<String, dynamic>? _selectedContact;
-  bool _isDetailSheetVisible = false; // ✅ FIXED: Renamed variable
+  bool _isDetailSheetVisible = false;
 
   @override
   void initState() {
     super.initState();
     _initAnimations();
-    _scrollController.addListener(_onScroll);
   }
 
   void _initAnimations() {
@@ -67,43 +63,37 @@ class _ContactUsPageState extends State<ContactUsPage>
       curve: Curves.easeOutCubic,
     );
 
-    // FAB Animation
-    _fabController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+    // Bottom Sheet Animation - Smooth sliding
+    _sheetController = AnimationController(
+      duration: const Duration(milliseconds: 350),
       vsync: this,
     );
-    _fabScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fabController, curve: Curves.elasticOut),
-    );
 
-    // Pulse Animation for call button
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
+    _sheetSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1), // Start from bottom (off-screen)
+      end: Offset.zero, // End at original position
+    ).animate(CurvedAnimation(
+      parent: _sheetController,
+      curve: Curves.easeOutCubic, // Smooth curve for opening
+      reverseCurve: Curves.easeInCubic, // Smooth curve for closing
+    ));
 
-    // Start animations
+    _sheetFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _sheetController,
+      curve: Curves.easeOut,
+    ));
+
+    // Start header animation
     _headerController.forward();
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) _fabController.forward();
-    });
-  }
-
-  void _onScroll() {
-    final showHeader = _scrollController.offset > 100;
-    if (showHeader != _showFloatingHeader) {
-      setState(() => _showFloatingHeader = showHeader);
-    }
   }
 
   @override
   void dispose() {
     _headerController.dispose();
-    _fabController.dispose();
-    _pulseController.dispose();
+    _sheetController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -160,22 +150,24 @@ class _ContactUsPageState extends State<ContactUsPage>
     );
   }
 
-  // ✅ FIXED: Renamed method to avoid conflict
   void _openContactDetail(Map<String, dynamic> contact) {
     HapticFeedback.lightImpact();
     setState(() {
       _selectedContact = contact;
       _isDetailSheetVisible = true;
     });
+    _sheetController.forward(); // Animate sheet in
   }
 
   void _closeContactDetail() {
     HapticFeedback.lightImpact();
-    setState(() {
-      _isDetailSheetVisible = false;
-    });
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) setState(() => _selectedContact = null);
+    _sheetController.reverse().then((_) {
+      if (mounted) {
+        setState(() {
+          _isDetailSheetVisible = false;
+          _selectedContact = null;
+        });
+      }
     });
   }
 
@@ -203,26 +195,22 @@ class _ContactUsPageState extends State<ContactUsPage>
             ),
           ),
 
-          // Contact Detail Bottom Sheet
-          if (_selectedContact != null) _buildContactDetailSheet(),
-
           // Overlay when sheet is visible
-          if (_isDetailSheetVisible)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: _closeContactDetail,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  color: Colors.black.withOpacity(_isDetailSheetVisible ? 0.3 : 0),
-                ),
-              ),
+          if (_isDetailSheetVisible || _sheetController.isAnimating)
+            AnimatedBuilder(
+              animation: _sheetFadeAnimation,
+              builder: (context, child) {
+                return GestureDetector(
+                  onTap: _closeContactDetail,
+                  child: Container(
+                    color: Colors.black.withOpacity(0.4 * _sheetFadeAnimation.value),
+                  ),
+                );
+              },
             ),
 
-          // Contact Detail Bottom Sheet (on top of overlay)
+          // Contact Detail Bottom Sheet
           if (_selectedContact != null) _buildContactDetailSheet(),
-
-          // Floating Action Button
-          if (!_isDetailSheetVisible) _buildFloatingActionButton(),
         ],
       ),
     );
@@ -372,9 +360,28 @@ class _ContactUsPageState extends State<ContactUsPage>
           return _buildEmptyState();
         }
 
-        return _buildContactList(docs);
+        // Sort documents by Order field
+        final sortedDocs = List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(docs);
+        sortedDocs.sort((a, b) {
+          final orderA = a.data()['Order'];
+          final orderB = b.data()['Order'];
+
+          int intA = _parseOrder(orderA);
+          int intB = _parseOrder(orderB);
+
+          return intA.compareTo(intB);
+        });
+
+        return _buildContactGrid(sortedDocs);
       },
     );
+  }
+
+  int _parseOrder(dynamic value) {
+    if (value == null) return 999999;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 999999;
+    return 999999;
   }
 
   Widget _buildLoadingState() {
@@ -383,8 +390,8 @@ class _ContactUsPageState extends State<ContactUsPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 70,
-            height: 70,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               color: kGreenMain.withOpacity(0.1),
               shape: BoxShape.circle,
@@ -393,7 +400,7 @@ class _ContactUsPageState extends State<ContactUsPage>
               child: Icon(
                 Icons.people_alt_rounded,
                 color: kGreenMain,
-                size: 35,
+                size: 40,
               ),
             ),
           ),
@@ -408,7 +415,7 @@ class _ContactUsPageState extends State<ContactUsPage>
           ),
           const SizedBox(height: 20),
           Text(
-            'Loading contacts...',
+            'Loading team members...',
             style: TextStyle(
               color: Colors.grey[600],
               fontSize: 15,
@@ -510,7 +517,7 @@ class _ContactUsPageState extends State<ContactUsPage>
             ),
             const SizedBox(height: 28),
             const Text(
-              'No Contacts Yet',
+              'No Team Members Yet',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
@@ -519,7 +526,7 @@ class _ContactUsPageState extends State<ContactUsPage>
             ),
             const SizedBox(height: 12),
             Text(
-              'Contact information will appear here\nonce added to the system.',
+              'Team member information will appear here\nonce added to the system.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -533,7 +540,7 @@ class _ContactUsPageState extends State<ContactUsPage>
     );
   }
 
-  Widget _buildContactList(
+  Widget _buildContactGrid(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
     return CustomScrollView(
       controller: _scrollController,
@@ -549,17 +556,28 @@ class _ContactUsPageState extends State<ContactUsPage>
           child: _buildQuickActions(),
         ),
 
-        // Contact Cards
+        // Team Section Title
+        SliverToBoxAdapter(
+          child: _buildTeamSectionTitle(),
+        ),
+
+        // Contact Grid (2 columns)
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-          sliver: SliverList(
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.72, // Adjusted for larger image
+            ),
             delegate: SliverChildBuilderDelegate(
                   (context, index) {
                 final data = docs[index].data();
-                return _ContactCard(
+                return _MemberCard(
                   data: data,
                   index: index,
-                  onTap: () => _openContactDetail(data), // ✅ FIXED
+                  onTap: () => _openContactDetail(data),
                   onCall: () => _makePhoneCall(
                       data['Contact_Number']?.toString() ?? ''),
                   onEmail: () => _sendEmail(
@@ -606,7 +624,6 @@ class _ContactUsPageState extends State<ContactUsPage>
             ),
             child: Column(
               children: [
-                // Animated Icon
                 TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.0, end: 1.0),
                   duration: const Duration(milliseconds: 1000),
@@ -631,10 +648,8 @@ class _ContactUsPageState extends State<ContactUsPage>
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Title
                 const Text(
-                  'We\'re Here to Help!',
+                  'Meet Our Team',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
@@ -643,10 +658,8 @@ class _ContactUsPageState extends State<ContactUsPage>
                   ),
                 ),
                 const SizedBox(height: 8),
-
-                // Subtitle
                 Text(
-                  'Connect with our team members for any queries or assistance',
+                  'Connect with our dedicated team members for any queries or assistance',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -655,45 +668,11 @@ class _ContactUsPageState extends State<ContactUsPage>
                   ),
                 ),
 
-                const SizedBox(height: 20),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildStatItem({
-    required IconData icon,
-    required String value,
-    required String label,
-  }) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: Colors.white, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.white.withOpacity(0.8),
-          ),
-        ),
-      ],
     );
   }
 
@@ -703,7 +682,6 @@ class _ContactUsPageState extends State<ContactUsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Title
           Row(
             children: [
               Container(
@@ -729,10 +707,7 @@ class _ContactUsPageState extends State<ContactUsPage>
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Quick Action Buttons
           Row(
             children: [
               Expanded(
@@ -768,42 +743,62 @@ class _ContactUsPageState extends State<ContactUsPage>
               ),
             ],
           ),
-
           const SizedBox(height: 24),
-
-          // Team Section Title
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: kGreenMain.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.people_alt_rounded,
-                  color: kGreenMain,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 10),
-              const Text(
-                'Our Team',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1F2937),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
         ],
       ),
     );
   }
 
+  Widget _buildTeamSectionTitle() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: kGreenMain.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.people_alt_rounded,
+              color: kGreenMain,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 10),
+          const Text(
+            'Our Team',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1F2937),
+            ),
+          ),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: kGreenMain.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'Tap to view details',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: kGreenMain.withOpacity(0.8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================
+  // SMOOTH BOTTOM SHEET
+  // ============================================
   Widget _buildContactDetailSheet() {
     final contact = _selectedContact!;
     final name = contact['Name']?.toString() ?? 'Unnamed';
@@ -813,285 +808,556 @@ class _ContactUsPageState extends State<ContactUsPage>
     final email = contact['Edu_Mail']?.toString() ?? '';
     final imageUrl = contact['Image']?.toString() ?? '';
 
-    return AnimatedPositioned(
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOutCubic,
-      bottom: _isDetailSheetVisible ? 0 : -500, // ✅ FIXED
+    return Positioned(
+      bottom: 0,
       left: 0,
       right: 0,
-      child: GestureDetector(
-        onTap: () {}, // Prevent tap through
-        onVerticalDragUpdate: (details) {
-          if (details.delta.dy > 10) {
-            _closeContactDetail();
-          }
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(28)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 30,
-                offset: const Offset(0, -10),
+      child: SlideTransition(
+        position: _sheetSlideAnimation,
+        child: FadeTransition(
+          opacity: _sheetFadeAnimation,
+          child: GestureDetector(
+            onTap: () {}, // Prevent tap through
+            onVerticalDragUpdate: (details) {
+              // Smooth drag to close
+              if (details.primaryDelta! > 8) {
+                _closeContactDetail();
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 30,
+                    offset: const Offset(0, -10),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle
-              Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Handle Bar
+                  Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
 
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    // Profile Section
-                    Row(
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
                       children: [
-                        // Image
+                        // Close Button - Top Right
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            onTap: _closeContactDetail,
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.close_rounded,
+                                color: Colors.grey[600],
+                                size: 22,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Large Circular Image - INCREASED SIZE
                         Container(
-                          width: 80,
-                          height: 80,
+                          width: 120, // Increased from 100
+                          height: 120, // Increased from 100
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                kGreenMain.withOpacity(0.2),
+                                kGreenDark.withOpacity(0.1),
+                              ],
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: kGreenMain.withOpacity(0.2),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
+                                color: kGreenMain.withOpacity(0.3),
+                                blurRadius: 25,
+                                offset: const Offset(0, 10),
                               ),
                             ],
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: imageUrl.isNotEmpty
-                                ? Image.network(
-                              imageUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  _buildPlaceholderImage(),
-                            )
-                                : _buildPlaceholderImage(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: ClipOval(
+                              child: imageUrl.isNotEmpty
+                                  ? Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    _buildPlaceholderImage(size: 60),
+                              )
+                                  : _buildPlaceholderImage(size: 60),
+                            ),
                           ),
                         ),
 
-                        const SizedBox(width: 16),
+                        const SizedBox(height: 20),
 
-                        // Info
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                name,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF1F2937),
-                                ),
-                              ),
-                              if (designation.isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: kGreenMain.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    designation,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: kGreenMain,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                              if (department.isNotEmpty) ...[
-                                const SizedBox(height: 6),
-                                Text(
-                                  department,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ],
+                        // Name
+                        Text(
+                          name,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF1F2937),
                           ),
                         ),
 
-                        // Close button
-                        GestureDetector(
-                          onTap: _closeContactDetail,
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
+                        const SizedBox(height: 10),
+
+                        // Designation Badge
+                        if (designation.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(12),
+                              gradient: const LinearGradient(
+                                colors: [kGreenMain, kGreenDark],
+                              ),
+                              borderRadius: BorderRadius.circular(25),
                             ),
-                            child: Icon(
-                              Icons.close_rounded,
-                              color: Colors.grey[600],
-                              size: 22,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    // Action Buttons
-                    Row(
-                      children: [
-                        // Call Button
-                        if (phone.isNotEmpty)
-                          Expanded(
-                            child: ScaleTransition(
-                              scale: _pulseAnimation,
-                              child: _DetailActionButton(
-                                icon: Icons.phone_rounded,
-                                label: 'Call Now',
-                                sublabel: phone,
-                                color: kGreenMain,
-                                onTap: () => _makePhoneCall(phone),
+                            child: Text(
+                              designation,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
 
-                        if (phone.isNotEmpty && email.isNotEmpty)
-                          const SizedBox(width: 12),
-
-                        // Email Button
-                        if (email.isNotEmpty)
-                          Expanded(
-                            child: _DetailActionButton(
-                              icon: Icons.email_rounded,
-                              label: 'Send Email',
-                              sublabel: email,
-                              color: Colors.orange,
-                              onTap: () => _sendEmail(email, name: name),
-                            ),
+                        if (department.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.business_rounded,
+                                size: 18,
+                                color: Colors.grey[500],
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                department,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
                           ),
+                        ],
+
+                        const SizedBox(height: 24),
+
+                        // Divider
+                        Container(
+                          height: 1,
+                          color: Colors.grey[200],
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Action Buttons - NO PULSE ANIMATION
+                        Row(
+                          children: [
+                            if (phone.isNotEmpty)
+                              Expanded(
+                                child: _DetailActionButton(
+                                  icon: Icons.phone_rounded,
+                                  label: 'Call Now',
+                                  sublabel: phone,
+                                  color: kGreenMain,
+                                  onTap: () => _makePhoneCall(phone),
+                                ),
+                              ),
+                            if (phone.isNotEmpty && email.isNotEmpty)
+                              const SizedBox(width: 12),
+                            if (email.isNotEmpty)
+                              Expanded(
+                                child: _DetailActionButton(
+                                  icon: Icons.email_rounded,
+                                  label: 'Send Email',
+                                  sublabel: email,
+                                  color: Colors.orange,
+                                  onTap: () => _sendEmail(email, name: name),
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Copy Buttons
+                        Row(
+                          children: [
+                            if (phone.isNotEmpty)
+                              Expanded(
+                                child: _CopyButton(
+                                  icon: Icons.copy_rounded,
+                                  label: 'Copy Phone',
+                                  value: phone,
+                                ),
+                              ),
+                            if (phone.isNotEmpty && email.isNotEmpty)
+                              const SizedBox(width: 12),
+                            if (email.isNotEmpty)
+                              Expanded(
+                                child: _CopyButton(
+                                  icon: Icons.copy_rounded,
+                                  label: 'Copy Email',
+                                  value: email,
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
                       ],
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // Copy Buttons
-                    Row(
-                      children: [
-                        if (phone.isNotEmpty)
-                          Expanded(
-                            child: _CopyButton(
-                              icon: Icons.copy_rounded,
-                              label: 'Copy Phone',
-                              value: phone,
-                            ),
-                          ),
-                        if (phone.isNotEmpty && email.isNotEmpty)
-                          const SizedBox(width: 12),
-                        if (email.isNotEmpty)
-                          Expanded(
-                            child: _CopyButton(
-                              icon: Icons.copy_rounded,
-                              label: 'Copy Email',
-                              value: email,
-                            ),
-                          ),
-                      ],
-                    ),
-
-                    SizedBox(
-                        height: MediaQuery.of(context).padding.bottom + 16),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildPlaceholderImage() {
+  Widget _buildPlaceholderImage({double size = 40}) {
     return Container(
       color: kGreenMain.withOpacity(0.15),
+      child: Center(
+        child: Icon(
+          Icons.person_rounded,
+          color: kGreenMain,
+          size: size,
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// MEMBER CARD (Grid Item) - INCREASED IMAGE SIZE
+// ============================================
+class _MemberCard extends StatefulWidget {
+  final Map<String, dynamic> data;
+  final int index;
+  final VoidCallback onTap;
+  final VoidCallback onCall;
+  final VoidCallback onEmail;
+
+  const _MemberCard({
+    required this.data,
+    required this.index,
+    required this.onTap,
+    required this.onCall,
+    required this.onEmail,
+  });
+
+  @override
+  State<_MemberCard> createState() => _MemberCardState();
+}
+
+class _MemberCardState extends State<_MemberCard> {
+  bool _visible = false;
+  bool _isPressed = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(Duration(milliseconds: 80 * (widget.index + 1)), () {
+      if (mounted) setState(() => _visible = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = widget.data['Name']?.toString() ?? 'Unnamed';
+    final designation = widget.data['Designation']?.toString() ?? '';
+    final department = widget.data['Department']?.toString() ?? '';
+    final phone = widget.data['Contact_Number']?.toString() ?? '';
+    final email = widget.data['Edu_Mail']?.toString() ?? '';
+    final imageUrl = widget.data['Image']?.toString() ?? '';
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 500),
+      opacity: _visible ? 1 : 0,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.translationValues(0, _visible ? 0 : 30, 0),
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapUp: (_) {
+            setState(() => _isPressed = false);
+            HapticFeedback.lightImpact();
+            widget.onTap();
+          },
+          onTapCancel: () => setState(() => _isPressed = false),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: _isPressed
+                    ? kGreenMain.withOpacity(0.4)
+                    : Colors.grey.withOpacity(0.1),
+                width: _isPressed ? 2 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: _isPressed
+                      ? kGreenMain.withOpacity(0.2)
+                      : kGreenMain.withOpacity(0.08),
+                  blurRadius: _isPressed ? 25 : 15,
+                  offset: Offset(0, _isPressed ? 10 : 6),
+                ),
+              ],
+            ),
+            transform: Matrix4.identity()..scale(_isPressed ? 0.96 : 1.0),
+            transformAlignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Circular Profile Image - INCREASED SIZE
+                  Container(
+                    width: 120, // Increased from 70
+                    height: 120, // Increased from 70
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          kGreenMain.withOpacity(0.25),
+                          kGreenDark.withOpacity(0.15),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: kGreenMain.withOpacity(0.25),
+                          blurRadius: 15,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: ClipOval(
+                        child: imageUrl.isNotEmpty
+                            ? Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: kGreenMain.withOpacity(0.1),
+                              child: const Center(
+                                child: SizedBox(
+                                  width: 54,
+                                  height: 54,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(kGreenMain),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                        )
+                            : _buildPlaceholder(),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Name
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // Designation
+                  if (designation.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: kGreenMain.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        designation,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: kGreenDark,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 4),
+
+                  // Department
+                  if (department.isNotEmpty)
+                    Text(
+                      department,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+
+                  const Spacer(),
+
+                  // Action Buttons Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (phone.isNotEmpty)
+                        _SmallActionButton(
+                          icon: Icons.phone_rounded,
+                          color: kGreenMain,
+                          onTap: widget.onCall,
+                        ),
+                      if (phone.isNotEmpty && email.isNotEmpty)
+                        const SizedBox(width: 12),
+                      if (email.isNotEmpty)
+                        _SmallActionButton(
+                          icon: Icons.email_rounded,
+                          color: Colors.orange,
+                          onTap: widget.onEmail,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      color: kGreenMain.withOpacity(0.12),
       child: const Center(
         child: Icon(
           Icons.person_rounded,
           color: kGreenMain,
-          size: 40,
+          size: 35,
         ),
       ),
     );
   }
+}
 
-  Widget _buildFloatingActionButton() {
-    return Positioned(
-      right: 16,
-      bottom: 16 + MediaQuery.of(context).padding.bottom,
-      child: ScaleTransition(
-        scale: _fabScaleAnimation,
-        child: GestureDetector(
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            _sendEmail('austrc@aust.edu');
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [kGreenMain, kGreenDark],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: kGreenMain.withOpacity(0.4),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.chat_bubble_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                SizedBox(width: 10),
-                Text(
-                  'Message',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                  ),
-                ),
-              ],
-            ),
+// ============================================
+// SMALL ACTION BUTTON (For Grid Cards)
+// ============================================
+class _SmallActionButton extends StatefulWidget {
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _SmallActionButton({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  State<_SmallActionButton> createState() => _SmallActionButtonState();
+}
+
+class _SmallActionButtonState extends State<_SmallActionButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        HapticFeedback.lightImpact();
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: _isPressed
+              ? widget.color.withOpacity(0.25)
+              : widget.color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: widget.color.withOpacity(_isPressed ? 0.5 : 0.2),
+            width: 1.5,
           ),
+        ),
+        transform: Matrix4.identity()..scale(_isPressed ? 0.9 : 1.0),
+        transformAlignment: Alignment.center,
+        child: Icon(
+          widget.icon,
+          color: widget.color,
+          size: 18,
         ),
       ),
     );
@@ -1108,7 +1374,6 @@ class _BackgroundPainter extends CustomPainter {
       ..color = kGreenMain.withOpacity(0.03)
       ..style = PaintingStyle.fill;
 
-    // Draw decorative circles
     canvas.drawCircle(
       Offset(size.width * 0.9, size.height * 0.1),
       100,
@@ -1281,327 +1546,7 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
 }
 
 // ============================================
-// CONTACT CARD
-// ============================================
-class _ContactCard extends StatefulWidget {
-  final Map<String, dynamic> data;
-  final int index;
-  final VoidCallback onTap;
-  final VoidCallback onCall;
-  final VoidCallback onEmail;
-
-  const _ContactCard({
-    required this.data,
-    required this.index,
-    required this.onTap,
-    required this.onCall,
-    required this.onEmail,
-  });
-
-  @override
-  State<_ContactCard> createState() => _ContactCardState();
-}
-
-class _ContactCardState extends State<_ContactCard> {
-  bool _visible = false;
-  bool _isPressed = false;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer(Duration(milliseconds: 100 * (widget.index + 1)), () {
-      if (mounted) setState(() => _visible = true);
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final name = widget.data['Name']?.toString() ?? 'Unnamed';
-    final designation = widget.data['Designation']?.toString() ?? '';
-    final department = widget.data['Department']?.toString() ?? '';
-    final phone = widget.data['Contact_Number']?.toString() ?? '';
-    final email = widget.data['Edu_Mail']?.toString() ?? '';
-    final imageUrl = widget.data['Image']?.toString() ?? '';
-
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 500),
-      opacity: _visible ? 1 : 0,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOutCubic,
-        transform: Matrix4.translationValues(0, _visible ? 0 : 30, 0),
-        margin: const EdgeInsets.only(bottom: 12),
-        child: GestureDetector(
-          onTapDown: (_) => setState(() => _isPressed = true),
-          onTapUp: (_) {
-            setState(() => _isPressed = false);
-            widget.onTap();
-          },
-          onTapCancel: () => setState(() => _isPressed = false),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: _isPressed
-                    ? kGreenMain.withOpacity(0.4)
-                    : Colors.grey.withOpacity(0.1),
-                width: _isPressed ? 2 : 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: _isPressed
-                      ? kGreenMain.withOpacity(0.15)
-                      : kGreenMain.withOpacity(0.05),
-                  blurRadius: _isPressed ? 20 : 15,
-                  offset: Offset(0, _isPressed ? 8 : 5),
-                ),
-              ],
-            ),
-            transform: Matrix4.identity()..scale(_isPressed ? 0.98 : 1.0),
-            transformAlignment: Alignment.center,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  // Profile Image
-                  Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: kGreenMain.withOpacity(0.15),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: imageUrl.isNotEmpty
-                          ? Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        loadingBuilder:
-                            (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            color: kGreenMain.withOpacity(0.1),
-                            child: Center(
-                              child: SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor:
-                                  const AlwaysStoppedAnimation<Color>(
-                                      kGreenMain),
-                                  value: loadingProgress
-                                      .expectedTotalBytes !=
-                                      null
-                                      ? loadingProgress
-                                      .cumulativeBytesLoaded /
-                                      loadingProgress
-                                          .expectedTotalBytes!
-                                      : null,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (_, __, ___) => _buildPlaceholder(),
-                      )
-                          : _buildPlaceholder(),
-                    ),
-                  ),
-
-                  const SizedBox(width: 14),
-
-                  // Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF1F2937),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        if (designation.isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: kGreenMain.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              designation,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: kGreenDark,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        if (department.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.business_rounded,
-                                size: 14,
-                                color: Colors.grey[500],
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  department,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(width: 8),
-
-                  // Action Buttons
-                  Column(
-                    children: [
-                      // Call Button
-                      if (phone.isNotEmpty)
-                        _ActionIconButton(
-                          icon: Icons.phone_rounded,
-                          color: kGreenMain,
-                          onTap: widget.onCall,
-                        ),
-
-                      if (phone.isNotEmpty && email.isNotEmpty)
-                        const SizedBox(height: 10),
-
-                      // Email Button
-                      if (email.isNotEmpty)
-                        _ActionIconButton(
-                          icon: Icons.email_rounded,
-                          color: Colors.orange,
-                          onTap: widget.onEmail,
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlaceholder() {
-    return Container(
-      color: kGreenMain.withOpacity(0.12),
-      child: const Center(
-        child: Icon(
-          Icons.person_rounded,
-          color: kGreenMain,
-          size: 32,
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================
-// ACTION ICON BUTTON
-// ============================================
-class _ActionIconButton extends StatefulWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionIconButton({
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  State<_ActionIconButton> createState() => _ActionIconButtonState();
-}
-
-class _ActionIconButtonState extends State<_ActionIconButton> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) {
-        setState(() => _isPressed = false);
-        HapticFeedback.lightImpact();
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: _isPressed
-              ? widget.color.withOpacity(0.25)
-              : widget.color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: widget.color.withOpacity(_isPressed ? 0.5 : 0.2),
-            width: 1.5,
-          ),
-          boxShadow: _isPressed
-              ? [
-            BoxShadow(
-              color: widget.color.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ]
-              : [],
-        ),
-        transform: Matrix4.identity()..scale(_isPressed ? 0.9 : 1.0),
-        transformAlignment: Alignment.center,
-        child: Icon(
-          widget.icon,
-          color: widget.color,
-          size: 22,
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================
-// DETAIL ACTION BUTTON
+// DETAIL ACTION BUTTON - NO PULSE ANIMATION
 // ============================================
 class _DetailActionButton extends StatefulWidget {
   final IconData icon;
