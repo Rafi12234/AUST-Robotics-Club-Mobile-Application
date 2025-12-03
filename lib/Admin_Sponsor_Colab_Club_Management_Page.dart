@@ -5,7 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'dart:math' as math;
 
-// Theme colors (same as your existing theme)
+// Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
 const kGreenMain = Color(0xFF2D6A4F);
 const kGreenLight = Color(0xFF52B788);
@@ -36,31 +36,31 @@ class _AdminSponsorsCollaboratorsPageState
     super.initState();
 
     _headerController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 
     _cardsController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
     _headerAnimation = CurvedAnimation(
       parent: _headerController,
-      curve: Curves.easeOutBack,
+      curve: Curves.easeOut,
     );
 
     _card1Animation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _cardsController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
       ),
     );
 
     _card2Animation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _cardsController,
-        curve: const Interval(0.3, 0.9, curve: Curves.easeOut),
+        curve: const Interval(0.2, 0.7, curve: Curves.easeOut),
       ),
     );
 
@@ -89,7 +89,6 @@ class _AdminSponsorsCollaboratorsPageState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header Section
                   FadeTransition(
                     opacity: _headerAnimation,
                     child: SlideTransition(
@@ -102,19 +101,15 @@ class _AdminSponsorsCollaboratorsPageState
                   ),
                   const SizedBox(height: 32),
 
-                  // Sponsors Card
+                  // Sponsors card
                   AnimatedBuilder(
                     animation: _card1Animation,
                     builder: (context, child) {
-                      // ✅ FIX: Clamp values to valid range
-                      final scale = (0.5 + (0.5 * _card1Animation.value)).clamp(0.0, 1.0);
-                      final opacity = _card1Animation.value.clamp(0.0, 1.0);
+                      final scale = 0.8 + (0.2 * _card1Animation.value);
+                      final opacity = _card1Animation.value;
                       return Transform.scale(
                         scale: scale,
-                        child: Opacity(
-                          opacity: opacity,
-                          child: child,
-                        ),
+                        child: Opacity(opacity: opacity, child: child),
                       );
                     },
                     child: _CategoryCard(
@@ -134,19 +129,15 @@ class _AdminSponsorsCollaboratorsPageState
                   ),
                   const SizedBox(height: 20),
 
-                  // Collaborated Clubs Card
+                  // Collaborated clubs card
                   AnimatedBuilder(
                     animation: _card2Animation,
                     builder: (context, child) {
-                      // ✅ FIX: Clamp values to valid range
-                      final scale = (0.5 + (0.5 * _card2Animation.value)).clamp(0.0, 1.0);
-                      final opacity = _card2Animation.value.clamp(0.0, 1.0);
+                      final scale = 0.8 + (0.2 * _card2Animation.value);
+                      final opacity = _card2Animation.value;
                       return Transform.scale(
                         scale: scale,
-                        child: Opacity(
-                          opacity: opacity,
-                          child: child,
-                        ),
+                        child: Opacity(opacity: opacity, child: child),
                       );
                     },
                     child: _CategoryCard(
@@ -166,7 +157,6 @@ class _AdminSponsorsCollaboratorsPageState
                   ),
                   const SizedBox(height: 40),
 
-                  // Quick Stats Section
                   _buildQuickStats(),
                 ],
               ),
@@ -248,15 +238,15 @@ class _AdminSponsorsCollaboratorsPageState
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [kGreenMain.withOpacity(0.1), kGreenLight.withOpacity(0.1)],
+                colors: [
+                  kGreenMain.withOpacity(0.1),
+                  kGreenLight.withOpacity(0.1)
+                ],
               ),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
-              Icons.image_rounded,
-              size: 32,
-              color: kGreenMain,
-            ),
+            child:
+            const Icon(Icons.image_rounded, size: 32, color: kGreenMain),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -274,10 +264,7 @@ class _AdminSponsorsCollaboratorsPageState
                 const SizedBox(height: 4),
                 Text(
                   'Upload and manage carousel images',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -344,23 +331,22 @@ class _AdminSponsorsCollaboratorsPageState
             ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOut,
-            ),
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
             child: SlideTransition(
               position: Tween<Offset>(
                 begin: const Offset(1, 0),
                 end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-              )),
+              ).animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                ),
+              ),
               child: child,
             ),
           );
         },
-        transitionDuration: const Duration(milliseconds: 400),
+        transitionDuration: const Duration(milliseconds: 300),
       ),
     );
   }
@@ -430,11 +416,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(
-                  widget.icon,
-                  size: 40,
-                  color: Colors.white,
-                ),
+                child: Icon(widget.icon, size: 40, color: Colors.white),
               ),
               const SizedBox(width: 20),
               Expanded(
@@ -459,7 +441,6 @@ class _CategoryCardState extends State<_CategoryCard> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    // Image count badge
                     StreamBuilder<DocumentSnapshot>(
                       stream: FirebaseFirestore.instance
                           .collection('All_Data')
@@ -468,8 +449,8 @@ class _CategoryCardState extends State<_CategoryCard> {
                       builder: (context, snapshot) {
                         int imageCount = 0;
                         if (snapshot.hasData && snapshot.data!.exists) {
-                          final data =
-                          snapshot.data!.data() as Map<String, dynamic>?;
+                          final data = snapshot.data!.data()
+                          as Map<String, dynamic>?;
                           if (data != null) {
                             imageCount = data.keys
                                 .where((key) => key.startsWith('Image_'))
@@ -632,7 +613,7 @@ class _ImageManagerPageState extends State<ImageManagerPage>
   void initState() {
     super.initState();
     _fabController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     )..forward();
   }
@@ -704,34 +685,12 @@ class _ImageManagerPageState extends State<ImageManagerPage>
           ),
           background: Stack(
             children: [
-              // Decorative pattern
               Positioned(
                 right: -50,
                 top: 20,
                 child: Opacity(
                   opacity: 0.15,
-                  child: Icon(
-                    widget.icon,
-                    size: 200,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              // Floating circles
-              Positioned(
-                left: 30,
-                bottom: 60,
-                child: _FloatingCircle(
-                  size: 60,
-                  color: Colors.white.withOpacity(0.1),
-                ),
-              ),
-              Positioned(
-                right: 100,
-                top: 80,
-                child: _FloatingCircle(
-                  size: 40,
-                  color: Colors.white.withOpacity(0.08),
+                  child: Icon(widget.icon, size: 200, color: Colors.white),
                 ),
               ),
             ],
@@ -744,15 +703,14 @@ class _ImageManagerPageState extends State<ImageManagerPage>
   Widget _buildInfoCard() {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 400),
       curve: Curves.easeOut,
       builder: (context, value, child) {
+        final scale = 0.9 + (0.1 * value);
+        final opacity = value;
         return Transform.scale(
-          scale: 0.8 + (0.2 * value),
-          child: Opacity(
-            opacity: value.clamp(0.0, 1.0),
-            child: child,
-          ),
+          scale: scale,
+          child: Opacity(opacity: opacity, child: child),
         );
       },
       child: Container(
@@ -797,7 +755,7 @@ class _ImageManagerPageState extends State<ImageManagerPage>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Images will appear in the homepage carousel. Tap + to add, long-press to delete.',
+                    'Images will appear in the homepage carousel. Tap + to add, tap delete icon to remove.',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[600],
@@ -854,7 +812,8 @@ class _ImageManagerPageState extends State<ImageManagerPage>
               }
             }
             return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: widget.gradientColors[0].withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
@@ -889,9 +848,7 @@ class _ImageManagerPageState extends State<ImageManagerPage>
 
         if (snapshot.hasError) {
           return SliverFillRemaining(
-            child: Center(
-              child: Text('Error: ${snapshot.error}'),
-            ),
+            child: Center(child: Text('Error: ${snapshot.error}')),
           );
         }
 
@@ -908,12 +865,9 @@ class _ImageManagerPageState extends State<ImageManagerPage>
         }
 
         if (images.isEmpty) {
-          return SliverFillRemaining(
-            child: _buildEmptyState(),
-          );
+          return SliverFillRemaining(child: _buildEmptyState());
         }
 
-        // Sort images by number
         final sortedKeys = images.keys.toList()
           ..sort((a, b) {
             final numA = int.tryParse(a.replaceAll('Image_', '')) ?? 0;
@@ -924,7 +878,8 @@ class _ImageManagerPageState extends State<ImageManagerPage>
         return SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
@@ -935,6 +890,7 @@ class _ImageManagerPageState extends State<ImageManagerPage>
                 final key = sortedKeys[index];
                 final url = images[key]!;
                 return _ImageCard(
+                  key: ValueKey(key),
                   fieldName: key,
                   imageUrl: url,
                   documentName: widget.documentName,
@@ -957,15 +913,14 @@ class _ImageManagerPageState extends State<ImageManagerPage>
         children: [
           TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.elasticOut,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOut,
             builder: (context, value, child) {
+              final scale = 0.5 + (0.5 * value);
+              final opacity = value;
               return Transform.scale(
-                scale: value.clamp(0.0, 1.5), // Allow overshoot for elastic
-                child: Opacity(
-                  opacity: value.clamp(0.0, 1.0),
-                  child: child,
-                ),
+                scale: scale,
+                child: Opacity(opacity: opacity, child: child),
               );
             },
             child: Container(
@@ -993,10 +948,7 @@ class _ImageManagerPageState extends State<ImageManagerPage>
           const SizedBox(height: 8),
           Text(
             'Tap the + button to upload your first image',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
         ],
       ),
@@ -1005,10 +957,7 @@ class _ImageManagerPageState extends State<ImageManagerPage>
 
   Widget _buildFAB() {
     return ScaleTransition(
-      scale: CurvedAnimation(
-        parent: _fabController,
-        curve: Curves.easeOut,
-      ),
+      scale: CurvedAnimation(parent: _fabController, curve: Curves.easeOut),
       child: FloatingActionButton.extended(
         onPressed: _isUploading ? null : _uploadNewImage,
         backgroundColor: widget.gradientColors[0],
@@ -1034,7 +983,6 @@ class _ImageManagerPageState extends State<ImageManagerPage>
     try {
       setState(() => _isUploading = true);
 
-      // Pick image
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 85,
@@ -1045,7 +993,6 @@ class _ImageManagerPageState extends State<ImageManagerPage>
         return;
       }
 
-      // Upload to Cloudinary
       final cloudinary = CloudinaryPublic('dxyhzgrul', 'austrc-club');
       final response = await cloudinary.uploadFile(
         CloudinaryFile.fromFile(
@@ -1054,7 +1001,6 @@ class _ImageManagerPageState extends State<ImageManagerPage>
         ),
       );
 
-      // Get current document to find next image number
       final doc = await FirebaseFirestore.instance
           .collection('All_Data')
           .doc(widget.documentName)
@@ -1066,7 +1012,8 @@ class _ImageManagerPageState extends State<ImageManagerPage>
         if (data != null) {
           final existingKeys = data.keys
               .where((key) => key.startsWith('Image_'))
-              .map((key) => int.tryParse(key.replaceAll('Image_', '')) ?? 0)
+              .map((key) =>
+          int.tryParse(key.replaceAll('Image_', '')) ?? 0)
               .toList();
           if (existingKeys.isNotEmpty) {
             nextNumber = existingKeys.reduce(math.max) + 1;
@@ -1074,7 +1021,6 @@ class _ImageManagerPageState extends State<ImageManagerPage>
         }
       }
 
-      // Save to Firestore
       await FirebaseFirestore.instance
           .collection('All_Data')
           .doc(widget.documentName)
@@ -1120,7 +1066,7 @@ class _ImageManagerPageState extends State<ImageManagerPage>
 }
 
 // ============================================
-// IMAGE CARD WIDGET
+// IMAGE CARD WIDGET - bottom-sheet confirmation
 // ============================================
 class _ImageCard extends StatefulWidget {
   final String fieldName;
@@ -1130,12 +1076,13 @@ class _ImageCard extends StatefulWidget {
   final int index;
 
   const _ImageCard({
+    Key? key,
     required this.fieldName,
     required this.imageUrl,
     required this.documentName,
     required this.gradientColors,
     required this.index,
-  });
+  }) : super(key: key);
 
   @override
   State<_ImageCard> createState() => _ImageCardState();
@@ -1150,13 +1097,21 @@ class _ImageCardState extends State<_ImageCard>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(milliseconds: 400 + (widget.index * 100)),
+      duration: Duration(
+        milliseconds:
+        (200 + (widget.index * 50)).clamp(0, 350).toInt(),
+      ),
       vsync: this,
     );
 
-    Future.delayed(Duration(milliseconds: widget.index * 80), () {
-      if (mounted) _controller.forward();
-    });
+    Future.delayed(
+      Duration(
+        milliseconds: (widget.index * 30).clamp(0, 120).toInt(),
+      ),
+          () {
+        if (mounted) _controller.forward();
+      },
+    );
   }
 
   @override
@@ -1170,34 +1125,29 @@ class _ImageCardState extends State<_ImageCard>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        // ✅ FIX: Clamp values to valid range
-        final animValue = _controller.value.clamp(0.0, 1.0);
+        final animValue = _controller.value;
         return Transform.scale(
-          scale: 0.5 + (0.5 * animValue),
-          child: Opacity(
-            opacity: animValue,
-            child: child,
-          ),
+          scale: 0.7 + (0.3 * animValue),
+          child: Opacity(opacity: animValue, child: child),
         );
       },
-      child: GestureDetector(
-        onLongPress: _showDeleteDialog,
-        onTap: () => _showImagePreview(context),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: widget.gradientColors[0].withOpacity(0.2),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              // Image
-              ClipRRect(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: widget.gradientColors[0].withOpacity(0.2),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Tap to preview
+            GestureDetector(
+              onTap: () => _showImagePreview(context),
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: CachedNetworkImage(
                   imageUrl: widget.imageUrl,
@@ -1209,9 +1159,8 @@ class _ImageCardState extends State<_ImageCard>
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child:
+                    const Center(child: CircularProgressIndicator()),
                   ),
                   errorWidget: (context, url, error) => Container(
                     decoration: BoxDecoration(
@@ -1226,77 +1175,82 @@ class _ImageCardState extends State<_ImageCard>
                   ),
                 ),
               ),
+            ),
 
-              // Gradient overlay
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.7),
-                      ],
-                    ),
+            // Bottom gradient overlay
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.7),
+                    ],
                   ),
                 ),
               ),
+            ),
 
-              // Image number badge
-              Positioned(
-                top: 10,
-                left: 10,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
+            // Number badge
+            Positioned(
+              top: 10,
+              left: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: widget.gradientColors,
                   ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: widget.gradientColors),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '#${widget.fieldName.replaceAll('Image_', '')}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '#${widget.fieldName.replaceAll('Image_', '')}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
+            ),
 
-              // Delete button
-              Positioned(
-                top: 10,
-                right: 10,
-                child: GestureDetector(
-                  onTap: _showDeleteDialog,
+            // Delete button -> bottom sheet confirm
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _isDeleting ? null : _confirmAndDeleteBottomSheet,
+                  borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.9),
+                      color: Colors.red,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.red.withOpacity(0.4),
+                          color: Colors.red.withOpacity(0.5),
                           blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
                     child: _isDeleting
                         ? const SizedBox(
-                      width: 16,
-                      height: 16,
+                      width: 18,
+                      height: 18,
                       child: CircularProgressIndicator(
                         color: Colors.white,
                         strokeWidth: 2,
@@ -1305,38 +1259,38 @@ class _ImageCardState extends State<_ImageCard>
                         : const Icon(
                       Icons.delete_rounded,
                       color: Colors.white,
-                      size: 16,
+                      size: 18,
                     ),
                   ),
                 ),
               ),
+            ),
 
-              // Bottom info
-              Positioned(
-                bottom: 10,
-                left: 10,
-                right: 10,
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.touch_app_rounded,
-                      color: Colors.white70,
-                      size: 14,
+            // Bottom text
+            Positioned(
+              bottom: 10,
+              left: 10,
+              right: 10,
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.touch_app_rounded,
+                    color: Colors.white70,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Tap to preview',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Tap to preview',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1345,32 +1299,36 @@ class _ImageCardState extends State<_ImageCard>
   void _showImagePreview(BuildContext context) {
     showDialog(
       context: context,
+      barrierColor: Colors.black87,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.all(20),
         child: Stack(
+          alignment: Alignment.center,
           children: [
-            // Image
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: CachedNetworkImage(
                 imageUrl: widget.imageUrl,
                 fit: BoxFit.contain,
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
               ),
             ),
-            // Close button
             Positioned(
-              top: 10,
-              right: 10,
+              top: 0,
+              right: 0,
               child: GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.close, size: 24),
+                  child: const Icon(Icons.close,
+                      size: 24, color: Colors.black),
                 ),
               ),
             ),
@@ -1380,173 +1338,202 @@ class _ImageCardState extends State<_ImageCard>
     );
   }
 
-  Future<void> _showDeleteDialog() async {
-    final confirm = await showDialog<bool>(
+  /// Bottom-sheet confirmation (no "page dull but empty" issue)
+  Future<void> _confirmAndDeleteBottomSheet() async {
+    if (!mounted || _isDeleting) return;
+
+    final bool? shouldDelete = await showModalBottomSheet<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.delete_rounded, color: Colors.red),
+      isScrollControlled: false,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext sheetContext) {
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, -4),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            const Text('Delete Image'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: CachedNetworkImage(
-                imageUrl: widget.imageUrl,
-                height: 120,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.delete_rounded,
+                        color: Colors.red,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Delete this image?',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: kGreenDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: CachedNetworkImage(
+                    imageUrl: widget.imageUrl,
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      height: 120,
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'This action cannot be undone.',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () =>
+                            Navigator.of(sheetContext).pop(false),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: Colors.grey[300]!,
+                          ),
+                          foregroundColor: Colors.grey[800],
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            Navigator.of(sheetContext).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Delete',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Are you sure you want to delete this image? This action cannot be undone.',
-              style: TextStyle(
-                color: Colors.grey[700],
-                height: 1.4,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+        );
+      },
     );
 
-    if (confirm == true) {
+    if (shouldDelete == true && mounted) {
       await _deleteImage();
     }
   }
 
   Future<void> _deleteImage() async {
+    if (!mounted || _isDeleting) return;
+
     setState(() => _isDeleting = true);
 
+    final docRef = FirebaseFirestore.instance
+        .collection('All_Data')
+        .doc(widget.documentName);
+
     try {
-      await FirebaseFirestore.instance
-          .collection('All_Data')
-          .doc(widget.documentName)
-          .update({widget.fieldName: FieldValue.delete()});
+      await docRef.update({
+        widget.fieldName: FieldValue.delete(),
+      });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 12),
-                Text('Image deleted successfully!'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
+              Text(
+                'Image ${widget.fieldName.replaceAll('Image_', '#')} deleted!',
+              ),
+            ],
           ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error deleting image: $e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isDeleting = false);
-      }
-    }
-  }
-}
-
-// ============================================
-// FLOATING CIRCLE DECORATION
-// ============================================
-class _FloatingCircle extends StatefulWidget {
-  final double size;
-  final Color color;
-
-  const _FloatingCircle({
-    required this.size,
-    required this.color,
-  });
-
-  @override
-  State<_FloatingCircle> createState() => _FloatingCircleState();
-}
-
-class _FloatingCircleState extends State<_FloatingCircle>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(
-            math.sin(_controller.value * math.pi * 2) * 5,
-            math.cos(_controller.value * math.pi * 2) * 5,
-          ),
-          child: child,
-        );
-      },
-      child: Container(
-        width: widget.size,
-        height: widget.size,
-        decoration: BoxDecoration(
-          color: widget.color,
-          shape: BoxShape.circle,
+          duration: const Duration(seconds: 2),
         ),
-      ),
-    );
+      );
+      // StreamBuilder will rebuild and this card disappears.
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text('Error deleting image: $e'),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+
+      setState(() => _isDeleting = false);
+    }
   }
 }
