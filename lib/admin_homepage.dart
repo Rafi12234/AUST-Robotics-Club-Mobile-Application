@@ -125,7 +125,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       destinationPage: const AdminBestPanelMembersPage(),
     ),
   AdminCardConfig(
-  title: 'Sponsor & Collaborator Club',
+  title: 'Sponsor & Collaborated Club',
   subtitle: 'Manage sponsors & collaborators',
   icon: Icons.stars_rounded,
   gradientColors: const [
