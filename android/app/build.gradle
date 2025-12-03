@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.aust_robotics_club_mobile_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

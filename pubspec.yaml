@@ -46,6 +46,11 @@ dependencies:
   image_picker: ^1.2.0
   cloudinary_public: ^0.23.1
   http: ^1.5.0
+  csv: ^6.0.0
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.1
+  open_file: ^3.5.10
+  share_plus: ^12.0.1
 
 
 

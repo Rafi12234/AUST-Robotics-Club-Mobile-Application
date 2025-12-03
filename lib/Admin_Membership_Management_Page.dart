@@ -1,8 +1,15 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
-// Theme colors
+import 'package:csv/csv.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
+// ============================================
+// THEME COLORS
+// ============================================
 const kGreenDark = Color(0xFF0F3D2E);
 const kGreenMain = Color(0xFF2D6A4F);
 const kGreenLight = Color(0xFF52B788);
@@ -11,6 +18,489 @@ const kAccentRed = Color(0xFFEF4444);
 const kAccentBlue = Color(0xFF3B82F6);
 const kAccentPurple = Color(0xFF6366F1);
 
+// ============================================
+// CSV EXPORT SERVICE - FIXED
+// ============================================
+class CSVExportService {
+  static Future<ExportResult> exportMembersToCSV({
+    required String semesterName,
+    required List<Map<String, dynamic>> members,
+    required BuildContext context,
+  }) async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const _ExportLoadingDialog(),
+      );
+
+      // Create CSV data
+      List<List<dynamic>> csvData = [];
+
+      // Add header row
+      csvData.add([
+        'S/N',
+        'Name',
+        'Department',
+        'Edu Mail',
+        'Personal Email',
+        'Current Semester',
+        'Semester',
+        'Phone Number',
+        'Payment By',
+        'Transaction ID',
+      ]);
+
+      // Add member data rows
+      int serialNumber = 1;
+      for (var member in members) {
+        csvData.add([
+          serialNumber++,
+          member['Name'] ?? '',
+          member['Department'] ?? '',
+          member['Edu_Mail'] ?? '',
+          member['Personal_Email'] ?? '',
+          member['Current_Semester'] ?? '',
+          member['Semester'] ?? '',
+          member['Phone_Number'] ?? '',
+          member['Payment_By'] ?? '',
+          member['Transaction_ID'] ?? '',
+        ]);
+      }
+
+      // Convert to CSV string
+      String csv = const ListToCsvConverter().convert(csvData);
+
+      // Get application documents directory (works on both Android & iOS)
+      final directory = await getApplicationDocumentsDirectory();
+
+      // Create filename with timestamp
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final sanitizedSemester =
+      semesterName.replaceAll(RegExp(r'[^\w\s]'), '_').replaceAll(' ', '_');
+      final fileName = '${sanitizedSemester}_Members_$timestamp.csv';
+      final filePath = '${directory.path}/$fileName';
+
+      // Write file
+      final file = File(filePath);
+      await file.writeAsString(csv);
+
+      // Verify file exists
+      if (!await file.exists()) {
+        throw Exception('Failed to create file');
+      }
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      return ExportResult(
+        success: true,
+        filePath: filePath,
+        fileName: fileName,
+        memberCount: members.length,
+      );
+    } catch (e) {
+      // Close loading dialog if open
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      return ExportResult(
+        success: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  /// Share the exported file - FIXED VERSION
+  static Future<ShareResult?> shareFile(String filePath) async {
+    try {
+      final file = File(filePath);
+
+      // Check if file exists
+      if (!await file.exists()) {
+        debugPrint('File does not exist: $filePath');
+        return null;
+      }
+
+      // Get file size for debugging
+      final fileSize = await file.length();
+      debugPrint('Sharing file: $filePath (Size: $fileSize bytes)');
+
+      // Use ShareResult to get feedback
+      final result = await Share.shareXFiles(
+        [XFile(filePath)],
+        subject: 'Members Export',
+        text: 'Exported members data in CSV format',
+      );
+
+      debugPrint('Share result: ${result.status}');
+      return result;
+    } catch (e) {
+      debugPrint('Error sharing file: $e');
+      return null;
+    }
+  }
+}
+
+class ExportResult {
+  final bool success;
+  final String? filePath;
+  final String? fileName;
+  final int? memberCount;
+  final String? error;
+
+  ExportResult({
+    required this.success,
+    this.filePath,
+    this.fileName,
+    this.memberCount,
+    this.error,
+  });
+}
+
+// ============================================
+// EXPORT LOADING DIALOG
+// ============================================
+class _ExportLoadingDialog extends StatelessWidget {
+  const _ExportLoadingDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: kGreenLight.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: CircularProgressIndicator(
+                    color: kGreenMain,
+                    strokeWidth: 4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Exporting Data...',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: kGreenDark,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Generating CSV file',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// EXPORT SUCCESS DIALOG - FIXED
+// ============================================
+class ExportSuccessDialog extends StatefulWidget {
+  final String filePath;
+  final String fileName;
+  final int memberCount;
+  final String semesterName;
+
+  const ExportSuccessDialog({
+    super.key,
+    required this.filePath,
+    required this.fileName,
+    required this.memberCount,
+    required this.semesterName,
+  });
+
+  @override
+  State<ExportSuccessDialog> createState() => _ExportSuccessDialogState();
+}
+
+class _ExportSuccessDialogState extends State<ExportSuccessDialog> {
+  bool _isSharing = false;
+
+  Future<void> _handleShare() async {
+    if (_isSharing) return;
+
+    setState(() => _isSharing = true);
+
+    try {
+      // Don't close the dialog yet - let share complete first
+      final result = await CSVExportService.shareFile(widget.filePath);
+
+      if (mounted) {
+        setState(() => _isSharing = false);
+
+        // Only close dialog after share sheet is dismissed
+        if (result != null) {
+          // Small delay to ensure share sheet is fully dismissed
+          await Future.delayed(const Duration(milliseconds: 300));
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSharing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error sharing: $e'),
+            backgroundColor: kAccentRed,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 30,
+              offset: const Offset(0, 15),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Success Icon
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            kGreenMain.withOpacity(0.15),
+                            kGreenLight.withOpacity(0.15),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [kGreenMain, kGreenLight],
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+
+              const Text(
+                'Export Successful!',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: kGreenDark,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              Text(
+                '${widget.memberCount} members exported from ${widget.semesterName}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // File Info Card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: kAccentBlue.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: kAccentBlue.withOpacity(0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: kAccentBlue.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.description_rounded,
+                        color: kAccentBlue,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.fileName,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: kGreenDark,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'CSV File Ready',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: _isSharing ? null : () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        'Close',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _isSharing ? null : _handleShare,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kGreenMain,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: kGreenMain.withOpacity(0.6),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 4,
+                        shadowColor: kGreenMain.withOpacity(0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: _isSharing
+                          ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                          : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.share_rounded, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Share / Save',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// ADMIN MEMBERSHIP MANAGEMENT PAGE
+// ============================================
 class AdminMembershipManagementPage extends StatefulWidget {
   const AdminMembershipManagementPage({Key? key}) : super(key: key);
 
@@ -20,8 +510,7 @@ class AdminMembershipManagementPage extends StatefulWidget {
 }
 
 class _AdminMembershipManagementPageState
-    extends State<AdminMembershipManagementPage>
-    with TickerProviderStateMixin {
+    extends State<AdminMembershipManagementPage> with TickerProviderStateMixin {
   late AnimationController _headerController;
   late AnimationController _contentController;
 
@@ -59,13 +548,11 @@ class _AdminMembershipManagementPageState
               contentController: _contentController,
             ),
           ),
-          // View Applicants Button Section
           SliverToBoxAdapter(
             child: _ViewApplicantsButton(
               contentController: _contentController,
             ),
           ),
-          // Bottom Spacing
           const SliverToBoxAdapter(
             child: SizedBox(height: 40),
           ),
@@ -193,7 +680,6 @@ class _FormControlSectionState extends State<_FormControlSection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Section Header
                   Row(
                     children: [
                       Container(
@@ -221,15 +707,11 @@ class _FormControlSectionState extends State<_FormControlSection> {
                     ],
                   ),
                   const SizedBox(height: 20),
-
-                  // Form Status Card with Toggle
                   _FormStatusCard(
                     isEnabled: isFormEnabled,
                     onToggle: (value) => _updateFormAccess(value),
                   ),
                   const SizedBox(height: 16),
-
-                  // Payment Numbers Card
                   _PaymentNumbersCard(
                     bkashNumber: bkashNumber,
                     nagadNumber: nagadNumber,
@@ -237,8 +719,6 @@ class _FormControlSectionState extends State<_FormControlSection> {
                     onNagadUpdate: (value) => _updateField('Nagad', value),
                   ),
                   const SizedBox(height: 16),
-
-                  // Offline Message Card
                   _OfflineMessageCard(
                     message: message,
                     onUpdate: (value) => _updateField('Message', value),
@@ -338,25 +818,8 @@ class _ViewApplicantsButton extends StatefulWidget {
   State<_ViewApplicantsButton> createState() => _ViewApplicantsButtonState();
 }
 
-class _ViewApplicantsButtonState extends State<_ViewApplicantsButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _pulseController;
+class _ViewApplicantsButtonState extends State<_ViewApplicantsButton> {
   bool _isHovered = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -375,7 +838,6 @@ class _ViewApplicantsButtonState extends State<_ViewApplicantsButton>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section Header
               Row(
                 children: [
                   Container(
@@ -403,131 +865,101 @@ class _ViewApplicantsButtonState extends State<_ViewApplicantsButton>
                 ],
               ),
               const SizedBox(height: 16),
-
-              // Applicants Stats Card
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('New_Member_Recruitment')
-                    .doc('Spring')
-                    .collection('Spring')
-                    .snapshots(),
-                builder: (context, springSnapshot) {
-                  return StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('New_Member_Recruitment')
-                        .doc('Fall')
-                        .collection('Fall')
-                        .snapshots(),
-                    builder: (context, fallSnapshot) {
-                      final springCount = springSnapshot.data?.docs.length ?? 0;
-                      final fallCount = fallSnapshot.data?.docs.length ?? 0;
-                      final totalCount = springCount + fallCount;
-
-                      return MouseRegion(
-                        onEnter: (_) => setState(() => _isHovered = true),
-                        onExit: (_) => setState(() => _isHovered = false),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                const AdminMembershipApplicantsPage(),
-                              ),
-                            );
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOutCubic,
-                            transform: Matrix4.identity()
-                              ..scale(_isHovered ? 1.02 : 1.0),
-                            child: Container(
-                              child: Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFF0C1C0C),  // Blackish green
-                                        Color(0xFF1A3A1A),  // Hunter green
-                                        Color(0xFF234D23),  // Deep hunter
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFF1B5E20).withOpacity(0.4),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 6),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: const Icon(
-                                          Icons.people_alt_rounded,
-                                          color: Colors.white,
-                                          size: 28,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              'View All Applicants',
-                                              style: TextStyle(
-                                                color: Colors.white.withOpacity(0.95),
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w700,
-                                                letterSpacing: 0.3,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Review and manage applications',
-                                              style: TextStyle(
-                                                color: Colors.white.withOpacity(0.7),
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.15),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          color: Colors.white,
-                                          size: 16,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            ),
+              MouseRegion(
+                onEnter: (_) => setState(() => _isHovered = true),
+                onExit: (_) => setState(() => _isHovered = false),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                        const AdminMembershipApplicantsPage(),
+                      ),
+                    );
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    transform: Matrix4.identity()
+                      ..scale(_isHovered ? 1.02 : 1.0),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF0C1C0C),
+                          Color(0xFF1A3A1A),
+                          Color(0xFF234D23),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF1B5E20).withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.people_alt_rounded,
+                            color: Colors.white,
+                            size: 28,
                           ),
                         ),
-                      );
-                    },
-                  );
-                },
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'View All Applicants',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.95),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Review and manage applications',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.7),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -538,7 +970,7 @@ class _ViewApplicantsButtonState extends State<_ViewApplicantsButton>
 }
 
 // ============================================
-// FORM STATUS CARD WITH ANIMATED TOGGLE
+// FORM STATUS CARD
 // ============================================
 class _FormStatusCard extends StatefulWidget {
   final bool isEnabled;
@@ -587,8 +1019,8 @@ class _FormStatusCardState extends State<_FormStatusCard>
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: (widget.isEnabled ? kGreenMain : Colors.grey)
-                .withOpacity(0.4),
+            color:
+            (widget.isEnabled ? kGreenMain : Colors.grey).withOpacity(0.4),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -598,7 +1030,6 @@ class _FormStatusCardState extends State<_FormStatusCard>
         children: [
           Row(
             children: [
-              // Status Icon with Pulse Animation
               AnimatedBuilder(
                 animation: _pulseController,
                 builder: (context, child) {
@@ -610,8 +1041,8 @@ class _FormStatusCardState extends State<_FormStatusCard>
                       boxShadow: widget.isEnabled
                           ? [
                         BoxShadow(
-                          color: kAccentGold.withOpacity(
-                              0.5 * _pulseController.value),
+                          color: kAccentGold
+                              .withOpacity(0.5 * _pulseController.value),
                           blurRadius: 20 * _pulseController.value,
                           spreadRadius: 5 * _pulseController.value,
                         ),
@@ -648,8 +1079,7 @@ class _FormStatusCardState extends State<_FormStatusCard>
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                            color:
-                            widget.isEnabled ? kAccentGold : kAccentRed,
+                            color: widget.isEnabled ? kAccentGold : kAccentRed,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -681,8 +1111,6 @@ class _FormStatusCardState extends State<_FormStatusCard>
             ],
           ),
           const SizedBox(height: 24),
-
-          // Custom Animated Toggle Switch
           _AnimatedToggleSwitch(
             isEnabled: widget.isEnabled,
             onToggle: widget.onToggle,
@@ -694,7 +1122,7 @@ class _FormStatusCardState extends State<_FormStatusCard>
 }
 
 // ============================================
-// CUSTOM ANIMATED TOGGLE SWITCH
+// ANIMATED TOGGLE SWITCH
 // ============================================
 class _AnimatedToggleSwitch extends StatefulWidget {
   final bool isEnabled;
@@ -758,7 +1186,6 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
 
   void _handleDragUpdate(DragUpdateDetails details, double containerWidth) {
     if (_isToggling) return;
-
     setState(() {
       _dragPosition += details.primaryDelta! / containerWidth;
       _dragPosition = _dragPosition.clamp(0.0, 1.0);
@@ -770,19 +1197,14 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
     setState(() {
       _isDragging = false;
     });
-
-    // Determine final state based on position and velocity
     final velocity = details.primaryVelocity ?? 0;
-    final shouldEnable = velocity > 0
-        ? _dragPosition > 0.3
-        : _dragPosition > 0.7;
-
+    final shouldEnable =
+    velocity > 0 ? _dragPosition > 0.3 : _dragPosition > 0.7;
     _toggleState(shouldEnable);
   }
 
   Future<void> _toggleState(bool newState) async {
     if (_isToggling || newState == widget.isEnabled) {
-      // Animate back to current state
       if (widget.isEnabled) {
         _controller.forward();
       } else {
@@ -793,14 +1215,12 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
 
     setState(() => _isToggling = true);
 
-    // Animate to new position
     if (newState) {
       await _controller.forward();
     } else {
       await _controller.reverse();
     }
 
-    // Update Firebase
     widget.onToggle(newState);
 
     await Future.delayed(const Duration(milliseconds: 300));
@@ -820,7 +1240,8 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
         return GestureDetector(
           onTap: _handleTap,
           onHorizontalDragStart: _handleDragStart,
-          onHorizontalDragUpdate: (details) => _handleDragUpdate(details, containerWidth),
+          onHorizontalDragUpdate: (details) =>
+              _handleDragUpdate(details, containerWidth),
           onHorizontalDragEnd: _handleDragEnd,
           child: AnimatedBuilder(
             animation: _controller,
@@ -842,18 +1263,9 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
                     color: Colors.white.withOpacity(0.3),
                     width: 2,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (isEnabled ? kAccentGold : Colors.grey)
-                          .withOpacity(0.2),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
                 ),
                 child: Stack(
                   children: [
-                    // Background Labels
                     Positioned.fill(
                       child: Row(
                         children: [
@@ -894,10 +1306,10 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
                         ],
                       ),
                     ),
-
-                    // Sliding Thumb
                     Positioned(
-                      left: 8 + (_controller.value * (containerWidth - thumbWidth - 16)),
+                      left: 8 +
+                          (_controller.value *
+                              (containerWidth - thumbWidth - 16)),
                       top: 8,
                       bottom: 8,
                       child: AnimatedContainer(
@@ -910,7 +1322,10 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
                           gradient: LinearGradient(
                             colors: isEnabled
                                 ? [kAccentGold, const Color(0xFFFF9500)]
-                                : [const Color(0xFF9CA3AF), const Color(0xFF6B7280)],
+                                : [
+                              const Color(0xFF9CA3AF),
+                              const Color(0xFF6B7280)
+                            ],
                           ),
                           borderRadius: BorderRadius.circular(27),
                           boxShadow: [
@@ -919,12 +1334,6 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
                                   .withOpacity(0.5),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
-                            ),
-                            BoxShadow(
-                              color: (isEnabled ? kAccentGold : Colors.grey)
-                                  .withOpacity(0.2),
-                              blurRadius: 30,
-                              spreadRadius: 5,
                             ),
                           ],
                         ),
@@ -941,34 +1350,20 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
                               : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 200),
-                                child: Icon(
-                                  isEnabled
-                                      ? Icons.power_settings_new_rounded
-                                      : Icons.power_off_rounded,
-                                  key: ValueKey(isEnabled),
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
+                              Icon(
+                                isEnabled
+                                    ? Icons.power_settings_new_rounded
+                                    : Icons.power_off_rounded,
+                                color: Colors.white,
+                                size: 24,
                               ),
                               const SizedBox(width: 8),
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 200),
-                                transitionBuilder: (child, animation) {
-                                  return ScaleTransition(
-                                    scale: animation,
-                                    child: child,
-                                  );
-                                },
-                                child: Text(
-                                  isEnabled ? 'ON' : 'OFF',
-                                  key: ValueKey(isEnabled),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w900,
-                                  ),
+                              Text(
+                                isEnabled ? 'ON' : 'OFF',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
                                 ),
                               ),
                             ],
@@ -976,17 +1371,6 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
                         ),
                       ),
                     ),
-
-                    // Ripple effect overlay when dragging
-                    if (_isDragging)
-                      Positioned.fill(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(35),
-                            color: Colors.white.withOpacity(0.1),
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               );
@@ -1072,8 +1456,6 @@ class _PaymentNumbersCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-
-          // Bkash Number
           _PaymentNumberField(
             label: 'Bkash',
             value: bkashNumber,
@@ -1082,8 +1464,6 @@ class _PaymentNumbersCard extends StatelessWidget {
             onUpdate: onBkashUpdate,
           ),
           const SizedBox(height: 16),
-
-          // Nagad Number
           _PaymentNumberField(
             label: 'Nagad',
             value: nagadNumber,
@@ -1337,7 +1717,8 @@ class _OfflineMessageCardState extends State<_OfflineMessageCard> {
                   ],
                 )
                     : IconButton(
-                  icon: const Icon(Icons.edit_rounded, color: kGreenMain),
+                  icon:
+                  const Icon(Icons.edit_rounded, color: kGreenMain),
                   onPressed: () => setState(() => _isEditing = true),
                 ),
               ),
@@ -1348,7 +1729,8 @@ class _OfflineMessageCardState extends State<_OfflineMessageCard> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _isEditing ? Colors.grey[50] : kAccentRed.withOpacity(0.05),
+              color:
+              _isEditing ? Colors.grey[50] : kAccentRed.withOpacity(0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: _isEditing ? kGreenMain : kAccentRed.withOpacity(0.2),
@@ -1377,17 +1759,9 @@ class _OfflineMessageCardState extends State<_OfflineMessageCard> {
   }
 }
 
-
-
-
-
-
-
 // ============================================
-// APPLICANT CARD WIDGET
+// ADMIN MEMBERSHIP APPLICANTS PAGE
 // ============================================
-
-
 class AdminMembershipApplicantsPage extends StatefulWidget {
   const AdminMembershipApplicantsPage({Key? key}) : super(key: key);
 
@@ -1397,8 +1771,7 @@ class AdminMembershipApplicantsPage extends StatefulWidget {
 }
 
 class _AdminMembershipApplicantsPageState
-    extends State<AdminMembershipApplicantsPage>
-    with TickerProviderStateMixin {
+    extends State<AdminMembershipApplicantsPage> with TickerProviderStateMixin {
   late AnimationController _headerController;
   late AnimationController _fabController;
   String? _selectedSemester;
@@ -1439,7 +1812,6 @@ class _AdminMembershipApplicantsPageState
         _isLoadingSemesters = false;
       });
 
-      // Start FAB animation after semesters load
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) _fabController.forward();
       });
@@ -1482,7 +1854,6 @@ class _AdminMembershipApplicantsPageState
           ],
         ),
       ),
-      // Add Semester FAB - Only show when no semester is selected
       floatingActionButton: _selectedSemester == null
           ? _AddSemesterFAB(
         controller: _fabController,
@@ -1553,7 +1924,7 @@ class _AdminMembershipApplicantsPageState
                         Text(
                           _selectedSemester == null
                               ? 'Select a semester to view members'
-                              : '$_selectedSemester - ${_availableSemesters.length} semesters',
+                              : _selectedSemester!,
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.85),
                             fontSize: 12,
@@ -1564,6 +1935,8 @@ class _AdminMembershipApplicantsPageState
                     ),
                   ),
                 ),
+                if (_selectedSemester != null)
+                  _ExportButton(semesterName: _selectedSemester!),
               ],
             ),
           ),
@@ -1665,31 +2038,6 @@ class _AdminMembershipApplicantsPageState
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
-              const SizedBox(height: 32),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: kAccentGold.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: kAccentGold.withOpacity(0.3)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.lightbulb_outline_rounded,
-                        color: kAccentGold, size: 20),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Example: "Spring 2025" or "Fall 2024"',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -1737,10 +2085,87 @@ class _AdminMembershipApplicantsPageState
             index: index,
             onTap: () => setState(() => _selectedSemester = semester),
             onDelete: () => _deleteSemester(semester),
+            onExport: () => _exportSemesterData(semester),
           );
-        }).toList(),
-        const SizedBox(height: 100), // Space for FAB
+        }),
+        const SizedBox(height: 100),
       ],
+    );
+  }
+
+  Future<void> _exportSemesterData(String semester) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('New_Members_Informations')
+          .doc(semester)
+          .collection('Members')
+          .orderBy('Member_Number', descending: false)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text('No members found in $semester'),
+                ],
+              ),
+              backgroundColor: kAccentGold,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      final members = snapshot.docs.map((doc) => doc.data()).toList();
+
+      final result = await CSVExportService.exportMembersToCSV(
+        semesterName: semester,
+        members: members,
+        context: context,
+      );
+
+      if (result.success && mounted) {
+        _showExportSuccessDialog(result, semester);
+      } else if (!result.success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: ${result.error}'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: $e'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showExportSuccessDialog(ExportResult result, String semester) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => ExportSuccessDialog(
+        filePath: result.filePath!,
+        fileName: result.fileName!,
+        memberCount: result.memberCount!,
+        semesterName: semester,
+      ),
     );
   }
 
@@ -1752,13 +2177,23 @@ class _AdminMembershipApplicantsPageState
 
     if (confirm == true) {
       try {
-        // Delete the semester document
+        // Delete all members in the subcollection first
+        final membersSnapshot = await FirebaseFirestore.instance
+            .collection('New_Members_Informations')
+            .doc(semester)
+            .collection('Members')
+            .get();
+
+        for (var doc in membersSnapshot.docs) {
+          await doc.reference.delete();
+        }
+
+        // Then delete the semester document
         await FirebaseFirestore.instance
             .collection('New_Members_Informations')
             .doc(semester)
             .delete();
 
-        // Reload semesters
         _loadAvailableSemesters();
 
         if (mounted) {
@@ -1832,12 +2267,6 @@ class _AdminMembershipApplicantsPageState
                         fontWeight: FontWeight.w700,
                         color: kAccentRed),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    snapshot.error.toString(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
                 ],
               ),
             ),
@@ -1897,6 +2326,170 @@ class _AdminMembershipApplicantsPageState
 }
 
 // ============================================
+// EXPORT BUTTON (Header)
+// ============================================
+class _ExportButton extends StatefulWidget {
+  final String semesterName;
+
+  const _ExportButton({required this.semesterName});
+
+  @override
+  State<_ExportButton> createState() => _ExportButtonState();
+}
+
+class _ExportButtonState extends State<_ExportButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  bool _isExporting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleExport() async {
+    if (_isExporting) return;
+
+    setState(() => _isExporting = true);
+    _controller.repeat();
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('New_Members_Informations')
+          .doc(widget.semesterName)
+          .collection('Members')
+          .orderBy('Member_Number', descending: false)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text('No members found in ${widget.semesterName}'),
+                ],
+              ),
+              backgroundColor: kAccentGold,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      final members = snapshot.docs.map((doc) => doc.data()).toList();
+
+      final result = await CSVExportService.exportMembersToCSV(
+        semesterName: widget.semesterName,
+        members: members,
+        context: context,
+      );
+
+      if (result.success && mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => ExportSuccessDialog(
+            filePath: result.filePath!,
+            fileName: result.fileName!,
+            memberCount: result.memberCount!,
+            semesterName: widget.semesterName,
+          ),
+        );
+      } else if (!result.success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: ${result.error}'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: $e'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
+        _controller.stop();
+        _controller.reset();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _handleExport,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.3)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_isExporting)
+                RotationTransition(
+                  turns: _controller,
+                  child: const Icon(
+                    Icons.sync_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                )
+              else
+                const Icon(
+                  Icons.download_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              const SizedBox(width: 6),
+              Text(
+                _isExporting ? 'Exporting...' : 'Export CSV',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
 // ADD SEMESTER FAB
 // ============================================
 class _AddSemesterFAB extends StatefulWidget {
@@ -1948,7 +2541,8 @@ class _AddSemesterFABState extends State<_AddSemesterFAB>
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: kGreenMain.withOpacity(0.3 + (_pulseController.value * 0.2)),
+                  color: kGreenMain
+                      .withOpacity(0.3 + (_pulseController.value * 0.2)),
                   blurRadius: 16 + (_pulseController.value * 8),
                   offset: const Offset(0, 6),
                 ),
@@ -1976,30 +2570,10 @@ class _AddSemesterFABState extends State<_AddSemesterFAB>
   }
 
   Future<void> _showAddSemesterDialog(BuildContext context) async {
-    final result = await showGeneralDialog<String>(
+    final result = await showDialog<String>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: 'Dismiss',
-      barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return const SizedBox.shrink();
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        final curvedAnimation = CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOutBack,
-          reverseCurve: Curves.easeInBack,
-        );
-
-        return ScaleTransition(
-          scale: Tween<double>(begin: 0.8, end: 1.0).animate(curvedAnimation),
-          child: FadeTransition(
-            opacity: curvedAnimation,
-            child: _AddSemesterDialog(),
-          ),
-        );
-      },
+      builder: (context) => const _AddSemesterDialog(),
     );
 
     if (result != null && result.isNotEmpty) {
@@ -2010,7 +2584,6 @@ class _AddSemesterFABState extends State<_AddSemesterFAB>
 
   Future<void> _createSemester(String semesterName) async {
     try {
-      // Check if semester already exists
       final doc = await FirebaseFirestore.instance
           .collection('New_Members_Informations')
           .doc(semesterName)
@@ -2038,7 +2611,6 @@ class _AddSemesterFABState extends State<_AddSemesterFAB>
         return;
       }
 
-      // Create the semester document
       await FirebaseFirestore.instance
           .collection('New_Members_Informations')
           .doc(semesterName)
@@ -2090,6 +2662,8 @@ class _AddSemesterFABState extends State<_AddSemesterFAB>
 // ADD SEMESTER DIALOG
 // ============================================
 class _AddSemesterDialog extends StatefulWidget {
+  const _AddSemesterDialog();
+
   @override
   State<_AddSemesterDialog> createState() => _AddSemesterDialogState();
 }
@@ -2101,15 +2675,29 @@ class _AddSemesterDialogState extends State<_AddSemesterDialog> {
   bool _isValid = false;
 
   final List<Map<String, dynamic>> _presets = [
-    {'name': 'Spring', 'icon': Icons.eco_rounded, 'color': Color(0xFF10B981)},
-    {'name': 'Fall', 'icon': Icons.park_rounded, 'color': Color(0xFFFF6B35)},
+    {
+      'name': 'Spring',
+      'icon': Icons.eco_rounded,
+      'color': const Color(0xFF10B981)
+    },
+    {
+      'name': 'Fall',
+      'icon': Icons.park_rounded,
+      'color': const Color(0xFFFF6B35)
+    },
+    {
+      'name': 'Summer',
+      'icon': Icons.wb_sunny_rounded,
+      'color': const Color(0xFFFBBF24)
+    },
+    {'name': 'Winter', 'icon': Icons.ac_unit_rounded, 'color': kAccentBlue},
   ];
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_validateInput);
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) _focusNode.requestFocus();
     });
   }
@@ -2138,314 +2726,267 @@ class _AddSemesterDialogState extends State<_AddSemesterDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       child: SingleChildScrollView(
         child: Container(
-          margin: const EdgeInsets.all(24),
           padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 30,
-                offset: const Offset(0, 15),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [kGreenMain, kGreenLight],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [kGreenMain, kGreenLight],
                       ),
-                      child: const Icon(
-                        Icons.calendar_month_rounded,
-                        color: Colors.white,
-                        size: 28,
-                      ),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Create New Semester',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: kGreenDark,
-                            ),
+                    child: const Icon(
+                      Icons.calendar_month_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Create New Semester',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: kGreenDark,
                           ),
+                        ),
+                        Text(
+                          'Add a semester for member registration',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Quick Select Presets
+              const Text(
+                'Quick Select',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: kGreenDark,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _presets.map((preset) {
+                  final isSelected = _selectedPreset == preset['name'];
+                  return InkWell(
+                    onTap: () => _selectPreset(preset['name']),
+                    borderRadius: BorderRadius.circular(12),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? (preset['color'] as Color).withOpacity(0.15)
+                            : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? preset['color'] as Color
+                              : Colors.grey[300]!,
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            preset['icon'] as IconData,
+                            size: 18,
+                            color: isSelected
+                                ? preset['color'] as Color
+                                : Colors.grey[600],
+                          ),
+                          const SizedBox(width: 6),
                           Text(
-                            'Add a semester for member registration',
+                            preset['name'] as String,
                             style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isSelected
+                                  ? preset['color'] as Color
+                                  : Colors.grey[700],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
 
-                // Quick Select Presets
-                const Text(
-                  'Quick Select',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: kGreenDark,
+              // Divider
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey[300])),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'OR',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: Colors.grey[300])),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Custom Input
+              const Text(
+                'Custom Semester Name',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: kGreenDark,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                textCapitalization: TextCapitalization.words,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: kGreenDark,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'e.g., Spring 2025',
+                  hintStyle: TextStyle(
+                    color: Colors.grey[400],
+                    fontWeight: FontWeight.w400,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.edit_calendar_rounded,
+                    color: kGreenMain,
+                  ),
+                  suffixIcon: _isValid
+                      ? const Icon(
+                    Icons.check_circle_rounded,
+                    color: kGreenMain,
+                  )
+                      : null,
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: kGreenMain, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
                   ),
                 ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _presets.map((preset) {
-                    final isSelected = _selectedPreset == preset['name'];
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      child: InkWell(
-                        onTap: () => _selectPreset(preset['name']),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? (preset['color'] as Color).withOpacity(0.15)
-                                : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isSelected
-                                  ? preset['color'] as Color
-                                  : Colors.grey[300]!,
-                              width: isSelected ? 2 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                preset['icon'] as IconData,
-                                size: 18,
-                                color: isSelected
-                                    ? preset['color'] as Color
-                                    : Colors.grey[600],
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                preset['name'] as String,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: isSelected
-                                      ? preset['color'] as Color
-                                      : Colors.grey[700],
-                                ),
-                              ),
-                            ],
-                          ),
+                onSubmitted: (value) {
+                  if (_isValid) {
+                    Navigator.pop(context, _controller.text.trim());
+                  }
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-
-                // Divider
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.grey[300])),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        'OR',
+                        'Cancel',
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
+                          fontSize: 15,
                           fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.grey[300])),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Custom Input
-                const Text(
-                  'Custom Semester Name',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: kGreenDark,
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  textCapitalization: TextCapitalization.words,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: kGreenDark,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'e.g., Spring 2025',
-                    hintStyle: TextStyle(
-                      color: Colors.grey[400],
-                      fontWeight: FontWeight.w400,
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.edit_calendar_rounded,
-                      color: kGreenMain,
-                    ),
-                    suffixIcon: _isValid
-                        ? const Icon(
-                      Icons.check_circle_rounded,
-                      color: kGreenMain,
-                    )
-                        : null,
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: kGreenMain, width: 2),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 18,
-                    ),
-                  ),
-                  onSubmitted: (value) {
-                    if (_isValid) {
-                      Navigator.pop(context, _controller.text.trim());
-                    }
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // Helper Text
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: kAccentBlue.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: kAccentBlue.withOpacity(0.2)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline_rounded,
-                          color: kAccentBlue, size: 18),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'This will create a new document in Firestore where members can register.',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[700],
-                            height: 1.4,
-                          ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _isValid
+                          ? () =>
+                          Navigator.pop(context, _controller.text.trim())
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kGreenMain,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey[300],
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: _isValid ? 4 : 0,
+                        shadowColor: kGreenMain.withOpacity(0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Action Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_rounded,
+                            size: 20,
+                            color: _isValid ? Colors.white : Colors.grey[500],
                           ),
-                        ),
-                        child: Text(
-                          'Cancel',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 2,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        child: ElevatedButton(
-                          onPressed: _isValid
-                              ? () => Navigator.pop(
-                              context, _controller.text.trim())
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: kGreenMain,
-                            foregroundColor: Colors.white,
-                            disabledBackgroundColor: Colors.grey[300],
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            elevation: _isValid ? 4 : 0,
-                            shadowColor: kGreenMain.withOpacity(0.4),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Create Semester',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: _isValid ? Colors.white : Colors.grey[500],
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.add_rounded,
-                                size: 20,
-                                color: _isValid ? Colors.white : Colors.grey[500],
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Create Semester',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: _isValid ? Colors.white : Colors.grey[500],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -2551,7 +3092,7 @@ class _DeleteSemesterDialog extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'This will delete all member data in this semester permanently!',
+                    'This will delete all member data permanently!',
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.red[700],
@@ -2615,19 +3156,21 @@ class _DeleteSemesterDialog extends StatelessWidget {
 }
 
 // ============================================
-// SEMESTER TILE (Updated with delete option)
+// SEMESTER TILE
 // ============================================
 class _SemesterTile extends StatefulWidget {
   final String semester;
   final int index;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final VoidCallback onExport;
 
   const _SemesterTile({
     required this.semester,
     required this.index,
     required this.onTap,
     required this.onDelete,
+    required this.onExport,
   });
 
   @override
@@ -2637,6 +3180,7 @@ class _SemesterTile extends StatefulWidget {
 class _SemesterTileState extends State<_SemesterTile>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  bool _isExporting = false;
 
   @override
   void initState() {
@@ -2674,6 +3218,17 @@ class _SemesterTileState extends State<_SemesterTile>
     return kAccentPurple;
   }
 
+  void _handleExport() {
+    setState(() => _isExporting = true);
+    widget.onExport();
+    // Reset after some time
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final color = _getSemesterColor(widget.semester);
@@ -2709,62 +3264,84 @@ class _SemesterTileState extends State<_SemesterTile>
                     ),
                   ],
                 ),
-                child: Row(
+                child: Column(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [color, color.withOpacity(0.7)],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Icon(_getSemesterIcon(widget.semester),
-                          color: Colors.white, size: 28),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.semester,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: kGreenDark,
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [color, color.withOpacity(0.7)],
                             ),
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          const SizedBox(height: 4),
-                          FutureBuilder<int>(
-                            future: _getMemberCount(),
-                            builder: (context, snapshot) {
-                              final count = snapshot.data ?? 0;
-                              return Text(
-                                '$count registered member${count != 1 ? 's' : ''}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
+                          child: Icon(_getSemesterIcon(widget.semester),
+                              color: Colors.white, size: 28),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.semester,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: kGreenDark,
                                 ),
-                              );
-                            },
+                              ),
+                              const SizedBox(height: 4),
+                              FutureBuilder<int>(
+                                future: _getMemberCount(),
+                                builder: (context, snapshot) {
+                                  final count = snapshot.data ?? 0;
+                                  return Text(
+                                    '$count registered member${count != 1 ? 's' : ''}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        Icon(Icons.arrow_forward_ios_rounded,
+                            color: color, size: 20),
+                      ],
                     ),
-                    // Delete Button
-                    IconButton(
-                      onPressed: widget.onDelete,
-                      icon: Icon(
-                        Icons.delete_outline_rounded,
-                        color: Colors.grey[400],
-                        size: 22,
-                      ),
-                      tooltip: 'Delete Semester',
+                    const SizedBox(height: 12),
+                    // Action Buttons Row
+                    Row(
+                      children: [
+                        // Export Button
+                        Expanded(
+                          child: _SemesterActionButton(
+                            icon: _isExporting
+                                ? Icons.hourglass_top_rounded
+                                : Icons.download_rounded,
+                            label: _isExporting ? 'Exporting...' : 'Export CSV',
+                            color: kAccentBlue,
+                            isLoading: _isExporting,
+                            onTap: _isExporting ? () {} : _handleExport,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Delete Button
+                        Expanded(
+                          child: _SemesterActionButton(
+                            icon: Icons.delete_outline_rounded,
+                            label: 'Delete',
+                            color: kAccentRed,
+                            onTap: widget.onDelete,
+                          ),
+                        ),
+                      ],
                     ),
-                    Icon(Icons.arrow_forward_ios_rounded,
-                        color: color, size: 20),
                   ],
                 ),
               ),
@@ -2790,7 +3367,75 @@ class _SemesterTileState extends State<_SemesterTile>
 }
 
 // ============================================
-// MEMBER CARD (Keep your existing implementation)
+// SEMESTER ACTION BUTTON
+// ============================================
+class _SemesterActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  final bool isLoading;
+
+  const _SemesterActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: isLoading ? null : onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+          decoration: BoxDecoration(
+            color: color.withOpacity(isLoading ? 0.05 : 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: color.withOpacity(isLoading ? 0.2 : 0.3),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isLoading)
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: color,
+                  ),
+                )
+              else
+                Icon(icon, color: color, size: 18),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: color.withOpacity(isLoading ? 0.6 : 1.0),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// MEMBER CARD
 // ============================================
 class _MemberCard extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -3141,6 +3786,9 @@ class _InfoItem extends StatelessWidget {
                     backgroundColor: kGreenMain,
                     behavior: SnackBarBehavior.floating,
                     duration: const Duration(seconds: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 );
               },
@@ -3213,11 +3861,14 @@ class _ImageLinkWidget extends StatelessWidget {
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: link));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Link copied!'),
+                    SnackBar(
+                      content: const Text('Link copied!'),
                       backgroundColor: kGreenMain,
                       behavior: SnackBarBehavior.floating,
-                      duration: Duration(seconds: 2),
+                      duration: const Duration(seconds: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   );
                 },
@@ -3230,6 +3881,19 @@ class _ImageLinkWidget extends StatelessWidget {
                   final uri = Uri.parse(link);
                   if (await canLaunchUrl(uri)) {
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Could not open link'),
+                          backgroundColor: kAccentRed,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    }
                   }
                 },
               ),
@@ -3241,6 +3905,9 @@ class _ImageLinkWidget extends StatelessWidget {
   }
 }
 
+// ============================================
+// ICON BUTTON
+// ============================================
 class _IconBtn extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -3254,17 +3921,20 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.3)),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withOpacity(0.3)),
+          ),
+          child: Icon(icon, color: color, size: 14),
         ),
-        child: Icon(icon, color: color, size: 14),
       ),
     );
   }
