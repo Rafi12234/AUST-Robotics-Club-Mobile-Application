@@ -124,14 +124,19 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       accentColor: kGreenLight,
       destinationPage: const AdminBestPanelMembersPage(),
     ),
-    AdminCardConfig(
-      title: 'Sponsor & Collaborator Club',
-      subtitle: 'Manage sponsors & collaborators',
-      icon: Icons.stars_rounded,
-      gradientColors: [Color(0xFF064E3B), Color(0xFF047857), Color(0xFF10B981)],
-      accentColor: kGreenLight,
-      destinationPage: const AdminSponsorsCollaboratorsPage(),
-    ),
+  AdminCardConfig(
+  title: 'Sponsor & Collaborator Club',
+  subtitle: 'Manage sponsors & collaborators',
+  icon: Icons.stars_rounded,
+  gradientColors: const [
+  Color(0xFF0F766E), // deep teal (anchor for contrast with white text)
+  Color(0xFF0EA5E9), // bright cyan accent
+  Color(0xFF6EE7B7), // soft mint highlight
+  ],
+  accentColor: kGreenLight, // can stay as is, still harmonizes with last stop
+  destinationPage: const AdminSponsorsCollaboratorsPage(),
+  )
+
   ];
 
   @override
