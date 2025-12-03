@@ -728,16 +728,6 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
-                      _buildAnimatedTextField(
-                        controller: _imageLinkController,
-                        label: 'Image Drive Link',
-                        icon: Icons.link,
-                        delay: 450,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Image link is required'
-                            : null,
-                      ),
 
                       // Payment Section
                       const SizedBox(height: 32),
