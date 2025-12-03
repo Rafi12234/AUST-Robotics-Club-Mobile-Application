@@ -10,6 +10,7 @@ import 'admin_member_id_management_page.dart';
 import 'admin_governing_panel_page.dart';
 import 'Admin_Membership_Management_Page.dart';
 import 'Admin_Best_Panel_Members_Page.dart';
+import 'Admin_Sponsor_Colab_Club_Management_Page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -122,6 +123,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       gradientColors: [Color(0xFF064E3B), Color(0xFF047857), Color(0xFF10B981)],
       accentColor: kGreenLight,
       destinationPage: const AdminBestPanelMembersPage(),
+    ),
+    AdminCardConfig(
+      title: 'Sponsor & Collaborator Club',
+      subtitle: 'Manage sponsors & collaborators',
+      icon: Icons.stars_rounded,
+      gradientColors: [Color(0xFF064E3B), Color(0xFF047857), Color(0xFF10B981)],
+      accentColor: kGreenLight,
+      destinationPage: const AdminSponsorsCollaboratorsPage(),
     ),
   ];
 
