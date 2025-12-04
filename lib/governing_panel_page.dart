@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
 import 'executive_panel_page.dart';
 
@@ -10,6 +11,14 @@ const Color kBrandEnd = Color(0xFF16A34A);
 const Color kDarkGreen = Color(0xFF004D40);
 const Color kLightGreen = Color(0xFF81C784);
 const Color kAccentGold = Color(0xFFFFB703);
+
+// Panel Types Enum
+enum PanelType {
+  executive,
+  deputyExecutive,
+  seniorSubExecutive,
+  subExecutive,
+}
 
 class GoverningPanelPage extends StatefulWidget {
   const GoverningPanelPage({Key? key}) : super(key: key);
@@ -31,7 +40,10 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
   late Animation<double> _headerSlide;
   late Animation<double> _headerFade;
 
+  // Navigation States
   bool _showSemesters = false;
+  bool _showPanelCategories = false;
+  String? _selectedSemester;
   bool _isInitialAnimationComplete = false;
 
   @override
@@ -48,7 +60,6 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
   }
 
   void _initializeAnimations() {
-    // Header animation
     _headerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -60,25 +71,21 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
       CurvedAnimation(parent: _headerController, curve: Curves.easeOut),
     );
 
-    // Floating animation for decorative elements
     _floatingController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 3000),
     )..repeat(reverse: true);
 
-    // Pulse animation for CTA button
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
 
-    // Wave animation for background
     _waveController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 4000),
     )..repeat();
 
-    // Particle animation
     _particleController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 6000),
@@ -124,7 +131,105 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
 
   void _hideSemesters() {
     HapticFeedback.lightImpact();
-    setState(() => _showSemesters = false);
+    setState(() {
+      _showSemesters = false;
+      _showPanelCategories = false;
+      _selectedSemester = null;
+    });
+  }
+
+  void _selectSemester(String semester) {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _selectedSemester = semester;
+      _showPanelCategories = true;
+    });
+  }
+
+  void _hidePanelCategories() {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _showPanelCategories = false;
+      _selectedSemester = null;
+    });
+  }
+
+  void _navigateToPanelPage(PanelType panelType) {
+    HapticFeedback.mediumImpact();
+
+    if (panelType == PanelType.executive) {
+      // Navigate to existing Executive Panel Page
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              ExecutivePanelPage(semesterId: _selectedSemester!),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.1, 0),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                )),
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
+      );
+    } else {
+      // Navigate to Poster Gallery Page
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              _PanelPosterGalleryPage(
+                semesterId: _selectedSemester!,
+                panelType: panelType,
+              ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.1, 0),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                )),
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
+      );
+    }
+  }
+
+  String _getHeaderSubtitle() {
+    if (_showPanelCategories && _selectedSemester != null) {
+      return 'Select panel category';
+    } else if (_showSemesters) {
+      return 'Select a semester to explore';
+    }
+    return 'Leadership & Excellence';
+  }
+
+  void _handleBackPress() {
+    if (_showPanelCategories) {
+      _hidePanelCategories();
+    } else if (_showSemesters) {
+      _hideSemesters();
+    } else {
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -135,24 +240,16 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
     return Scaffold(
       body: Stack(
         children: [
-          // Animated Background
           _AnimatedBackground(
             waveController: _waveController,
             particleController: _particleController,
           ),
-
-          // Main Content
           SafeArea(
             top: false,
             child: Column(
               children: [
-                // Animated Header
                 _buildHeader(topInset),
-
-                // Content Area
-                Expanded(
-                  child: _buildContent(screenSize),
-                ),
+                Expanded(child: _buildContent(screenSize)),
               ],
             ),
           ),
@@ -168,16 +265,12 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
         return Transform.translate(
           offset: Offset(0, _headerSlide.value),
           child: Opacity(
-            opacity: _headerFade.value,
+            opacity: _headerFade.value.clamp(0.0, 1.0),
             child: Container(
               height: 140 + topInset,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF064E3B),
-                    kBrandStart,
-                    kBrandEnd,
-                  ],
+                  colors: [Color(0xFF064E3B), kBrandStart, kBrandEnd],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -188,7 +281,6 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
               ),
               child: Stack(
                 children: [
-                  // Header Pattern
                   Positioned.fill(
                     child: ClipRRect(
                       borderRadius: const BorderRadius.only(
@@ -196,33 +288,18 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                         bottomRight: Radius.circular(40),
                       ),
                       child: CustomPaint(
-                        painter: _HeaderPatternPainter(
-                          animation: _floatingController,
-                        ),
+                        painter: _HeaderPatternPainter(animation: _floatingController),
                       ),
                     ),
                   ),
-
-                  // Header Content
                   Padding(
                     padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 20),
                     child: Column(
                       children: [
                         Row(
                           children: [
-                            // Back Button
-                            _AnimatedBackButton(
-                              onTap: () {
-                                if (_showSemesters) {
-                                  _hideSemesters();
-                                } else {
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
+                            _AnimatedBackButton(onTap: _handleBackPress),
                             const SizedBox(width: 12),
-
-                            // Title
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,14 +312,16 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                                       return Transform.translate(
                                         offset: Offset(30 * (1 - value), 0),
                                         child: Opacity(
-                                          opacity: value,
+                                          opacity: value.clamp(0.0, 1.0),
                                           child: child,
                                         ),
                                       );
                                     },
-                                    child: const Text(
-                                      'Governing Panel',
-                                      style: TextStyle(
+                                    child: Text(
+                                      _showPanelCategories && _selectedSemester != null
+                                          ? _selectedSemester!
+                                          : 'Governing Panel',
+                                      style: const TextStyle(
                                         fontSize: 26,
                                         fontWeight: FontWeight.w900,
                                         color: Colors.white,
@@ -266,10 +345,8 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                                       );
                                     },
                                     child: Text(
-                                      _showSemesters
-                                          ? 'Select a semester to explore'
-                                          : 'Leadership & Excellence',
-                                      key: ValueKey(_showSemesters),
+                                      _getHeaderSubtitle(),
+                                      key: ValueKey(_getHeaderSubtitle()),
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: Colors.white.withOpacity(0.9),
@@ -280,8 +357,6 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                                 ],
                               ),
                             ),
-
-                            // Decorative Badge
                             _HeaderBadge(animation: _pulseController),
                           ],
                         ),
@@ -318,7 +393,6 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
           return _EmptyState();
         }
 
-        // Sort semesters
         final sortedDocs = [...docs];
         sortedDocs.sort((a, b) {
           final ay = _extractYear(a.id) ?? -1;
@@ -346,11 +420,19 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
               ),
             );
           },
-          child: _showSemesters
+          child: _showPanelCategories && _selectedSemester != null
+              ? _PanelCategoriesList(
+            key: const ValueKey('categories'),
+            semesterName: _selectedSemester!,
+            onBack: _hidePanelCategories,
+            onSelectPanel: _navigateToPanelPage,
+          )
+              : _showSemesters
               ? _SemestersList(
             key: const ValueKey('semesters'),
             sortedDocs: sortedDocs,
             onBack: _hideSemesters,
+            onSelectSemester: _selectSemester,
           )
               : _WelcomeSection(
             key: const ValueKey('welcome'),
@@ -361,6 +443,1188 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
           ),
         );
       },
+    );
+  }
+}
+
+// ============================================
+// PANEL CATEGORIES LIST
+// ============================================
+class _PanelCategoriesList extends StatelessWidget {
+  final String semesterName;
+  final VoidCallback onBack;
+  final Function(PanelType) onSelectPanel;
+
+  const _PanelCategoriesList({
+    Key? key,
+    required this.semesterName,
+    required this.onBack,
+    required this.onSelectPanel,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final categories = [
+      _PanelCategoryData(
+        type: PanelType.executive,
+        title: 'Executive Panel',
+        subtitle: 'Meet our top leaders',
+        icon: Icons.stars_rounded,
+        gradient: [const Color(0xFFFFB703), const Color(0xFFFB8500)],
+      ),
+      _PanelCategoryData(
+        type: PanelType.deputyExecutive,
+        title: 'Deputy Executive Panel',
+        subtitle: 'Supporting leadership team',
+        icon: Icons.military_tech_rounded,
+        gradient: [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)],
+      ),
+      _PanelCategoryData(
+        type: PanelType.seniorSubExecutive,
+        title: 'Senior Sub Executive Panel',
+        subtitle: 'Experienced coordinators',
+        icon: Icons.workspace_premium_rounded,
+        gradient: [const Color(0xFF10B981), const Color(0xFF059669)],
+      ),
+      _PanelCategoryData(
+        type: PanelType.subExecutive,
+        title: 'Sub Executive Panel',
+        subtitle: 'Dedicated team members',
+        icon: Icons.groups_rounded,
+        gradient: [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)],
+      ),
+    ];
+
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(24),
+      children: [
+        // Back Section
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Transform.translate(
+              offset: Offset(-30 * (1 - value), 0),
+              child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
+            );
+          },
+          child: GestureDetector(
+            onTap: onBack,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.arrow_back_rounded, color: kBrandStart, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Back to Semesters',
+                    style: TextStyle(
+                      color: kBrandStart,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Section Header
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Opacity(opacity: value.clamp(0.0, 1.0), child: child);
+          },
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: kBrandStart.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(Icons.category_rounded, color: kBrandStart, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Panel Categories',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1B4332),
+                    ),
+                  ),
+                  Text(
+                    'Choose a panel to explore',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Category Cards
+        ...categories.asMap().entries.map((entry) {
+          final index = entry.key;
+          final category = entry.value;
+          return _PanelCategoryCard(
+            category: category,
+            index: index,
+            onTap: () => onSelectPanel(category.type),
+          );
+        }).toList(),
+
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+}
+
+class _PanelCategoryData {
+  final PanelType type;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final List<Color> gradient;
+
+  _PanelCategoryData({
+    required this.type,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.gradient,
+  });
+}
+
+class _PanelCategoryCard extends StatefulWidget {
+  final _PanelCategoryData category;
+  final int index;
+  final VoidCallback onTap;
+
+  const _PanelCategoryCard({
+    required this.category,
+    required this.index,
+    required this.onTap,
+  });
+
+  @override
+  State<_PanelCategoryCard> createState() => _PanelCategoryCardState();
+}
+
+class _PanelCategoryCardState extends State<_PanelCategoryCard> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 400 + (widget.index * 100)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(0, 50 * (1 - value)),
+          child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapUp: (_) {
+            setState(() => _isPressed = false);
+            widget.onTap();
+          },
+          onTapCancel: () => setState(() => _isPressed = false),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            transform: Matrix4.identity()..scale(_isPressed ? 0.97 : 1.0),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: widget.category.gradient,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.category.gradient[0].withOpacity(_isPressed ? 0.5 : 0.3),
+                  blurRadius: _isPressed ? 25 : 18,
+                  offset: Offset(0, _isPressed ? 12 : 8),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Pattern
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: CustomPaint(
+                      painter: _CardPatternPainter(color: Colors.white),
+                    ),
+                  ),
+                ),
+                // Content
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: Icon(
+                          widget.category.icon,
+                          color: Colors.white,
+                          size: 32,
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.category.title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              widget.category.subtitle,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// PANEL POSTER GALLERY PAGE
+// ============================================
+class _PanelPosterGalleryPage extends StatefulWidget {
+  final String semesterId;
+  final PanelType panelType;
+
+  const _PanelPosterGalleryPage({
+    Key? key,
+    required this.semesterId,
+    required this.panelType,
+  }) : super(key: key);
+
+  @override
+  State<_PanelPosterGalleryPage> createState() => _PanelPosterGalleryPageState();
+}
+
+class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
+    with TickerProviderStateMixin {
+  late AnimationController _headerController;
+  late Animation<double> _headerSlide;
+  late Animation<double> _headerFade;
+
+  @override
+  void initState() {
+    super.initState();
+    _headerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _headerSlide = Tween<double>(begin: -50, end: 0).animate(
+      CurvedAnimation(parent: _headerController, curve: Curves.easeOutCubic),
+    );
+    _headerFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _headerController, curve: Curves.easeOut),
+    );
+    _headerController.forward();
+  }
+
+  @override
+  void dispose() {
+    _headerController.dispose();
+    super.dispose();
+  }
+
+  String _getPanelTitle() {
+    switch (widget.panelType) {
+      case PanelType.deputyExecutive:
+        return 'Deputy Executive Panel';
+      case PanelType.seniorSubExecutive:
+        return 'Senior Sub Executive Panel';
+      case PanelType.subExecutive:
+        return 'Sub Executive Panel';
+      default:
+        return 'Panel';
+    }
+  }
+
+  String _getCollectionName() {
+    switch (widget.panelType) {
+      case PanelType.deputyExecutive:
+        return 'Deputy_Executive_Panel';
+      case PanelType.seniorSubExecutive:
+        return 'Senior_Sub_Executive_Panel';
+      case PanelType.subExecutive:
+        return 'Sub_Executive_Panel';
+      default:
+        return '';
+    }
+  }
+
+  String _getDocumentName() {
+    switch (widget.panelType) {
+      case PanelType.deputyExecutive:
+        return 'Deputy_Executive_1';
+      case PanelType.seniorSubExecutive:
+        return 'Senior_Sub_Executive_1';
+      case PanelType.subExecutive:
+        return 'Sub_Executive_1';
+      default:
+        return '';
+    }
+  }
+
+  List<Color> _getGradientColors() {
+    switch (widget.panelType) {
+      case PanelType.deputyExecutive:
+        return [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)];
+      case PanelType.seniorSubExecutive:
+        return [const Color(0xFF10B981), const Color(0xFF059669)];
+      case PanelType.subExecutive:
+        return [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)];
+      default:
+        return [kBrandStart, kBrandEnd];
+    }
+  }
+
+  IconData _getPanelIcon() {
+    switch (widget.panelType) {
+      case PanelType.deputyExecutive:
+        return Icons.military_tech_rounded;
+      case PanelType.seniorSubExecutive:
+        return Icons.workspace_premium_rounded;
+      case PanelType.subExecutive:
+        return Icons.groups_rounded;
+      default:
+        return Icons.people_rounded;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final topInset = MediaQuery.of(context).padding.top;
+    final gradientColors = _getGradientColors();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFB),
+      body: Column(
+        children: [
+          // Header
+          _buildHeader(topInset, gradientColors),
+
+          // Content
+          Expanded(
+            child: _buildContent(gradientColors),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(double topInset, List<Color> gradientColors) {
+    return AnimatedBuilder(
+      animation: _headerController,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _headerSlide.value),
+          child: Opacity(
+            opacity: _headerFade.value.clamp(0.0, 1.0),
+            child: Container(
+              padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: gradientColors,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: gradientColors[0].withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      // Back Button
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 2,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Title
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _getPanelTitle(),
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.semesterId,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Icon Badge
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: Icon(
+                          _getPanelIcon(),
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildContent(List<Color> gradientColors) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('All_Data')
+          .doc('Governing_Panel')
+          .collection('Semesters')
+          .doc(widget.semesterId)
+          .collection(_getCollectionName())
+          .doc(_getDocumentName())
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(gradientColors[0]),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Loading posters...',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return _buildErrorWidget(snapshot.error.toString(), gradientColors);
+        }
+
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return _buildEmptyWidget(gradientColors);
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>?;
+        if (data == null || data.isEmpty) {
+          return _buildEmptyWidget(gradientColors);
+        }
+
+        // Extract image URLs
+        final List<String> imageUrls = [];
+        data.forEach((key, value) {
+          if (key.startsWith('Image_') && value is String && value.isNotEmpty) {
+            imageUrls.add(value);
+          }
+        });
+
+        // Sort by image number
+        imageUrls.sort((a, b) {
+          final keyA = data.entries.firstWhere((e) => e.value == a).key;
+          final keyB = data.entries.firstWhere((e) => e.value == b).key;
+          final numA = int.tryParse(keyA.replaceAll('Image_', '')) ?? 0;
+          final numB = int.tryParse(keyB.replaceAll('Image_', '')) ?? 0;
+          return numA.compareTo(numB);
+        });
+
+        if (imageUrls.isEmpty) {
+          return _buildEmptyWidget(gradientColors);
+        }
+
+        return _buildPosterGrid(imageUrls, gradientColors);
+      },
+    );
+  }
+
+  Widget _buildPosterGrid(List<String> imageUrls, List<Color> gradientColors) {
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(20),
+      children: [
+        // Stats Card
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Transform.translate(
+              offset: Offset(0, 30 * (1 - value)),
+              child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: gradientColors[0].withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: gradientColors),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.photo_library_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${imageUrls.length} Poster${imageUrls.length > 1 ? 's' : ''}',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: gradientColors[0],
+                      ),
+                    ),
+                    Text(
+                      'Tap any poster to view full size',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Poster Grid
+        ...imageUrls.asMap().entries.map((entry) {
+          final index = entry.key;
+          final url = entry.value;
+          return _PosterCard(
+            imageUrl: url,
+            index: index,
+            gradientColors: gradientColors,
+          );
+        }).toList(),
+
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _buildEmptyWidget(List<Color> gradientColors) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value.clamp(0.0, 1.2),
+                  child: child,
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: gradientColors[0].withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.image_not_supported_rounded,
+                  size: 80,
+                  color: gradientColors[0].withOpacity(0.5),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              'No Posters Yet',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF1B4332),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Posters for this panel will\nappear here once uploaded',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(String error, List<Color> gradientColors) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: Colors.redAccent,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Oops! Something went wrong',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF1B4332),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              error,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// POSTER CARD
+// ============================================
+class _PosterCard extends StatefulWidget {
+  final String imageUrl;
+  final int index;
+  final List<Color> gradientColors;
+
+  const _PosterCard({
+    required this.imageUrl,
+    required this.index,
+    required this.gradientColors,
+  });
+
+  @override
+  State<_PosterCard> createState() => _PosterCardState();
+}
+
+class _PosterCardState extends State<_PosterCard> {
+  bool _isPressed = false;
+
+  void _showFullImage(BuildContext context) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black87,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return _FullImageViewer(
+            imageUrl: widget.imageUrl,
+            gradientColors: widget.gradientColors,
+          );
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.9, end: 1.0).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              ),
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 400 + (widget.index * 100)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(0, 50 * (1 - value)),
+          child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapUp: (_) {
+            setState(() => _isPressed = false);
+            _showFullImage(context);
+          },
+          onTapCancel: () => setState(() => _isPressed = false),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            transform: Matrix4.identity()..scale(_isPressed ? 0.98 : 1.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.gradientColors[0].withOpacity(_isPressed ? 0.3 : 0.15),
+                  blurRadius: _isPressed ? 25 : 20,
+                  offset: Offset(0, _isPressed ? 15 : 10),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Stack(
+                children: [
+                  // Image
+                  CachedNetworkImage(
+                    imageUrl: widget.imageUrl,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      height: 300,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(widget.gradientColors[0]),
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      height: 300,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.broken_image_rounded,
+                            size: 60,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Failed to load',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Overlay gradient at bottom
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 80,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.6),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Poster number badge
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: widget.gradientColors),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: widget.gradientColors[0].withOpacity(0.4),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.photo_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Poster ${widget.index + 1}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Tap to view indicator
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.zoom_in_rounded,
+                            color: widget.gradientColors[0],
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Tap to view',
+                            style: TextStyle(
+                              color: widget.gradientColors[0],
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// FULL IMAGE VIEWER
+// ============================================
+class _FullImageViewer extends StatelessWidget {
+  final String imageUrl;
+  final List<Color> gradientColors;
+
+  const _FullImageViewer({
+    required this.imageUrl,
+    required this.gradientColors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          // Dismiss on tap background
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(color: Colors.transparent),
+          ),
+
+          // Image with zoom
+          Center(
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.contain,
+                    placeholder: (context, url) => Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.broken_image,
+                        color: Colors.white,
+                        size: 60,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Close button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            right: 20,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.black87,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+
+          // Hint text at bottom
+          Positioned(
+            bottom: MediaQuery.of(context).padding.bottom + 30,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.pinch_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      'Pinch to zoom • Tap outside to close',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -381,7 +1645,6 @@ class _AnimatedBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Base Gradient
         Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -395,28 +1658,20 @@ class _AnimatedBackground extends StatelessWidget {
             ),
           ),
         ),
-
-        // Animated Wave
         AnimatedBuilder(
           animation: waveController,
           builder: (context, child) {
             return CustomPaint(
-              painter: _WaveBackgroundPainter(
-                animation: waveController.value,
-              ),
+              painter: _WaveBackgroundPainter(animation: waveController.value),
               size: Size.infinite,
             );
           },
         ),
-
-        // Floating Particles
         AnimatedBuilder(
           animation: particleController,
           builder: (context, child) {
             return CustomPaint(
-              painter: _ParticlePainter(
-                animation: particleController.value,
-              ),
+              painter: _ParticlePainter(animation: particleController.value),
               size: Size.infinite,
             );
           },
@@ -440,17 +1695,14 @@ class _HeaderPatternPainter extends CustomPainter {
       ..color = Colors.white.withOpacity(0.05)
       ..style = PaintingStyle.fill;
 
-    // Animated circles
     for (var i = 0; i < 6; i++) {
       final progress = (animation.value + i * 0.15) % 1.0;
       final x = size.width * (0.1 + i * 0.18);
       final y = size.height * (0.3 + math.sin(progress * math.pi * 2) * 0.1);
       final radius = 20.0 + i * 8;
-
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
 
-    // Grid lines
     final linePaint = Paint()
       ..color = Colors.white.withOpacity(0.03)
       ..strokeWidth = 1
@@ -535,7 +1787,6 @@ class _ParticlePainter extends CustomPainter {
       final offsetY = math.sin((animation + p.x) * 2 * math.pi) * 20;
       final x = size.width * p.x;
       final y = size.height * p.y + offsetY;
-
       paint.color = p.color;
       canvas.drawCircle(Offset(x, y), p.radius, paint);
     }
@@ -667,23 +1918,15 @@ class _WelcomeSection extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 20),
-
-          // Animated Illustration
           _WelcomeIllustration(
             floatingController: floatingController,
             isAnimationComplete: isAnimationComplete,
           ),
           const SizedBox(height: 40),
-
-          // Title & Description
           _WelcomeText(isAnimationComplete: isAnimationComplete),
           const SizedBox(height: 40),
-
-          // Features Cards
           _FeaturesSection(isAnimationComplete: isAnimationComplete),
           const SizedBox(height: 40),
-
-          // CTA Button
           _ExploreButton(
             pulseController: pulseController,
             onTap: onExplore,
@@ -716,7 +1959,7 @@ class _WelcomeIllustration extends StatelessWidget {
       curve: Curves.elasticOut,
       builder: (context, value, child) {
         return Transform.scale(
-          scale: value,
+          scale: value.clamp(0.0, 1.2),
           child: child,
         );
       },
@@ -728,7 +1971,6 @@ class _WelcomeIllustration extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Outer Ring
                 Container(
                   width: 200,
                   height: 200,
@@ -746,8 +1988,6 @@ class _WelcomeIllustration extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Middle Ring
                 Container(
                   width: 160,
                   height: 160,
@@ -761,8 +2001,6 @@ class _WelcomeIllustration extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Inner Circle with Icon
                 Container(
                   width: 120,
                   height: 120,
@@ -787,8 +2025,6 @@ class _WelcomeIllustration extends StatelessWidget {
                     size: 56,
                   ),
                 ),
-
-                // Orbiting Elements
                 ..._buildOrbitingElements(floatingController.value),
               ],
             ),
@@ -812,12 +2048,7 @@ class _WelcomeIllustration extends StatelessWidget {
         Icons.auto_awesome_rounded,
       ];
 
-      final colors = [
-        kAccentGold,
-        kBrandEnd,
-        kBrandStart,
-        kLightGreen,
-      ];
+      final colors = [kAccentGold, kBrandEnd, kBrandStart, kLightGreen];
 
       return Positioned(
         left: 100 + x - 18,
@@ -835,11 +2066,7 @@ class _WelcomeIllustration extends StatelessWidget {
               ),
             ],
           ),
-          child: Icon(
-            icons[index],
-            color: colors[index],
-            size: 20,
-          ),
+          child: Icon(icons[index], color: colors[index], size: 20),
         ),
       );
     });
@@ -865,7 +2092,7 @@ class _WelcomeText extends StatelessWidget {
           builder: (context, value, child) {
             return Transform.translate(
               offset: Offset(0, 30 * (1 - value)),
-              child: Opacity(opacity: value, child: child),
+              child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
             );
           },
           child: const Text(
@@ -888,7 +2115,7 @@ class _WelcomeText extends StatelessWidget {
           builder: (context, value, child) {
             return Transform.translate(
               offset: Offset(0, 30 * (1 - value)),
-              child: Opacity(opacity: value, child: child),
+              child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
             );
           },
           child: Text(
@@ -951,13 +2178,10 @@ class _FeaturesSection extends StatelessWidget {
             builder: (context, value, child) {
               return Transform.translate(
                 offset: Offset(0, 40 * (1 - value)),
-                child: Opacity(opacity: value, child: child),
+                child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
               );
             },
-            child: _FeatureCard(
-              feature: feature,
-              index: index,
-            ),
+            child: _FeatureCard(feature: feature, index: index),
           ),
         );
       }).toList(),
@@ -983,10 +2207,7 @@ class _FeatureCard extends StatefulWidget {
   final _FeatureData feature;
   final int index;
 
-  const _FeatureCard({
-    required this.feature,
-    required this.index,
-  });
+  const _FeatureCard({required this.feature, required this.index});
 
   @override
   State<_FeatureCard> createState() => _FeatureCardState();
@@ -1066,7 +2287,7 @@ class _FeatureCardState extends State<_FeatureCard> {
 }
 
 // ============================================
-// EXPLORE BUTTON
+// EXPLORE BUTTON (Continued)
 // ============================================
 class _ExploreButton extends StatefulWidget {
   final AnimationController pulseController;
@@ -1095,7 +2316,7 @@ class _ExploreButtonState extends State<_ExploreButton> {
       builder: (context, value, child) {
         return Transform.scale(
           scale: 0.8 + (0.2 * value),
-          child: Opacity(opacity: value, child: child),
+          child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
         );
       },
       child: AnimatedBuilder(
@@ -1200,11 +2421,13 @@ class _ExploreButtonState extends State<_ExploreButton> {
 class _SemestersList extends StatelessWidget {
   final List<QueryDocumentSnapshot<Map<String, dynamic>>> sortedDocs;
   final VoidCallback onBack;
+  final Function(String) onSelectSemester;
 
   const _SemestersList({
     Key? key,
     required this.sortedDocs,
     required this.onBack,
+    required this.onSelectSemester,
   }) : super(key: key);
 
   @override
@@ -1221,7 +2444,7 @@ class _SemestersList extends StatelessWidget {
           builder: (context, value, child) {
             return Transform.translate(
               offset: Offset(-30 * (1 - value), 0),
-              child: Opacity(opacity: value, child: child),
+              child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
             );
           },
           child: GestureDetector(
@@ -1265,7 +2488,7 @@ class _SemestersList extends StatelessWidget {
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOutCubic,
           builder: (context, value, child) {
-            return Opacity(opacity: value, child: child);
+            return Opacity(opacity: value.clamp(0.0, 1.0), child: child);
           },
           child: Row(
             children: [
@@ -1312,6 +2535,7 @@ class _SemestersList extends StatelessWidget {
             label: doc.id,
             index: index,
             totalCount: sortedDocs.length,
+            onTap: () => onSelectSemester(doc.id),
           );
         }).toList(),
 
@@ -1328,36 +2552,21 @@ class _SemesterCard extends StatefulWidget {
   final String label;
   final int index;
   final int totalCount;
+  final VoidCallback onTap;
 
   const _SemesterCard({
     required this.label,
     required this.index,
     required this.totalCount,
+    required this.onTap,
   });
 
   @override
   State<_SemesterCard> createState() => _SemesterCardState();
 }
 
-class _SemesterCardState extends State<_SemesterCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _hoverController;
+class _SemesterCardState extends State<_SemesterCard> {
   bool _isPressed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _hoverController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-  }
-
-  @override
-  void dispose() {
-    _hoverController.dispose();
-    super.dispose();
-  }
 
   IconData _getSeasonIcon(String label) {
     final l = label.toLowerCase();
@@ -1389,7 +2598,7 @@ class _SemesterCardState extends State<_SemesterCard>
       builder: (context, value, child) {
         return Transform.translate(
           offset: Offset(0, 50 * (1 - value)),
-          child: Opacity(opacity: value, child: child),
+          child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
         );
       },
       child: Padding(
@@ -1399,30 +2608,7 @@ class _SemesterCardState extends State<_SemesterCard>
           onTapUp: (_) {
             setState(() => _isPressed = false);
             HapticFeedback.lightImpact();
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    ExecutivePanelPage(semesterId: widget.label),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0.1, 0),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeOutCubic,
-                      )),
-                      child: child,
-                    ),
-                  );
-                },
-                transitionDuration: const Duration(milliseconds: 400),
-              ),
-            );
+            widget.onTap();
           },
           onTapCancel: () => setState(() => _isPressed = false),
           child: AnimatedContainer(
@@ -1531,7 +2717,7 @@ class _SemesterCardState extends State<_SemesterCard>
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'Tap to view panel details',
+                              'Tap to view panel categories',
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.9),
                                 fontSize: 13,
@@ -1581,7 +2767,6 @@ class _CardPatternPainter extends CustomPainter {
       ..color = color.withOpacity(0.05)
       ..style = PaintingStyle.fill;
 
-    // Circles
     canvas.drawCircle(
       Offset(size.width * 0.9, size.height * 0.2),
       60,
@@ -1608,26 +2793,16 @@ class _LoadingState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 1000),
-            curve: Curves.easeInOut,
-            builder: (context, value, child) {
-              return Transform.rotate(
-                angle: value * 2 * math.pi,
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: kBrandStart.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(kBrandStart),
-                    strokeWidth: 3,
-                  ),
-                ),
-              );
-            },
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: kBrandStart.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(kBrandStart),
+              strokeWidth: 3,
+            ),
           ),
           const SizedBox(height: 24),
           Text(
@@ -1714,7 +2889,10 @@ class _EmptyState extends StatelessWidget {
               duration: const Duration(milliseconds: 800),
               curve: Curves.elasticOut,
               builder: (context, value, child) {
-                return Transform.scale(scale: value, child: child);
+                return Transform.scale(
+                  scale: value.clamp(0.0, 1.2),
+                  child: child,
+                );
               },
               child: Container(
                 padding: const EdgeInsets.all(32),
