@@ -11,6 +11,7 @@ import 'admin_governing_panel_page.dart';
 import 'Admin_Membership_Management_Page.dart';
 import 'Admin_Best_Panel_Members_Page.dart';
 import 'Admin_Sponsor_Colab_Club_Management_Page.dart';
+import 'Admin_Voice_of_AUSTRC_Page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -135,7 +136,15 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
   ],
   accentColor: kGreenLight, // can stay as is, still harmonizes with last stop
   destinationPage: const AdminSponsorsCollaboratorsPage(),
-  )
+  ),
+    AdminCardConfig(
+      title: 'Voice of AUSTRC',
+      subtitle: 'Feedback & suggestions',
+      icon: Icons.record_voice_over_rounded,
+      gradientColors: [Color(0xFF581C87), Color(0xFF7E22CE), Color(0xFFA78BFA)],
+      accentColor: kAccentPurple,
+      destinationPage: const AdminVoiceOfAUSTRCPage(),
+    ),
 
   ];
 
