@@ -12,6 +12,7 @@ import 'Admin_Membership_Management_Page.dart';
 import 'Admin_Best_Panel_Members_Page.dart';
 import 'Admin_Sponsor_Colab_Club_Management_Page.dart';
 import 'Admin_Voice_of_AUSTRC_Page.dart';
+import 'Admin_FAQ_Management_Page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -144,6 +145,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       gradientColors: [Color(0xFF581C87), Color(0xFF7E22CE), Color(0xFFA78BFA)],
       accentColor: kAccentPurple,
       destinationPage: const AdminVoiceOfAUSTRCPage(),
+    ),
+    AdminCardConfig(
+      title: 'FAQ Management',
+      subtitle: 'Manage FAQs',
+      icon: Icons.question_answer_rounded,
+      gradientColors: [Color(0xFF854D0E), Color(0xFFD97706), Color(0xFFFFA500)],
+      accentColor: kAccentOrange,
+      destinationPage: const AdminFeedbackPage(),
     ),
 
   ];
