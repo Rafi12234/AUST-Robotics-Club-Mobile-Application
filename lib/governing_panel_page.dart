@@ -2579,8 +2579,8 @@ class _SemesterCardState extends State<_SemesterCard> {
 
   Color _getSeasonColor(String label) {
     final l = label.toLowerCase();
-    if (l.contains('spring')) return const Color(0xFF10B981);
-    if (l.contains('fall')) return const Color(0xFFFF6B35);
+    if (l.contains('spring')) return  const Color(0xFF047857);
+    if (l.contains('fall')) return const Color(0xFF059669);
     if (l.contains('summer')) return const Color(0xFFFBBF24);
     if (l.contains('winter')) return const Color(0xFF3B82F6);
     return kBrandStart;

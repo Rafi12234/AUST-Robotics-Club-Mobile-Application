@@ -13,6 +13,7 @@ import 'Admin_Best_Panel_Members_Page.dart';
 import 'Admin_Sponsor_Colab_Club_Management_Page.dart';
 import 'Admin_Voice_of_AUSTRC_Page.dart';
 import 'Admin_FAQ_Management_Page.dart';
+import 'admin_governing_panel_page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -87,6 +88,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       destinationPage: const AdminEducationalProgramsPage(),
     ),
     AdminCardConfig(
+      title: 'Governing Panel',
+      subtitle: 'Panel member management',
+      icon: Icons.account_balance_rounded,
+      gradientColors: [Color(0xFF306041), Color(0xFF49AC59), Color(0xFFA78BFA)],
+      accentColor: kAccentPurple,
+      destinationPage: const AdminGoverningPanelPage(),
+    ),
+    AdminCardConfig(
       title: 'Member IDs',
       subtitle: 'ID card management',
       icon: Icons.badge_rounded,
@@ -154,6 +163,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       accentColor: kAccentOrange,
       destinationPage: const AdminFeedbackPage(),
     ),
+
 
   ];
 
@@ -403,7 +413,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
         const SizedBox(height: 8),
 
         // Governing Panel Special Card
-        _GoverningPanelCard(index: _adminCards.length),
+        // _GoverningPanelCard(index: _adminCards.length),
       ],
     );
   }
@@ -895,344 +905,6 @@ class _AdminCardState extends State<_AdminCard>
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================
-// GOVERNING PANEL CARD - SPECIAL DESIGN
-// ============================================
-class _GoverningPanelCard extends StatefulWidget {
-  final int index;
-
-  const _GoverningPanelCard({required this.index});
-
-  @override
-  State<_GoverningPanelCard> createState() => _GoverningPanelCardState();
-}
-
-class _GoverningPanelCardState extends State<_GoverningPanelCard>
-    with TickerProviderStateMixin {
-  late AnimationController _entryController;
-  late AnimationController _glowController;
-  late AnimationController _hoverController;
-  bool _isPressed = false;
-  bool _isHovered = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _entryController = AnimationController(
-      duration: Duration(milliseconds: 600 + (widget.index * 100)),
-      vsync: this,
-    );
-
-    _glowController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _hoverController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-
-    Future.delayed(Duration(milliseconds: 150 + (widget.index * 80)), () {
-      if (mounted) _entryController.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _entryController.dispose();
-    _glowController.dispose();
-    _hoverController.dispose();
-    super.dispose();
-  }
-
-  void _navigateToPage() {
-    HapticFeedback.mediumImpact();
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-        const AdminGoverningPanelPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.05),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-              )),
-              child: child,
-            ),
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 400),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _entryController,
-      builder: (context, child) {
-        final slideValue = Curves.easeOutCubic.transform(_entryController.value);
-        final scaleValue = Curves.elasticOut.transform(
-          (_entryController.value).clamp(0.0, 1.0),
-        );
-
-        return Transform.translate(
-          offset: Offset(0, 30 * (1 - slideValue)),
-          child: Transform.scale(
-            scale: 0.8 + (0.2 * scaleValue),
-            child: Opacity(
-              opacity: _entryController.value.clamp(0.0, 1.0),
-              child: child,
-            ),
-          ),
-        );
-      },
-      child: MouseRegion(
-        onEnter: (_) {
-          setState(() => _isHovered = true);
-          _hoverController.forward();
-        },
-        onExit: (_) {
-          setState(() => _isHovered = false);
-          _hoverController.reverse();
-        },
-        child: GestureDetector(
-          onTapDown: (_) => setState(() => _isPressed = true),
-          onTapUp: (_) {
-            setState(() => _isPressed = false);
-            _navigateToPage();
-          },
-          onTapCancel: () => setState(() => _isPressed = false),
-          child: AnimatedBuilder(
-            animation: _glowController,
-            builder: (context, child) {
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                transform: Matrix4.identity()
-                  ..scale(_isPressed ? 0.97 : (_isHovered ? 1.02 : 1.0)),
-                child: Container(
-                  height: 140,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1E293B).withOpacity(
-                          _isHovered ? 0.5 : 0.35,
-                        ),
-                        blurRadius: _isHovered ? 32 : 24,
-                        offset: Offset(0, _isHovered ? 14 : 10),
-                      ),
-                      BoxShadow(
-                        color: kAccentGold.withOpacity(0.3 * _glowController.value),
-                        blurRadius: 20 * _glowController.value,
-                        spreadRadius: 3 * _glowController.value,
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
-                    child: Stack(
-                      children: [
-                        // Dark Gradient Background
-                        Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF0F172A),
-                                Color(0xFF1E293B),
-                                Color(0xFF334155),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        // Gold Glow
-                        Positioned(
-                          top: -50,
-                          right: -50,
-                          child: AnimatedBuilder(
-                            animation: _glowController,
-                            builder: (context, child) {
-                              return Container(
-                                width: 180,
-                                height: 180,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: RadialGradient(
-                                    colors: [
-                                      kAccentGold.withOpacity(
-                                        0.25 * _glowController.value,
-                                      ),
-                                      kAccentGold.withOpacity(0),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                        // Decorative Ring
-                        Positioned(
-                          left: -30,
-                          bottom: -30,
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.05),
-                                width: 20,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Content
-                        Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Row(
-                            children: [
-                              // Icon with Glow
-                              AnimatedBuilder(
-                                animation: _glowController,
-                                builder: (context, child) {
-                                  return Container(
-                                    padding: const EdgeInsets.all(18),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          kAccentGold,
-                                          kAccentGold.withOpacity(0.8),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(22),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: kAccentGold.withOpacity(
-                                            0.5 * _glowController.value,
-                                          ),
-                                          blurRadius: 20 * _glowController.value,
-                                          spreadRadius: 2,
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.groups_rounded,
-                                      color: Colors.white,
-                                      size: 34,
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(width: 20),
-
-                              // Text Content
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text(
-                                      'Governing Panel',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 7,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: kAccentGold.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: kAccentGold.withOpacity(0.4),
-                                          width: 1.5,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.verified_rounded,
-                                            color: kAccentGold,
-                                            size: 16,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'Leadership Management',
-                                            style: TextStyle(
-                                              color: Colors.white.withOpacity(0.95),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Arrow
-                              AnimatedBuilder(
-                                animation: _hoverController,
-                                builder: (context, child) {
-                                  return Transform.translate(
-                                    offset: Offset(_hoverController.value * 5, 0),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(14),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.15),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: Colors.white.withOpacity(0.25),
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: const Icon(
-                                        Icons.arrow_forward_rounded,
-                                        color: Colors.white,
-                                        size: 22,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
           ),
         ),
       ),
