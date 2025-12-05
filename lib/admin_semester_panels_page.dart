@@ -279,7 +279,6 @@ class _PanelCardState extends State<_PanelCard> {
 
   void _handleTap() {
     if (widget.isExecutive) {
-      // Navigate to AdminPanelMembersPage for Executive Panel
       Navigator.push(
         context,
         PageRouteBuilder(
@@ -308,12 +307,11 @@ class _PanelCardState extends State<_PanelCard> {
         ),
       );
     } else {
-      // Navigate to Poster Management Page for other panels
       Navigator.push(
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              _AdminPanelPosterPage(
+              AdminPanelPosterPage(
                 semesterId: widget.semesterId,
                 panelTitle: widget.title,
                 collectionName: widget.collectionName,
@@ -384,7 +382,6 @@ class _PanelCardState extends State<_PanelCard> {
                 ),
                 child: Stack(
                   children: [
-                    // Pattern
                     Positioned.fill(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
@@ -393,7 +390,6 @@ class _PanelCardState extends State<_PanelCard> {
                         ),
                       ),
                     ),
-                    // Content
                     Padding(
                       padding: const EdgeInsets.all(24),
                       child: Row(
@@ -512,7 +508,7 @@ class _CardPatternPainter extends CustomPainter {
 // ============================================
 // ADMIN PANEL POSTER PAGE
 // ============================================
-class _AdminPanelPosterPage extends StatefulWidget {
+class AdminPanelPosterPage extends StatefulWidget {
   final String semesterId;
   final String panelTitle;
   final String collectionName;
@@ -520,7 +516,7 @@ class _AdminPanelPosterPage extends StatefulWidget {
   final List<Color> gradientColors;
   final IconData icon;
 
-  const _AdminPanelPosterPage({
+  const AdminPanelPosterPage({
     Key? key,
     required this.semesterId,
     required this.panelTitle,
@@ -531,10 +527,10 @@ class _AdminPanelPosterPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<_AdminPanelPosterPage> createState() => _AdminPanelPosterPageState();
+  State<AdminPanelPosterPage> createState() => _AdminPanelPosterPageState();
 }
 
-class _AdminPanelPosterPageState extends State<_AdminPanelPosterPage>
+class _AdminPanelPosterPageState extends State<AdminPanelPosterPage>
     with TickerProviderStateMixin {
   final ImagePicker _imagePicker = ImagePicker();
   bool _isUploading = false;
@@ -555,7 +551,6 @@ class _AdminPanelPosterPageState extends State<_AdminPanelPosterPage>
     super.dispose();
   }
 
-  // Get Firestore document reference
   DocumentReference get _documentRef => FirebaseFirestore.instance
       .collection('All_Data')
       .doc('Governing_Panel')
@@ -732,9 +727,7 @@ class _AdminPanelPosterPageState extends State<_AdminPanelPosterPage>
         if (snapshot.hasData && snapshot.data!.exists) {
           final data = snapshot.data!.data() as Map<String, dynamic>?;
           if (data != null) {
-            posterCount = data.keys
-                .where((key) => key.startsWith('Image_'))
-                .length;
+            posterCount = data.keys.where((key) => key.startsWith('Image_')).length;
           }
         }
 
@@ -888,7 +881,6 @@ class _AdminPanelPosterPageState extends State<_AdminPanelPosterPage>
           return SliverFillRemaining(child: _buildEmptyWidget());
         }
 
-        // Sort images by number
         final sortedKeys = images.keys.toList()
           ..sort((a, b) {
             final numA = int.tryParse(a.replaceAll('Image_', '')) ?? 0;
@@ -915,7 +907,7 @@ class _AdminPanelPosterPageState extends State<_AdminPanelPosterPage>
                   imageUrl: url,
                   index: index,
                   gradientColors: widget.gradientColors,
-                  onDelete: () => _deletePoster(key),
+                  documentRef: _documentRef,
                 );
               },
               childCount: sortedKeys.length,
@@ -1076,7 +1068,6 @@ class _AdminPanelPosterPageState extends State<_AdminPanelPosterPage>
     try {
       setState(() => _isUploading = true);
 
-      // Pick image
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 85,
@@ -1087,7 +1078,6 @@ class _AdminPanelPosterPageState extends State<_AdminPanelPosterPage>
         return;
       }
 
-      // Upload to Cloudinary
       final cloudinary = CloudinaryPublic('dxyhzgrul', 'austrc-club');
       final response = await cloudinary.uploadFile(
         CloudinaryFile.fromFile(
@@ -1096,7 +1086,6 @@ class _AdminPanelPosterPageState extends State<_AdminPanelPosterPage>
         ),
       );
 
-      // Get current document to find next image number
       final doc = await _documentRef.get();
 
       int nextNumber = 1;
@@ -1113,7 +1102,6 @@ class _AdminPanelPosterPageState extends State<_AdminPanelPosterPage>
         }
       }
 
-      // Save to Firestore
       await _documentRef.set(
         {'Image_$nextNumber': response.secureUrl},
         SetOptions(merge: true),
@@ -1160,43 +1148,6 @@ class _AdminPanelPosterPageState extends State<_AdminPanelPosterPage>
     } finally {
       if (mounted) {
         setState(() => _isUploading = false);
-      }
-    }
-  }
-
-  Future<void> _deletePoster(String fieldName) async {
-    try {
-      await _documentRef.update({
-        fieldName: FieldValue.delete(),
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle_rounded, color: Colors.white),
-                const SizedBox(width: 12),
-                Text('${fieldName.replaceAll('_', ' ')} deleted!'),
-              ],
-            ),
-            backgroundColor: kGreenMain,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error deleting: $e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
       }
     }
   }
@@ -1254,14 +1205,14 @@ class _StatItem extends StatelessWidget {
 }
 
 // ============================================
-// POSTER CARD WIDGET
+// POSTER CARD WIDGET - REDESIGNED WITH WORKING DELETE
 // ============================================
 class _PosterCard extends StatefulWidget {
   final String fieldName;
   final String imageUrl;
   final int index;
   final List<Color> gradientColors;
-  final VoidCallback onDelete;
+  final DocumentReference documentRef;
 
   const _PosterCard({
     Key? key,
@@ -1269,7 +1220,7 @@ class _PosterCard extends StatefulWidget {
     required this.imageUrl,
     required this.index,
     required this.gradientColors,
-    required this.onDelete,
+    required this.documentRef,
   }) : super(key: key);
 
   @override
@@ -1298,6 +1249,512 @@ class _PosterCardState extends State<_PosterCard>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  // ========== REDESIGNED DELETE CONFIRMATION DIALOG ==========
+  Future<void> _showDeleteConfirmation() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    final bool? confirmed = await showGeneralDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      barrierColor: Colors.black.withOpacity(0.6),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Container();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack,
+        );
+
+        return ScaleTransition(
+          scale: Tween<double>(begin: 0.8, end: 1.0).animate(curvedAnimation),
+          child: FadeTransition(
+            opacity: animation,
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
+              contentPadding: EdgeInsets.zero,
+              content: Container(
+                width: MediaQuery.of(context).size.width * 0.85,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header with gradient
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.red.shade400,
+                            Colors.red.shade600,
+                          ],
+                        ),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(28),
+                          topRight: Radius.circular(28),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          // Animated Icon
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: 1),
+                            duration: const Duration(milliseconds: 600),
+                            curve: Curves.elasticOut,
+                            builder: (context, value, child) {
+                              return Transform.scale(
+                                scale: value,
+                                child: child,
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.delete_forever_rounded,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Delete Poster?',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Poster #${widget.fieldName.replaceAll('Image_', '')}',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Image Preview
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          // Image with border
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.grey.shade200,
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: CachedNetworkImage(
+                                imageUrl: widget.imageUrl,
+                                height: 160,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  height: 160,
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  height: 160,
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.broken_image, size: 50),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Warning message
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade50,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.amber.shade200,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.shade100,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.amber.shade700,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'This action cannot be undone',
+                                        style: TextStyle(
+                                          color: Colors.amber.shade900,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'The poster will be permanently removed',
+                                        style: TextStyle(
+                                          color: Colors.amber.shade700,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Action Buttons
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                      child: Row(
+                        children: [
+                          // Cancel Button
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  side: BorderSide(color: Colors.grey.shade300),
+                                ),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          // Delete Button
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              icon: const Icon(Icons.delete_rounded, size: 20),
+                              label: const Text(
+                                'Delete',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    // If confirmed, proceed with deletion
+    if (confirmed == true && mounted) {
+      await _performDelete(scaffoldMessenger);
+    }
+  }
+
+  // ========== ACTUAL DELETE OPERATION ==========
+  Future<void> _performDelete(ScaffoldMessengerState scaffoldMessenger) async {
+    if (_isDeleting) return;
+
+    setState(() => _isDeleting = true);
+
+    try {
+      // Perform the Firestore delete operation
+      await widget.documentRef.update({
+        widget.fieldName: FieldValue.delete(),
+      });
+
+      // Show success message
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.white24,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Poster Deleted',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      'Poster #${widget.fieldName.replaceAll('Image_', '')} has been removed',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: kGreenMain,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      // Show error message
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.white24,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Delete Failed',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      'Error: $e',
+                      style: const TextStyle(fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+
+      if (mounted) {
+        setState(() => _isDeleting = false);
+      }
+    }
+  }
+
+  void _showImagePreview(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.9),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: CachedNetworkImage(
+                  imageUrl: widget.imageUrl,
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    size: 24,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 20,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: widget.gradientColors),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.photo_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Poster #${widget.fieldName.replaceAll('Image_', '')}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 70,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.pinch_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      'Pinch to zoom',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -1435,23 +1892,24 @@ class _PosterCardState extends State<_PosterCard>
               ),
             ),
 
-            // Delete button
+            // DELETE BUTTON - Now calls the confirmation dialog
             Positioned(
               top: 8,
               right: 8,
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: _isDeleting ? null : () => _showDeleteDialog(context),
+                  onTap: _isDeleting ? null : _showDeleteConfirmation,
                   borderRadius: BorderRadius.circular(50),
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: _isDeleting ? Colors.grey : Colors.red,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.red.withOpacity(0.5),
+                          color: (_isDeleting ? Colors.grey : Colors.red).withOpacity(0.5),
                           blurRadius: 10,
                         ),
                       ],
@@ -1503,302 +1961,5 @@ class _PosterCardState extends State<_PosterCard>
         ),
       ),
     );
-  }
-
-  void _showImagePreview(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.9),
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(16),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Zoomable image
-            InteractiveViewer(
-              minScale: 0.5,
-              maxScale: 4.0,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: CachedNetworkImage(
-                  imageUrl: widget.imageUrl,
-                  fit: BoxFit.contain,
-                  placeholder: (context, url) => const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
-
-            // Close button
-            Positioned(
-              top: 0,
-              right: 0,
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.close_rounded,
-                    size: 24,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-
-            // Poster number indicator
-            Positioned(
-              bottom: 20,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: widget.gradientColors),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.photo_rounded,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Poster #${widget.fieldName.replaceAll('Image_', '')}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Hint text
-            Positioned(
-              bottom: 70,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.pinch_rounded,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                    SizedBox(width: 6),
-                    Text(
-                      'Pinch to zoom',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showDeleteDialog(BuildContext context) async {
-    final bool? shouldDelete = await showDialog<bool>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          contentPadding: const EdgeInsets.all(24),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.delete_forever_rounded,
-                      color: Colors.red,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Delete Poster',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: kGreenDark,
-                          ),
-                        ),
-                        Text(
-                          'Poster #${widget.fieldName.replaceAll('Image_', '')}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Image preview
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: CachedNetworkImage(
-                  imageUrl: widget.imageUrl,
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    height: 150,
-                    color: Colors.grey[200],
-                    child: const Center(child: CircularProgressIndicator()),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Warning
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.red.withOpacity(0.2),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.red[700],
-                      size: 22,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'This action cannot be undone.',
-                        style: TextStyle(
-                          color: Colors.red[700],
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(dialogContext).pop(false),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.grey[700],
-                        side: BorderSide(color: Colors.grey[300]!),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => Navigator.of(dialogContext).pop(true),
-                      icon: const Icon(Icons.delete_rounded, size: 18),
-                      label: const Text(
-                        'Delete',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (shouldDelete == true) {
-      await _executeDelete();
-    }
-  }
-
-  Future<void> _executeDelete() async {
-    if (_isDeleting) return;
-
-    setState(() => _isDeleting = true);
-
-    try {
-      widget.onDelete();
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isDeleting = false);
-      }
-    }
   }
 }
