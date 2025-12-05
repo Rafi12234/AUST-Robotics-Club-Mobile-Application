@@ -13,7 +13,6 @@ import 'Admin_Best_Panel_Members_Page.dart';
 import 'Admin_Sponsor_Colab_Club_Management_Page.dart';
 import 'Admin_Voice_of_AUSTRC_Page.dart';
 import 'Admin_FAQ_Management_Page.dart';
-import 'admin_governing_panel_page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);

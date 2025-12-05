@@ -6,6 +6,7 @@ import 'member_recruitment_page.dart';
 import 'best_panel_member_page.dart';
 import 'admin_login_page.dart';
 import 'size_config.dart';
+import 'AUSTRC_ID_Find_Page.dart';
 
 class FancyFloatingButton extends StatefulWidget {
   const FancyFloatingButton({super.key});
@@ -117,9 +118,9 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
     return [
       _FabMenuItem(
         icon: Icons.calculate_rounded,
-        label: 'Governing Panel',
+        label: 'Find AUSTRC ID',
         color: const Color(0xFFFF9800),
-        onTap: () => _navigateToPage(const GoverningPanelPage()),
+        onTap: () => _navigateToPage(const ForgotAustrcIdPage()),
       ),
       _FabMenuItem(
         icon: Icons.emoji_events_rounded,
