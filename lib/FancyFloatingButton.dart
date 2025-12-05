@@ -117,7 +117,7 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
   List<_FabMenuItem> _getMenuItems() {
     return [
       _FabMenuItem(
-        icon: Icons.calculate_rounded,
+        icon: Icons.search_rounded,
         label: 'Find AUSTRC ID',
         color: const Color(0xFFFF9800),
         onTap: () => _navigateToPage(const ForgotAustrcIdPage()),

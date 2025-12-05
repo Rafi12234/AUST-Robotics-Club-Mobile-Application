@@ -162,7 +162,7 @@ class _ForgotAustrcIdPageState extends State<ForgotAustrcIdPage>
       final austId = _austIdController.text.trim();
       final eduMail = _eduMailController.text.trim().toLowerCase();
 
-      // Query Firebase
+      // Query Firebase to verify
       final membersCollection = FirebaseFirestore.instance
           .collection('All_Data')
           .doc('Student_AUSTRC_ID')
@@ -186,6 +186,9 @@ class _ForgotAustrcIdPageState extends State<ForgotAustrcIdPage>
       }
 
       if (found) {
+        // Store the request in Firebase
+        await _storeRequestInFirebase(austId, eduMail);
+
         setState(() {
           _isSuccess = true;
           _foundAustrcId = austrcId;
@@ -213,6 +216,24 @@ class _ForgotAustrcIdPageState extends State<ForgotAustrcIdPage>
     }
   }
 
+  // Store request in Firebase
+  Future<void> _storeRequestInFirebase(String austId, String eduMail) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Find_AUSTRC_ID')
+          .doc(austId)
+          .set({
+        'AUST_ID': austId,
+        'Edu_Mail': eduMail,
+        'Requested_At': FieldValue.serverTimestamp(),
+        'Status': 'Pending',
+      }, SetOptions(merge: true));
+    } catch (e) {
+      // Log error but don't fail the process
+      debugPrint('Error storing request: $e');
+    }
+  }
+
   void _triggerShake() {
     _shakeController.reset();
     _shakeController.forward();
@@ -232,22 +253,22 @@ class _ForgotAustrcIdPageState extends State<ForgotAustrcIdPage>
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final topInset = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      body: Stack(
+      body: Column(
         children: [
-          _AnimatedBackground(
-            waveController: _waveController,
-            particleController: _particleController,
-          ),
-          SafeArea(
-            top: false,
-            child: Column(
+          _buildHeader(topInset),
+          Expanded(
+            child: Stack(
               children: [
-                _buildHeader(topInset),
-                Expanded(child: _buildContent()),
+                _AnimatedBackground(
+                  waveController: _waveController,
+                  particleController: _particleController,
+                ),
+                _buildContent(),
               ],
             ),
           ),
@@ -286,6 +307,7 @@ class _ForgotAustrcIdPageState extends State<ForgotAustrcIdPage>
               ),
               child: Stack(
                 children: [
+                  // Static pattern instead of animated
                   Positioned.fill(
                     child: ClipRRect(
                       borderRadius: const BorderRadius.only(
@@ -293,7 +315,7 @@ class _ForgotAustrcIdPageState extends State<ForgotAustrcIdPage>
                         bottomRight: Radius.circular(40),
                       ),
                       child: CustomPaint(
-                        painter: _HeaderPatternPainter(animation: _floatingController),
+                        painter: _StaticHeaderPatternPainter(),
                       ),
                     ),
                   ),
@@ -357,7 +379,7 @@ class _ForgotAustrcIdPageState extends State<ForgotAustrcIdPage>
                                 ],
                               ),
                             ),
-                            _HeaderBadge(animation: _pulseController),
+                            _StaticHeaderBadge(),
                           ],
                         ),
                       ],
@@ -414,6 +436,64 @@ class _ForgotAustrcIdPageState extends State<ForgotAustrcIdPage>
         hasError: _hasError,
         errorMessage: _errorMessage,
         onSubmit: _verifyAndSubmit,
+      ),
+    );
+  }
+}
+
+// ============================================
+// STATIC HEADER PATTERN PAINTER (No Animation - No Flicker)
+// ============================================
+class _StaticHeaderPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.05)
+      ..style = PaintingStyle.fill;
+
+    // Static circles
+    for (var i = 0; i < 6; i++) {
+      final x = size.width * (0.1 + i * 0.18);
+      final y = size.height * 0.35;
+      final radius = 20.0 + i * 8;
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+
+    final linePaint = Paint()
+      ..color = Colors.white.withOpacity(0.03)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    for (var i = 0; i < 8; i++) {
+      final y = size.height * i / 8;
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ============================================
+// STATIC HEADER BADGE (No Animation - No Flicker)
+// ============================================
+class _StaticHeaderBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white.withOpacity(0.4),
+          width: 2,
+        ),
+      ),
+      child: const Icon(
+        Icons.help_outline_rounded,
+        color: Colors.white,
+        size: 24,
       ),
     );
   }
@@ -1069,23 +1149,12 @@ class _CustomTextField extends StatefulWidget {
   State<_CustomTextField> createState() => _CustomTextFieldState();
 }
 
-class _CustomTextFieldState extends State<_CustomTextField>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _focusController;
-  late Animation<double> _focusAnimation;
+class _CustomTextFieldState extends State<_CustomTextField> {
   bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
-    _focusController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _focusAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _focusController, curve: Curves.easeOut),
-    );
-
     widget.focusNode.addListener(_onFocusChange);
   }
 
@@ -1093,17 +1162,11 @@ class _CustomTextFieldState extends State<_CustomTextField>
     setState(() {
       _isFocused = widget.focusNode.hasFocus;
     });
-    if (_isFocused) {
-      _focusController.forward();
-    } else {
-      _focusController.reverse();
-    }
   }
 
   @override
   void dispose() {
     widget.focusNode.removeListener(_onFocusChange);
-    _focusController.dispose();
     super.dispose();
   }
 
@@ -1121,23 +1184,20 @@ class _CustomTextFieldState extends State<_CustomTextField>
           ),
         ),
         const SizedBox(height: 8),
-        AnimatedBuilder(
-          animation: _focusController,
-          builder: (context, child) {
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: kBrandStart.withOpacity(0.15 * _focusAnimation.value),
-                    blurRadius: 15 * _focusAnimation.value,
-                    offset: Offset(0, 5 * _focusAnimation.value),
-                  ),
-                ],
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: _isFocused
+                    ? kBrandStart.withOpacity(0.15)
+                    : Colors.transparent,
+                blurRadius: 15,
+                offset: const Offset(0, 5),
               ),
-              child: child,
-            );
-          },
+            ],
+          ),
           child: TextFormField(
             controller: widget.controller,
             focusNode: widget.focusNode,
@@ -1270,37 +1330,20 @@ class _SubmitButtonState extends State<_SubmitButton> {
             onTapCancel: () => setState(() => _isPressed = false),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
-              transform: Matrix4.identity()
-                ..scale(_isPressed ? 0.95 : 1.0),
+              transform: Matrix4.identity()..scale(_isPressed ? 0.95 : 1.0),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(
-                  gradient: widget.isLoading
-                      ? LinearGradient(
-                    colors: [
-                      Colors.grey[400]!,
-                      Colors.grey[500]!,
-                    ],
-                  )
-                      : const LinearGradient(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
                     colors: [Color(0xFF064E3B), kBrandStart, kBrandEnd],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: widget.isLoading
-                          ? Colors.grey.withOpacity(0.3)
-                          : kBrandStart.withOpacity(
-                          0.3 + (widget.pulseController.value * 0.2)),
-                      blurRadius:
-                      20 + (widget.pulseController.value * 15),
-                      offset: const Offset(0, 8),
-                      spreadRadius: widget.pulseController.value * 3,
-                    ),
-                  ],
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1471,7 +1514,7 @@ class _SuccessView extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Your request has been verified successfully',
+                  'Your request has been verified and submitted successfully',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
@@ -1535,20 +1578,26 @@ class _SuccessView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _NextStep(
+                  const _NextStep(
                     number: '1',
+                    text: 'Your request has been recorded',
+                    icon: Icons.check_circle_rounded,
+                  ),
+                  const SizedBox(height: 12),
+                  const _NextStep(
+                    number: '2',
                     text: 'Admin will review your request',
                     icon: Icons.admin_panel_settings_rounded,
                   ),
                   const SizedBox(height: 12),
-                  _NextStep(
-                    number: '2',
+                  const _NextStep(
+                    number: '3',
                     text: 'Your AUSTRC ID will be sent to your Edu Mail',
                     icon: Icons.email_rounded,
                   ),
                   const SizedBox(height: 12),
-                  _NextStep(
-                    number: '3',
+                  const _NextStep(
+                    number: '4',
                     text: 'Please check your inbox within 24-48 hours',
                     icon: Icons.schedule_rounded,
                   ),
@@ -1614,8 +1663,8 @@ class _NextStep extends StatelessWidget {
         Container(
           width: 28,
           height: 28,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
               colors: [kBrandStart, kBrandEnd],
             ),
             shape: BoxShape.circle,
@@ -1852,7 +1901,7 @@ class _SuccessAnimation extends StatelessWidget {
 }
 
 // ============================================
-// ANIMATED BACKGROUND (Reuse from GoverningPanelPage)
+// ANIMATED BACKGROUND
 // ============================================
 class _AnimatedBackground extends StatelessWidget {
   final AnimationController waveController;
@@ -1901,43 +1950,6 @@ class _AnimatedBackground extends StatelessWidget {
       ],
     );
   }
-}
-
-// ============================================
-// HEADER PATTERN PAINTER
-// ============================================
-class _HeaderPatternPainter extends CustomPainter {
-  final AnimationController animation;
-
-  _HeaderPatternPainter({required this.animation}) : super(repaint: animation);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
-      ..style = PaintingStyle.fill;
-
-    for (var i = 0; i < 6; i++) {
-      final progress = (animation.value + i * 0.15) % 1.0;
-      final x = size.width * (0.1 + i * 0.18);
-      final y = size.height * (0.3 + math.sin(progress * math.pi * 2) * 0.1);
-      final radius = 20.0 + i * 8;
-      canvas.drawCircle(Offset(x, y), radius, paint);
-    }
-
-    final linePaint = Paint()
-      ..color = Colors.white.withOpacity(0.03)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    for (var i = 0; i < 8; i++) {
-      final y = size.height * i / 8;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _HeaderPatternPainter oldDelegate) => true;
 }
 
 // ============================================
@@ -2071,47 +2083,6 @@ class _AnimatedBackButtonState extends State<_AnimatedBackButton> {
           size: 20,
         ),
       ),
-    );
-  }
-}
-
-// ============================================
-// HEADER BADGE
-// ============================================
-class _HeaderBadge extends StatelessWidget {
-  final AnimationController animation;
-
-  const _HeaderBadge({required this.animation});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, child) {
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15 + animation.value * 0.1),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3 + animation.value * 0.2),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.white.withOpacity(0.1 * animation.value),
-                blurRadius: 15 * animation.value,
-                spreadRadius: 3 * animation.value,
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.help_outline_rounded,
-            color: Colors.white,
-            size: 24,
-          ),
-        );
-      },
     );
   }
 }
