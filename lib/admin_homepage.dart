@@ -13,6 +13,7 @@ import 'Admin_Best_Panel_Members_Page.dart';
 import 'Admin_Sponsor_Colab_Club_Management_Page.dart';
 import 'Admin_Voice_of_AUSTRC_Page.dart';
 import 'Admin_FAQ_Management_Page.dart';
+import 'Admin_AUSTRC_ID_Find_Page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -161,6 +162,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       gradientColors: [Color(0xFF854D0E), Color(0xFFD97706), Color(0xFFFFA500)],
       accentColor: kAccentOrange,
       destinationPage: const AdminFeedbackPage(),
+    ),
+    AdminCardConfig(
+      title: 'AUSTRC ID Finder',
+      subtitle: 'Find member IDs',
+      icon: Icons.search_rounded,
+      gradientColors: [Color(0xFF134E4A), Color(0xFF0F766E), Color(0xFF14B8A6)],
+      accentColor: kAccentTeal,
+      destinationPage: const AdminFindAustrcIdPage(),
     ),
 
 
