@@ -48,10 +48,11 @@ class _AdminMemberIdManagementPageState
           _buildSliverAppBar(),
 
           // Member List
-          StreamBuilder<DocumentSnapshot>(
+          StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('All_Data')
                 .doc('Student_AUSTRC_ID')
+                .collection('Members')
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -75,50 +76,41 @@ class _AdminMemberIdManagementPageState
                 );
               }
 
-              final data = snapshot.data?.data() as Map<String, dynamic>?;
-              final members = <MapEntry<String, String>>[];
-
-              if (data != null) {
-                // Extract all Member_X fields
-                data.forEach((key, value) {
-                  if (key.startsWith('Member_')) {
-                    members.add(MapEntry(key, value.toString()));
-                  }
-                });
-
-                // Sort by member number
-                members.sort((a, b) {
-                  final numA = int.tryParse(a.key.replaceAll('Member_', '')) ?? 0;
-                  final numB = int.tryParse(b.key.replaceAll('Member_', '')) ?? 0;
-                  return numA.compareTo(numB);
-                });
-              }
+              final memberDocs = snapshot.data?.docs ?? [];
+              memberDocs.sort((a, b) {
+                final numA = int.tryParse(a.id.replaceAll('Member_', '')) ?? 0;
+                final numB = int.tryParse(b.id.replaceAll('Member_', '')) ?? 0;
+                return numA.compareTo(numB);
+              });
 
               return SliverPadding(
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      if (index == members.length) {
-                        // Add New Member Button
+                      if (index == memberDocs.length) {
                         return _AddNewMemberCard(
-                          memberCount: members.length,
+                          memberCount: memberDocs.length,
                           onAdded: () {},
                         );
                       }
 
-                      final member = members[index];
+                      final memberDoc = memberDocs[index];
                       final memberNumber = int.tryParse(
-                              member.key.replaceAll('Member_', '')) ??
+                              memberDoc.id.replaceAll('Member_', '')) ??
                           0;
+                      final memberData = memberDoc.data() as Map<String, dynamic>;
 
                       return _MemberCard(
                         memberNumber: memberNumber,
-                        memberId: member.value,
+                        austId: memberData['AUST_ID'] ?? '',
+                        austrcId: memberData['AUSTRC_ID'] ?? '',
+                        eduMail: memberData['Edu_Mail'] ?? '',
+                        memberDocId: memberDoc.id,
                         index: index,
                       );
                     },
-                    childCount: members.length + 1,
+                    childCount: memberDocs.length + 1,
                   ),
                 ),
               );
@@ -196,12 +188,18 @@ class _AdminMemberIdManagementPageState
 
 class _MemberCard extends StatefulWidget {
   final int memberNumber;
-  final String memberId;
+  final String austId;
+  final String austrcId;
+  final String eduMail;
+  final String memberDocId;
   final int index;
 
   const _MemberCard({
     required this.memberNumber,
-    required this.memberId,
+    required this.austId,
+    required this.austrcId,
+    required this.eduMail,
+    required this.memberDocId,
     required this.index,
   });
 
@@ -290,7 +288,7 @@ class _MemberCardState extends State<_MemberCard>
                         padding: const EdgeInsets.all(20),
                         child: Row(
                           children: [
-                            // Member Icon with gradient
+                            // ...existing icon code...
                             Container(
                               width: 60,
                               height: 60,
@@ -345,14 +343,45 @@ class _MemberCardState extends State<_MemberCard>
                                         width: 1,
                                       ),
                                     ),
-                                    child: Text(
-                                      widget.memberId,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: kGreenDark.withOpacity(0.8),
-                                        letterSpacing: 0.5,
-                                      ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'AUST ID: ${widget.austId}',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                kGreenDark.withOpacity(0.8),
+                                            letterSpacing: 0.3,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          'AUSTRC ID: ${widget.austrcId}',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                kGreenDark.withOpacity(0.8),
+                                            letterSpacing: 0.3,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          'Email: ${widget.eduMail}',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                kGreenDark.withOpacity(0.8),
+                                            letterSpacing: 0.3,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -362,15 +391,12 @@ class _MemberCardState extends State<_MemberCard>
                             // Action Buttons
                             Row(
                               children: [
-                                // Edit Button
                                 _ActionButton(
                                   icon: Icons.edit_rounded,
                                   color: kGreenMain,
                                   onTap: () => _showEditDialog(context),
                                 ),
                                 const SizedBox(width: 8),
-
-                                // Delete Button
                                 _ActionButton(
                                   icon: Icons.delete_rounded,
                                   color: kAccentRed,
@@ -393,14 +419,14 @@ class _MemberCardState extends State<_MemberCard>
   }
 
   void _showEditDialog(BuildContext context) {
-    final controller = TextEditingController(text: widget.memberId);
+    final austIdController = TextEditingController(text: widget.austId);
+    final austrcIdController = TextEditingController(text: widget.austrcId);
+    final eduMailController = TextEditingController(text: widget.eduMail);
 
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         elevation: 10,
         child: Container(
           constraints: const BoxConstraints(maxWidth: 400),
@@ -417,7 +443,7 @@ class _MemberCardState extends State<_MemberCard>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header
+                // ...existing header...
                 Container(
                   width: 70,
                   height: 70,
@@ -443,9 +469,9 @@ class _MemberCardState extends State<_MemberCard>
                   ),
                 ),
                 const SizedBox(height: 24),
-                Text(
-                  'Edit Member ID',
-                  style: const TextStyle(
+                const Text(
+                  'Edit Member Info',
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
                     color: kGreenDark,
@@ -462,55 +488,28 @@ class _MemberCardState extends State<_MemberCard>
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // Input Field
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: kGreenMain.withOpacity(0.3),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: kGreenMain.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: controller,
-                    autofocus: true,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: kGreenDark,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: 'AUSTRC ID',
-                      labelStyle: TextStyle(
-                        color: kGreenMain.withOpacity(0.8),
-                        fontWeight: FontWeight.w600,
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.badge_outlined,
-                        color: kGreenMain,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.transparent,
-                      contentPadding: const EdgeInsets.all(20),
-                    ),
-                  ),
+                _buildTextField(
+                  'AUST ID',
+                  austIdController,
+                  Icons.badge_outlined,
+                  'Enter AUST ID',
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  'AUSTRC ID',
+                  austrcIdController,
+                  Icons.badge_outlined,
+                  'Enter AUSTRC ID',
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  'Institutional Mail',
+                  eduMailController,
+                  Icons.email_outlined,
+                  'Enter institutional email',
+                  isEmail: true,
                 ),
                 const SizedBox(height: 28),
-
-                // Buttons
                 Row(
                   children: [
                     Expanded(
@@ -540,50 +539,51 @@ class _MemberCardState extends State<_MemberCard>
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () async {
-                          final newId = controller.text.trim();
-                          if (newId.isNotEmpty) {
-                            try {
-                              await FirebaseFirestore.instance
-                                  .collection('All_Data')
-                                  .doc('Student_AUSTRC_ID')
-                                  .update({
-                                'Member_${widget.memberNumber}': newId,
-                              });
+                          final newAustId = austIdController.text.trim();
+                          final newAustrcId = austrcIdController.text.trim();
+                          final newEduMail = eduMailController.text.trim();
 
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Row(
-                                      children: [
-                                        const Icon(Icons.check_circle,
-                                            color: Colors.white),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          'Member ${widget.memberNumber} updated!',
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
-                                    ),
-                                    backgroundColor: kGreenMain,
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    margin: const EdgeInsets.all(16),
+                          if (newAustId.isEmpty || newAustrcId.isEmpty || newEduMail.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('All fields are required'),
+                                backgroundColor: kAccentRed,
+                              ),
+                            );
+                            return;
+                          }
+
+                          try {
+                            await FirebaseFirestore.instance
+                                .collection('All_Data')
+                                .doc('Student_AUSTRC_ID')
+                                .collection('Members')
+                                .doc(widget.memberDocId)
+                                .update({
+                              'AUST_ID': newAustId,
+                              'AUSTRC_ID': newAustrcId,
+                              'Edu_Mail': newEduMail,
+                            });
+
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Member ${widget.memberNumber} updated!',
                                   ),
-                                );
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error: $e'),
-                                    backgroundColor: kAccentRed,
-                                  ),
-                                );
-                              }
+                                  backgroundColor: kGreenMain,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error: $e'),
+                                  backgroundColor: kAccentRed,
+                                ),
+                              );
                             }
                           }
                         },
@@ -619,9 +619,7 @@ class _MemberCardState extends State<_MemberCard>
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         elevation: 10,
         child: Container(
           constraints: const BoxConstraints(maxWidth: 400),
@@ -638,7 +636,6 @@ class _MemberCardState extends State<_MemberCard>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Warning Icon
                 Container(
                   width: 70,
                   height: 70,
@@ -681,8 +678,6 @@ class _MemberCardState extends State<_MemberCard>
                   ),
                 ),
                 const SizedBox(height: 28),
-
-                // Buttons
                 Row(
                   children: [
                     Expanded(
@@ -716,33 +711,18 @@ class _MemberCardState extends State<_MemberCard>
                             await FirebaseFirestore.instance
                                 .collection('All_Data')
                                 .doc('Student_AUSTRC_ID')
-                                .update({
-                              'Member_${widget.memberNumber}':
-                                  FieldValue.delete(),
-                            });
+                                .collection('Members')
+                                .doc(widget.memberDocId)
+                                .delete();
 
                             if (context.mounted) {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Row(
-                                    children: [
-                                      const Icon(Icons.check_circle,
-                                          color: Colors.white),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        'Member ${widget.memberNumber} deleted!',
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                    ],
+                                  content: Text(
+                                    'Member ${widget.memberNumber} deleted!',
                                   ),
                                   backgroundColor: kAccentRed,
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  margin: const EdgeInsets.all(16),
                                 ),
                               );
                             }
@@ -782,6 +762,68 @@ class _MemberCardState extends State<_MemberCard>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    IconData icon,
+    String hint, {
+    bool isEmail = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: kGreenDark.withOpacity(0.8),
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: kGreenMain.withOpacity(0.3),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: kGreenMain.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: kGreenDark,
+            ),
+            decoration: InputDecoration(
+              prefixIcon: Icon(icon, color: kGreenMain),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.transparent,
+              contentPadding: const EdgeInsets.all(16),
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey[400]),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -827,11 +869,7 @@ class _ActionButtonState extends State<_ActionButton> {
               width: 1.5,
             ),
           ),
-          child: Icon(
-            widget.icon,
-            color: widget.color,
-            size: 20,
-          ),
+          child: Icon(widget.icon, color: widget.color, size: 20),
         ),
       ),
     );
@@ -926,10 +964,10 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  kGreenMain
-                                      .withOpacity(0.8 + _pulseController.value * 0.2),
-                                  kGreenLight
-                                      .withOpacity(0.8 + _pulseController.value * 0.2),
+                                  kGreenMain.withOpacity(
+                                      0.8 + _pulseController.value * 0.2),
+                                  kGreenLight.withOpacity(
+                                      0.8 + _pulseController.value * 0.2),
                                 ],
                               ),
                               shape: BoxShape.circle,
@@ -986,14 +1024,14 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
   }
 
   void _showAddDialog(BuildContext context) {
-    final controller = TextEditingController();
+    final austIdController = TextEditingController();
+    final austrcIdController = TextEditingController();
+    final eduMailController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         elevation: 10,
         child: Container(
           constraints: const BoxConstraints(maxWidth: 400),
@@ -1010,7 +1048,6 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header
                 Container(
                   width: 70,
                   height: 70,
@@ -1055,55 +1092,28 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // Input Field
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: kGreenMain.withOpacity(0.3),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: kGreenMain.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: controller,
-                    autofocus: true,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: kGreenDark,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: 'AUSTRC ID',
-                      labelStyle: TextStyle(
-                        color: kGreenMain.withOpacity(0.8),
-                        fontWeight: FontWeight.w600,
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.badge_outlined,
-                        color: kGreenMain,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.transparent,
-                      contentPadding: const EdgeInsets.all(20),
-                    ),
-                  ),
+                _buildAddTextField(
+                  'AUST ID',
+                  austIdController,
+                  Icons.badge_outlined,
+                  'Enter AUST ID',
+                ),
+                const SizedBox(height: 16),
+                _buildAddTextField(
+                  'AUSTRC ID',
+                  austrcIdController,
+                  Icons.badge_outlined,
+                  'Enter AUSTRC ID',
+                ),
+                const SizedBox(height: 16),
+                _buildAddTextField(
+                  'Institutional Mail',
+                  eduMailController,
+                  Icons.email_outlined,
+                  'Enter institutional email',
+                  isEmail: true,
                 ),
                 const SizedBox(height: 28),
-
-                // Buttons
                 Row(
                   children: [
                     Expanded(
@@ -1133,52 +1143,52 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () async {
-                          final newId = controller.text.trim();
-                          if (newId.isNotEmpty) {
-                            try {
-                              final nextMemberNumber = widget.memberCount + 1;
-                              await FirebaseFirestore.instance
-                                  .collection('All_Data')
-                                  .doc('Student_AUSTRC_ID')
-                                  .set({
-                                'Member_$nextMemberNumber': newId,
-                              }, SetOptions(merge: true));
+                          final newAustId = austIdController.text.trim();
+                          final newAustrcId = austrcIdController.text.trim();
+                          final newEduMail = eduMailController.text.trim();
 
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Row(
-                                      children: [
-                                        const Icon(Icons.check_circle,
-                                            color: Colors.white),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          'Member $nextMemberNumber added!',
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
-                                    ),
-                                    backgroundColor: kGreenMain,
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    margin: const EdgeInsets.all(16),
-                                  ),
-                                );
-                                widget.onAdded();
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error: $e'),
-                                    backgroundColor: kAccentRed,
-                                  ),
-                                );
-                              }
+                          if (newAustId.isEmpty || newAustrcId.isEmpty || newEduMail.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('All fields are required'),
+                                backgroundColor: kAccentRed,
+                              ),
+                            );
+                            return;
+                          }
+
+                          try {
+                            final nextMemberNumber = widget.memberCount + 1;
+                            await FirebaseFirestore.instance
+                                .collection('All_Data')
+                                .doc('Student_AUSTRC_ID')
+                                .collection('Members')
+                                .doc('Member_$nextMemberNumber')
+                                .set({
+                              'AUST_ID': newAustId,
+                              'AUSTRC_ID': newAustrcId,
+                              'Edu_Mail': newEduMail,
+                            });
+
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content:
+                                      Text('Member $nextMemberNumber added!'),
+                                  backgroundColor: kGreenMain,
+                                ),
+                              );
+                            }
+                            widget.onAdded();
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error: $e'),
+                                  backgroundColor: kAccentRed,
+                                ),
+                              );
                             }
                           }
                         },
@@ -1207,6 +1217,69 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAddTextField(
+    String label,
+    TextEditingController controller,
+    IconData icon,
+    String hint, {
+    bool isEmail = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: kGreenDark.withOpacity(0.8),
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: kGreenMain.withOpacity(0.3),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: kGreenMain.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            autofocus: label == 'AUST ID',
+            keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: kGreenDark,
+            ),
+            decoration: InputDecoration(
+              prefixIcon: Icon(icon, color: kGreenMain),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.transparent,
+              contentPadding: const EdgeInsets.all(16),
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey[400]),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
