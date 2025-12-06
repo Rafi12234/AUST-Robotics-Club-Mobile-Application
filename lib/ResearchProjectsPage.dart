@@ -1313,20 +1313,25 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
     });
 
     try {
-      final doc = await FirebaseFirestore.instance
+      // Get all member documents from the Members collection
+      final membersCollection = await FirebaseFirestore.instance
           .collection('All_Data')
           .doc('Student_AUSTRC_ID')
+          .collection('Members')
           .get();
 
-      if (!doc.exists) {
+      if (membersCollection.docs.isEmpty) {
         throw Exception('Database not available');
       }
 
-      final data = doc.data() as Map<String, dynamic>;
       bool found = false;
 
-      for (var entry in data.entries) {
-        if (entry.key.startsWith('Member_') && entry.value == id) {
+      // Check each member document for matching AUSTRC_ID
+      for (var memberDoc in membersCollection.docs) {
+        final memberData = memberDoc.data();
+        final austrcId = memberData['AUSTRC_ID'];
+
+        if (austrcId == id) {
           found = true;
           break;
         }
@@ -2033,20 +2038,25 @@ class _ProposalDialogState extends State<ProposalDialog> {
     });
 
     try {
-      final doc = await FirebaseFirestore.instance
+      // Get all member documents from the Members collection
+      final membersCollection = await FirebaseFirestore.instance
           .collection('All_Data')
           .doc('Student_AUSTRC_ID')
+          .collection('Members')
           .get();
 
-      if (!doc.exists) {
-        throw Exception('Student ID document not found');
+      if (membersCollection.docs.isEmpty) {
+        throw Exception('Members collection not found');
       }
 
-      final data = doc.data() as Map<String, dynamic>;
       bool found = false;
 
-      for (var entry in data.entries) {
-        if (entry.key.startsWith('Member_') && entry.value == id) {
+      // Check each member document for matching AUSTRC_ID
+      for (var memberDoc in membersCollection.docs) {
+        final memberData = memberDoc.data();
+        final austrcId = memberData['AUSTRC_ID'];
+
+        if (austrcId == id) {
           found = true;
           break;
         }
