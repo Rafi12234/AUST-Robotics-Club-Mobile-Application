@@ -106,6 +106,8 @@ class _AdminMemberIdManagementPageState
                         austId: memberData['AUST_ID'] ?? '',
                         austrcId: memberData['AUSTRC_ID'] ?? '',
                         eduMail: memberData['Edu_Mail'] ?? '',
+                        name: memberData['Name'] ?? '',
+                        department: memberData['Department'] ?? '',
                         memberDocId: memberDoc.id,
                         index: index,
                       );
@@ -191,6 +193,8 @@ class _MemberCard extends StatefulWidget {
   final String austId;
   final String austrcId;
   final String eduMail;
+  final String name;
+  final String department;
   final String memberDocId;
   final int index;
 
@@ -199,6 +203,8 @@ class _MemberCard extends StatefulWidget {
     required this.austId,
     required this.austrcId,
     required this.eduMail,
+    required this.name,
+    required this.department,
     required this.memberDocId,
     required this.index,
   });
@@ -320,14 +326,34 @@ class _MemberCardState extends State<_MemberCard>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Member ${widget.memberNumber}',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: kGreenDark,
-                                      letterSpacing: 0.3,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Member ${widget.memberNumber}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: kGreenDark,
+                                          letterSpacing: 0.3,
+                                        ),
+                                      ),
+                                      if (widget.name.isNotEmpty) ...[
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            '• ${widget.name}',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: kGreenMain.withOpacity(0.8),
+                                              letterSpacing: 0.3,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                   const SizedBox(height: 6),
                                   Container(
@@ -368,19 +394,19 @@ class _MemberCardState extends State<_MemberCard>
                                             letterSpacing: 0.3,
                                           ),
                                         ),
-                                        const SizedBox(height: 3),
-                                        Text(
-                                          'Email: ${widget.eduMail}',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color:
-                                                kGreenDark.withOpacity(0.8),
-                                            letterSpacing: 0.3,
+                                        if (widget.department.isNotEmpty) ...[
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            'Dept: ${widget.department}',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color:
+                                                  kGreenDark.withOpacity(0.8),
+                                              letterSpacing: 0.3,
+                                            ),
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                        ],
                                       ],
                                     ),
                                   ),
@@ -422,6 +448,8 @@ class _MemberCardState extends State<_MemberCard>
     final austIdController = TextEditingController(text: widget.austId);
     final austrcIdController = TextEditingController(text: widget.austrcId);
     final eduMailController = TextEditingController(text: widget.eduMail);
+    final nameController = TextEditingController(text: widget.name);
+    final departmentController = TextEditingController(text: widget.department);
 
     showDialog(
       context: context,
@@ -438,176 +466,196 @@ class _MemberCardState extends State<_MemberCard>
             ),
             borderRadius: BorderRadius.circular(24),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ...existing header...
-                Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [kGreenMain, kGreenLight],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: kGreenMain.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // ...existing header...
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [kGreenMain, kGreenLight],
                       ),
-                    ],
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: kGreenMain.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.edit_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.edit_rounded,
-                    color: Colors.white,
-                    size: 32,
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Edit Member Info',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: kGreenDark,
+                      letterSpacing: 0.3,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Edit Member Info',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    color: kGreenDark,
-                    letterSpacing: 0.3,
+                  const SizedBox(height: 8),
+                  Text(
+                    'Member ${widget.memberNumber}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: kGreenDark.withOpacity(0.6),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Member ${widget.memberNumber}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: kGreenDark.withOpacity(0.6),
+                  const SizedBox(height: 24),
+                  _buildTextField(
+                    'AUST ID',
+                    austIdController,
+                    Icons.badge_outlined,
+                    'Enter AUST ID',
                   ),
-                ),
-                const SizedBox(height: 24),
-                _buildTextField(
-                  'AUST ID',
-                  austIdController,
-                  Icons.badge_outlined,
-                  'Enter AUST ID',
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  'AUSTRC ID',
-                  austrcIdController,
-                  Icons.badge_outlined,
-                  'Enter AUSTRC ID',
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  'Institutional Mail',
-                  eduMailController,
-                  Icons.email_outlined,
-                  'Enter institutional email',
-                  isEmail: true,
-                ),
-                const SizedBox(height: 28),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(
-                            color: kGreenMain.withOpacity(0.3),
-                            width: 2,
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    'AUSTRC ID',
+                    austrcIdController,
+                    Icons.badge_outlined,
+                    'Enter AUSTRC ID',
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    'Institutional Mail',
+                    eduMailController,
+                    Icons.email_outlined,
+                    'Enter institutional email',
+                    isEmail: true,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    'Name',
+                    nameController,
+                    Icons.person_outline,
+                    'Enter member name',
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    'Department',
+                    departmentController,
+                    Icons.school_outlined,
+                    'Enter department (e.g., CSE, EEE)',
+                  ),
+                  const SizedBox(height: 28),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            side: BorderSide(
+                              color: kGreenMain.withOpacity(0.3),
+                              width: 2,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: kGreenMain,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(
-                            color: kGreenMain,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                          ),
-                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final newAustId = austIdController.text.trim();
-                          final newAustrcId = austrcIdController.text.trim();
-                          final newEduMail = eduMailController.text.trim();
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final newAustId = austIdController.text.trim();
+                            final newAustrcId = austrcIdController.text.trim();
+                            final newEduMail = eduMailController.text.trim();
+                            final newName = nameController.text.trim();
+                            final newDepartment = departmentController.text.trim();
 
-                          if (newAustId.isEmpty || newAustrcId.isEmpty || newEduMail.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('All fields are required'),
-                                backgroundColor: kAccentRed,
-                              ),
-                            );
-                            return;
-                          }
-
-                          try {
-                            await FirebaseFirestore.instance
-                                .collection('All_Data')
-                                .doc('Student_AUSTRC_ID')
-                                .collection('Members')
-                                .doc(widget.memberDocId)
-                                .update({
-                              'AUST_ID': newAustId,
-                              'AUSTRC_ID': newAustrcId,
-                              'Edu_Mail': newEduMail,
-                            });
-
-                            if (context.mounted) {
-                              Navigator.pop(context);
+                            if (newAustId.isEmpty || newAustrcId.isEmpty || newEduMail.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Member ${widget.memberNumber} updated!',
-                                  ),
-                                  backgroundColor: kGreenMain,
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Error: $e'),
+                                const SnackBar(
+                                  content: Text('AUST ID, AUSTRC ID, and Email are required'),
                                   backgroundColor: kAccentRed,
                                 ),
                               );
+                              return;
                             }
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kGreenMain,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+
+                            try {
+                              await FirebaseFirestore.instance
+                                  .collection('All_Data')
+                                  .doc('Student_AUSTRC_ID')
+                                  .collection('Members')
+                                  .doc(widget.memberDocId)
+                                  .update({
+                                'AUST_ID': newAustId,
+                                'AUSTRC_ID': newAustrcId,
+                                'Edu_Mail': newEduMail,
+                                'Name': newName,
+                                'Department': newDepartment,
+                              });
+
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Member ${widget.memberNumber} updated!',
+                                    ),
+                                    backgroundColor: kGreenMain,
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error: $e'),
+                                    backgroundColor: kAccentRed,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kGreenMain,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
                           ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Update',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
+                          child: const Text(
+                            'Update',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1027,6 +1075,8 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
     final austIdController = TextEditingController();
     final austrcIdController = TextEditingController();
     final eduMailController = TextEditingController();
+    final nameController = TextEditingController();
+    final departmentController = TextEditingController();
 
     showDialog(
       context: context,
@@ -1043,176 +1093,196 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
             ),
             borderRadius: BorderRadius.circular(24),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [kGreenMain, kGreenLight],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: kGreenMain.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [kGreenMain, kGreenLight],
                       ),
-                    ],
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: kGreenMain.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.person_add_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.person_add_rounded,
-                    color: Colors.white,
-                    size: 32,
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Add New Member',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: kGreenDark,
+                      letterSpacing: 0.3,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Add New Member',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    color: kGreenDark,
-                    letterSpacing: 0.3,
+                  const SizedBox(height: 8),
+                  Text(
+                    'Member ${widget.memberCount + 1}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: kGreenDark.withOpacity(0.6),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Member ${widget.memberCount + 1}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: kGreenDark.withOpacity(0.6),
+                  const SizedBox(height: 24),
+                  _buildAddTextField(
+                    'AUST ID',
+                    austIdController,
+                    Icons.badge_outlined,
+                    'Enter AUST ID',
                   ),
-                ),
-                const SizedBox(height: 24),
-                _buildAddTextField(
-                  'AUST ID',
-                  austIdController,
-                  Icons.badge_outlined,
-                  'Enter AUST ID',
-                ),
-                const SizedBox(height: 16),
-                _buildAddTextField(
-                  'AUSTRC ID',
-                  austrcIdController,
-                  Icons.badge_outlined,
-                  'Enter AUSTRC ID',
-                ),
-                const SizedBox(height: 16),
-                _buildAddTextField(
-                  'Institutional Mail',
-                  eduMailController,
-                  Icons.email_outlined,
-                  'Enter institutional email',
-                  isEmail: true,
-                ),
-                const SizedBox(height: 28),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(
-                            color: kGreenMain.withOpacity(0.3),
-                            width: 2,
+                  const SizedBox(height: 16),
+                  _buildAddTextField(
+                    'AUSTRC ID',
+                    austrcIdController,
+                    Icons.badge_outlined,
+                    'Enter AUSTRC ID',
+                  ),
+                  const SizedBox(height: 16),
+                  _buildAddTextField(
+                    'Institutional Mail',
+                    eduMailController,
+                    Icons.email_outlined,
+                    'Enter institutional email',
+                    isEmail: true,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildAddTextField(
+                    'Name',
+                    nameController,
+                    Icons.person_outline,
+                    'Enter member name',
+                  ),
+                  const SizedBox(height: 16),
+                  _buildAddTextField(
+                    'Department',
+                    departmentController,
+                    Icons.school_outlined,
+                    'Enter department (e.g., CSE, EEE)',
+                  ),
+                  const SizedBox(height: 28),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            side: BorderSide(
+                              color: kGreenMain.withOpacity(0.3),
+                              width: 2,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: kGreenMain,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(
-                            color: kGreenMain,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                          ),
-                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final newAustId = austIdController.text.trim();
-                          final newAustrcId = austrcIdController.text.trim();
-                          final newEduMail = eduMailController.text.trim();
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final newAustId = austIdController.text.trim();
+                            final newAustrcId = austrcIdController.text.trim();
+                            final newEduMail = eduMailController.text.trim();
+                            final newName = nameController.text.trim();
+                            final newDepartment = departmentController.text.trim();
 
-                          if (newAustId.isEmpty || newAustrcId.isEmpty || newEduMail.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('All fields are required'),
-                                backgroundColor: kAccentRed,
-                              ),
-                            );
-                            return;
-                          }
-
-                          try {
-                            final nextMemberNumber = widget.memberCount + 1;
-                            await FirebaseFirestore.instance
-                                .collection('All_Data')
-                                .doc('Student_AUSTRC_ID')
-                                .collection('Members')
-                                .doc('Member_$nextMemberNumber')
-                                .set({
-                              'AUST_ID': newAustId,
-                              'AUSTRC_ID': newAustrcId,
-                              'Edu_Mail': newEduMail,
-                            });
-
-                            if (context.mounted) {
-                              Navigator.pop(context);
+                            if (newAustId.isEmpty || newAustrcId.isEmpty || newEduMail.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content:
-                                      Text('Member $nextMemberNumber added!'),
-                                  backgroundColor: kGreenMain,
-                                ),
-                              );
-                            }
-                            widget.onAdded();
-                          } catch (e) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Error: $e'),
+                                const SnackBar(
+                                  content: Text('AUST ID, AUSTRC ID, and Email are required'),
                                   backgroundColor: kAccentRed,
                                 ),
                               );
+                              return;
                             }
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kGreenMain,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+
+                            try {
+                              final nextMemberNumber = widget.memberCount + 1;
+                              await FirebaseFirestore.instance
+                                  .collection('All_Data')
+                                  .doc('Student_AUSTRC_ID')
+                                  .collection('Members')
+                                  .doc('Member_$nextMemberNumber')
+                                  .set({
+                                'AUST_ID': newAustId,
+                                'AUSTRC_ID': newAustrcId,
+                                'Edu_Mail': newEduMail,
+                                'Name': newName,
+                                'Department': newDepartment,
+                              });
+
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content:
+                                        Text('Member $nextMemberNumber added!'),
+                                    backgroundColor: kGreenMain,
+                                  ),
+                                );
+                              }
+                              widget.onAdded();
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error: $e'),
+                                    backgroundColor: kAccentRed,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kGreenMain,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
                           ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Add',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
+                          child: const Text(
+                            'Add',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
