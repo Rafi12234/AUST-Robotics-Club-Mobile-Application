@@ -91,7 +91,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       title: 'Governing Panel',
       subtitle: 'Panel member management',
       icon: Icons.account_balance_rounded,
-      gradientColors: [Color(0xFF306041), Color(0xFF49AC59), Color(0xFFA78BFA)],
+      gradientColors: [Color(0xFF306041), Color(0xFF49AC59), Color(0xFFB1C5B5)],
       accentColor: kAccentPurple,
       destinationPage: const AdminGoverningPanelPage(),
     ),
