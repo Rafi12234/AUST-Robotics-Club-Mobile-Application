@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
+import 'package:csv/csv.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -8,6 +12,128 @@ const kGreenMain = Color(0xFF2D6A4F);
 const kGreenLight = Color(0xFF52B788);
 const kAccentGold = Color(0xFFFFB703);
 const kAccentRed = Color(0xFFEF4444);
+
+// CSV Export Service
+class CSVExportService {
+  static Future<ExportResult> exportMembersToCSV({
+    required List<Map<String, dynamic>> members,
+    required BuildContext context,
+  }) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const _ExportLoadingDialog(),
+      );
+
+      List<List<dynamic>> csvData = [];
+      csvData.add(['S/N', 'Member Number', 'Name', 'Department', 'AUST ID', 'AUSTRC ID', 'Institutional Mail']);
+
+      int serialNumber = 1;
+      for (var member in members) {
+        csvData.add([
+          serialNumber++,
+          member['Member_Number'] ?? '',
+          member['Name'] ?? '',
+          member['Department'] ?? '',
+          member['AUST_ID'] ?? '',
+          member['AUSTRC_ID'] ?? '',
+          member['Edu_Mail'] ?? '',
+        ]);
+      }
+
+      String csv = const ListToCsvConverter().convert(csvData);
+      final directory = await getApplicationDocumentsDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = 'AUSTRC_Members_$timestamp.csv';
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+      await file.writeAsString(csv);
+
+      if (!await file.exists()) {
+        throw Exception('Failed to create file');
+      }
+
+      if (context.mounted) Navigator.pop(context);
+
+      return ExportResult(
+        success: true,
+        filePath: filePath,
+        fileName: fileName,
+        memberCount: members.length,
+      );
+    } catch (e) {
+      if (context.mounted) Navigator.pop(context);
+      return ExportResult(success: false, error: e.toString());
+    }
+  }
+
+  static Future<ShareResult?> shareFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) return null;
+
+      final result = await Share.shareXFiles(
+        [XFile(filePath)],
+        subject: 'AUSTRC Members Export',
+        text: 'Exported AUSTRC members data in CSV format',
+      );
+      return result;
+    } catch (e) {
+      return null;
+    }
+  }
+}
+
+class ExportResult {
+  final bool success;
+  final String? filePath;
+  final String? fileName;
+  final int? memberCount;
+  final String? error;
+
+  ExportResult({required this.success, this.filePath, this.fileName, this.memberCount, this.error});
+}
+
+class _ExportLoadingDialog extends StatelessWidget {
+  const _ExportLoadingDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 30, offset: const Offset(0, 15))],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: kGreenLight.withOpacity(0.15), shape: BoxShape.circle),
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(kGreenMain), strokeWidth: 3),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text('Exporting Members...', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: kGreenDark)),
+              const SizedBox(height: 8),
+              Text('Preparing CSV file', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class AdminMemberIdManagementPage extends StatefulWidget {
   const AdminMemberIdManagementPage({Key? key}) : super(key: key);
@@ -35,6 +161,53 @@ class _AdminMemberIdManagementPageState
   void dispose() {
     _headerController.dispose();
     super.dispose();
+  }
+
+  Future<void> _exportToCSV(List<QueryDocumentSnapshot> memberDocs) async {
+    try {
+      final members = memberDocs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        final memberNumber = int.tryParse(doc.id.replaceAll('Member_', '')) ?? 0;
+        return {
+          'Member_Number': memberNumber,
+          'Name': data['Name'] ?? '',
+          'Department': data['Department'] ?? '',
+          'AUST_ID': data['AUST_ID'] ?? '',
+          'AUSTRC_ID': data['AUSTRC_ID'] ?? '',
+          'Edu_Mail': data['Edu_Mail'] ?? '',
+        };
+      }).toList();
+
+      members.sort((a, b) => (a['Member_Number'] as int).compareTo(b['Member_Number'] as int));
+
+      final result = await CSVExportService.exportMembersToCSV(members: members, context: context);
+
+      if (result.success && mounted) {
+        _showExportSuccessDialog(result);
+      } else if (!result.success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: ${result.error}'), backgroundColor: kAccentRed, behavior: SnackBarBehavior.floating),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e'), backgroundColor: kAccentRed, behavior: SnackBarBehavior.floating),
+        );
+      }
+    }
+  }
+
+  void _showExportSuccessDialog(ExportResult result) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => _ExportSuccessDialog(
+        filePath: result.filePath!,
+        fileName: result.fileName!,
+        memberCount: result.memberCount!,
+      ),
+    );
   }
 
   @override
@@ -139,6 +312,28 @@ class _AdminMemberIdManagementPageState
         icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
         onPressed: () => Navigator.pop(context),
       ),
+      actions: [
+        // Enhanced Export to CSV Button
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('All_Data')
+              .doc('Student_AUSTRC_ID')
+              .collection('Members')
+              .snapshots(),
+          builder: (context, snapshot) {
+            final hasMembers = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+            final memberCount = snapshot.data?.docs.length ?? 0;
+
+            return Padding(
+              padding: const EdgeInsets.only(right: 8, top: 6, bottom: 6),
+              child: _EnhancedExportButton(
+                onPressed: hasMembers ? () => _exportToCSV(snapshot.data!.docs) : null,
+                memberCount: memberCount,
+              ),
+            );
+          },
+        ),
+      ],
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -1354,3 +1549,317 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
   }
 }
 
+// Enhanced Export Button Widget
+class _EnhancedExportButton extends StatefulWidget {
+  final VoidCallback? onPressed;
+  final int memberCount;
+
+  const _EnhancedExportButton({
+    required this.onPressed,
+    required this.memberCount,
+  });
+
+  @override
+  State<_EnhancedExportButton> createState() => _EnhancedExportButtonState();
+}
+
+class _EnhancedExportButtonState extends State<_EnhancedExportButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _pulseAnimation;
+  bool _isHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _pulseAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEnabled = widget.onPressed != null;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedScale(
+        scale: _isHovered && isEnabled ? 1.05 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: isEnabled ? widget.onPressed : null,
+            borderRadius: BorderRadius.circular(16),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: isEnabled
+                    ? LinearGradient(
+                        colors: _isHovered
+                            ? [kGreenLight, kGreenMain]
+                            : [kGreenMain, kGreenDark],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : null,
+                color: isEnabled ? null : Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: isEnabled && _isHovered
+                    ? [
+                        BoxShadow(
+                          color: kGreenMain.withOpacity(0.5),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : isEnabled
+                        ? [
+                            BoxShadow(
+                              color: kGreenMain.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                border: Border.all(
+                  color: isEnabled ? Colors.white.withOpacity(0.3) : Colors.white.withOpacity(0.1),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Animated Icon
+                  AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: isEnabled ? _scaleAnimation.value : 1.0,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Pulse effect
+                            if (isEnabled)
+                              Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(_pulseAnimation.value * 0.3),
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                            // Main icon
+                            Icon(
+                              Icons.file_download_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 6),
+                  // Text
+                  Text(
+                    'Export as CSV',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Export Success Dialog
+class _ExportSuccessDialog extends StatefulWidget {
+  final String filePath;
+  final String fileName;
+  final int memberCount;
+
+  const _ExportSuccessDialog({
+    required this.filePath,
+    required this.fileName,
+    required this.memberCount,
+  });
+
+  @override
+  State<_ExportSuccessDialog> createState() => _ExportSuccessDialogState();
+}
+
+class _ExportSuccessDialogState extends State<_ExportSuccessDialog> {
+  bool _isSharing = false;
+
+  Future<void> _handleShare() async {
+    if (_isSharing) return;
+    setState(() => _isSharing = true);
+
+    try {
+      final result = await CSVExportService.shareFile(widget.filePath);
+      if (mounted) {
+        setState(() => _isSharing = false);
+        if (result != null) {
+          await Future.delayed(const Duration(milliseconds: 300));
+          if (mounted) Navigator.of(context).pop();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSharing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sharing: $e'), backgroundColor: kAccentRed),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 30, offset: const Offset(0, 15))],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: [kGreenMain.withOpacity(0.15), kGreenLight.withOpacity(0.15)]),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(gradient: LinearGradient(colors: [kGreenMain, kGreenLight]), shape: BoxShape.circle),
+                      child: const Icon(Icons.check_rounded, color: Colors.white, size: 40),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+            const Text('Export Successful!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: kGreenDark)),
+            const SizedBox(height: 8),
+            Text('${widget.memberCount} members exported', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: kGreenLight.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: kGreenLight.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(color: kGreenMain.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
+                    child: const Icon(Icons.description_rounded, color: kGreenMain, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(widget.fileName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: kGreenDark), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 4),
+                        Text('CSV File • Ready to share', style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    label: const Text('Close'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: kGreenDark,
+                      side: BorderSide(color: kGreenMain.withOpacity(0.3), width: 2),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton.icon(
+                    onPressed: _isSharing ? null : _handleShare,
+                    icon: _isSharing
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white)))
+                        : const Icon(Icons.share_rounded, size: 20),
+                    label: Text(_isSharing ? 'Sharing...' : 'Share File'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kGreenMain,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
