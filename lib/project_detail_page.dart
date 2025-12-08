@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProjectDetailPage extends StatefulWidget {
   final String docId; // document name inside research_projects
@@ -302,14 +303,12 @@ class _Carousel extends StatelessWidget {
                   onPageChanged: onChanged,
                   itemBuilder: (context, i) {
                     final url = images[i];
-                    return Image.network(
-                      url,
+                    return CachedNetworkImage(
+                      imageUrl: url,
                       fit: BoxFit.cover,
-                      loadingBuilder: (c, child, progress) {
-                        if (progress == null) return child;
-                        return const Center(child: CircularProgressIndicator());
-                      },
-                      errorBuilder: (_, __, ___) => Container(
+                      placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) => Container(
                         color: Colors.black12,
                         child: const Center(
                           child: Icon(Icons.broken_image_outlined,

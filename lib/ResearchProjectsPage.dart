@@ -2556,8 +2556,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
 
   void _resolveImageAspect(String url) {
     if (url.isEmpty || _imageAspect.containsKey(url)) return;
-    final img = Image.network(url);
-    final ImageStream stream = img.image.resolve(const ImageConfiguration());
+    final ImageProvider img = CachedNetworkImageProvider(url);
+    final ImageStream stream = img.resolve(const ImageConfiguration());
     ImageStreamListener? listener;
     listener = ImageStreamListener((ImageInfo info, bool _) {
       final w = info.image.width.toDouble();

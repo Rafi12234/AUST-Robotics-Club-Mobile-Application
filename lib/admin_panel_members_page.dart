@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class AdminPanelMembersPage extends StatefulWidget {
   final String semesterId;
@@ -402,11 +403,22 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                             const SizedBox(height: 8),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                imageUrl!,
+                              child: CachedNetworkImage(
+                                imageUrl: imageUrl!,
                                 height: 100,
                                 width: 100,
                                 fit: BoxFit.cover,
+                                placeholder: (context, url) => const SizedBox(
+                                  height: 100,
+                                  width: 100,
+                                  child: Center(child: CircularProgressIndicator()),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  height: 100,
+                                  width: 100,
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.error),
+                                ),
                               ),
                             ),
                           ],
@@ -819,11 +831,22 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                           if (imageUrl != null && imageUrl!.isNotEmpty) ...[
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                imageUrl!,
+                              child: CachedNetworkImage(
+                                imageUrl: imageUrl!,
                                 height: 100,
                                 width: 100,
                                 fit: BoxFit.cover,
+                                placeholder: (context, url) => const SizedBox(
+                                  height: 100,
+                                  width: 100,
+                                  child: Center(child: CircularProgressIndicator()),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  height: 100,
+                                  width: 100,
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.error),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -1256,19 +1279,29 @@ class _MemberCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: imageUrl.isNotEmpty
-                  ? Image.network(
-                imageUrl,
+                  ? CachedNetworkImage(
+                imageUrl: imageUrl,
                 width: 70,
                 height: 70,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 70,
-                    height: 70,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.person, size: 40),
-                  );
-                },
+                placeholder: (context, url) => Container(
+                  width: 70,
+                  height: 70,
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: 70,
+                  height: 70,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.person, size: 40),
+                ),
               )
                   : Container(
                 width: 70,

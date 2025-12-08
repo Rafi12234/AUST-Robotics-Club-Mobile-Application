@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'governing_panel_page.dart';
 import 'ResearchProjectsPage.dart';
 import 'event_page.dart';
@@ -950,39 +951,30 @@ class _CarouselImageItem extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
-        child: Image.network(
-          imageUrl,
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
           fit: imageFit,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Container(
-              color: const Color(0xFFF5F5F5),
-              child: Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                        : null,
-                    valueColor: const AlwaysStoppedAnimation(kGreenMain),
-                  ),
+          placeholder: (context, url) => Container(
+            color: const Color(0xFFF5F5F5),
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(kGreenMain),
                 ),
               ),
-            );
-          },
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: const Color(0xFFF5F5F5),
-              child: Icon(
-                Icons.image_not_supported_outlined,
-                color: Colors.grey[400],
-                size: 30,
-              ),
-            );
-          },
+            ),
+          ),
+          errorWidget: (context, url, error) => Container(
+            color: const Color(0xFFF5F5F5),
+            child: Icon(
+              Icons.image_not_supported_outlined,
+              color: Colors.grey[400],
+              size: 30,
+            ),
+          ),
         ),
       ),
     );
@@ -2211,31 +2203,26 @@ class _PosterCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.network(
-                item.imageUrl,
+              CachedNetworkImage(
+                imageUrl: item.imageUrl,
                 fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return Container(
-                    color: const Color(0xFFF5F5F5),
-                    alignment: Alignment.center,
-                    child: const SizedBox(
-                      height: 22,
-                      width: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: const Color(0xFFFDECEC),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'Image error',
-                      style: TextStyle(color: Color(0xFFB00020)),
-                    ),
-                  );
-                },
+                placeholder: (context, url) => Container(
+                  color: const Color(0xFFF5F5F5),
+                  alignment: Alignment.center,
+                  child: const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: const Color(0xFFFDECEC),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Image error',
+                    style: TextStyle(color: Color(0xFFB00020)),
+                  ),
+                ),
               ),
               Align(
                 alignment: Alignment.bottomRight,
@@ -3125,28 +3112,25 @@ class _EducationalProgramCardState extends State<_EducationalProgramCard> {
               children: [
                 // Background Image
                 Positioned.fill(
-                  child: Image.network(
-                    widget.item.imageUrl,
+                  child: CachedNetworkImage(
+                    imageUrl: widget.item.imageUrl,
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFFE8F5E9),
-                              Color(0xFFC8E6C9),
-                            ],
-                          ),
+                    placeholder: (context, url) => Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFFE8F5E9),
+                            Color(0xFFC8E6C9),
+                          ],
                         ),
-                        alignment: Alignment.center,
-                        child: const CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation(kGreenDark),
-                        ),
-                      );
-                    },
-                    errorBuilder: (_, __, ___) => Container(
+                      ),
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation(kGreenDark),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           colors: [Color(0xFFFFEBEE), Color(0xFFFFCDD2)],
@@ -3580,23 +3564,19 @@ class _VoicePosterCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Image.network(
-            url,
+          child: CachedNetworkImage(
+            imageUrl: url,
             fit: BoxFit.cover,
-            gaplessPlayback: true,
-            loadingBuilder: (context, child, progress) {
-              if (progress == null) return child;
-              return Container(
-                color: const Color(0xFFF5F5F5),
-                alignment: Alignment.center,
-                child: const SizedBox(
-                  height: 22,
-                  width: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) => Container(
+            placeholder: (context, url) => Container(
+              color: const Color(0xFFF5F5F5),
+              alignment: Alignment.center,
+              child: const SizedBox(
+                height: 22,
+                width: 22,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+            errorWidget: (context, url, error) => Container(
               color: const Color(0xFFFDECEC),
               alignment: Alignment.center,
               child: const Text(

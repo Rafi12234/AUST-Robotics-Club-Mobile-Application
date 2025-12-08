@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:async';
 
 // ============================================
@@ -900,10 +901,11 @@ class _ContactUsPageState extends State<ContactUsPage>
                             padding: const EdgeInsets.all(4),
                             child: ClipOval(
                               child: imageUrl.isNotEmpty
-                                  ? Image.network(
-                                imageUrl,
+                                  ? CachedNetworkImage(
+                                imageUrl: imageUrl,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
+                                placeholder: (context, url) => _buildPlaceholderImage(size: 60),
+                                errorWidget: (context, url, error) =>
                                     _buildPlaceholderImage(size: 60),
                               )
                                   : _buildPlaceholderImage(size: 60),
@@ -1181,26 +1183,23 @@ class _MemberCardState extends State<_MemberCard> {
                       padding: const EdgeInsets.all(3),
                       child: ClipOval(
                         child: imageUrl.isNotEmpty
-                            ? Image.network(
-                          imageUrl,
+                            ? CachedNetworkImage(
+                          imageUrl: imageUrl,
                           fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              color: kGreenMain.withOpacity(0.1),
-                              child: const Center(
-                                child: SizedBox(
-                                  width: 54,
-                                  height: 54,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(kGreenMain),
-                                  ),
+                          placeholder: (context, url) => Container(
+                            color: kGreenMain.withOpacity(0.1),
+                            child: const Center(
+                              child: SizedBox(
+                                width: 54,
+                                height: 54,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(kGreenMain),
                                 ),
                               ),
-                            );
-                          },
-                          errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => _buildPlaceholder(),
                         )
                             : _buildPlaceholder(),
                       ),

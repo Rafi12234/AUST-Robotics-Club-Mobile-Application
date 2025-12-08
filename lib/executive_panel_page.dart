@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
 
 class ExecutivePanelPage extends StatefulWidget {
@@ -552,20 +553,17 @@ class _ProfileCardState extends State<_ProfileCard>
                   AspectRatio(
                     aspectRatio: 16 / 16,
                     child: hasImg
-                        ? Image.network(
-                      widget.imageUrl,
+                        ? CachedNetworkImage(
+                      imageUrl: widget.imageUrl,
                       fit: BoxFit.cover,
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                _ExecutivePanelPageState.brandStart),
-                            strokeWidth: 2.5,
-                          ),
-                        );
-                      },
-                      errorBuilder: (_, __, ___) => _ImageFallback(),
+                      placeholder: (context, url) => Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              _ExecutivePanelPageState.brandStart),
+                          strokeWidth: 2.5,
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => _ImageFallback(),
                     )
                         : _ImageFallback(),
                   ),
