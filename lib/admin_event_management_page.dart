@@ -1113,22 +1113,120 @@ class _EditableTextFieldState extends State<_EditableTextField>
       return;
     }
 
-    await FirebaseFirestore.instance
-        .collection('All_Data')
-        .doc('Event_Page')
-        .collection('All_Events_of_RC')
-        .doc(widget.eventName)
-        .update({widget.fieldName: newValue});
+    // Special handling for Event_Name - need to rename the document
+    if (widget.fieldName == 'Event_Name' && newValue != widget.eventName) {
+      await _renameEventDocument(newValue);
+    } else {
+      // Regular field update
+      await FirebaseFirestore.instance
+          .collection('All_Data')
+          .doc('Event_Page')
+          .collection('All_Events_of_RC')
+          .doc(widget.eventName)
+          .update({widget.fieldName: newValue});
 
-    setState(() => _isEditing = false);
+      setState(() => _isEditing = false);
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${widget.label} updated!'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${widget.label} updated!'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _renameEventDocument(String newEventName) async {
+    try {
+      // Show loading indicator
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Text('Renaming event...'),
+              ],
+            ),
+            duration: Duration(seconds: 30),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+
+      final eventsCollection = FirebaseFirestore.instance
+          .collection('All_Data')
+          .doc('Event_Page')
+          .collection('All_Events_of_RC');
+
+      // Get all data from the old document
+      final oldDoc = await eventsCollection.doc(widget.eventName).get();
+
+      if (!oldDoc.exists) {
+        throw Exception('Event not found');
+      }
+
+      final data = oldDoc.data() as Map<String, dynamic>;
+
+      // Update the Event_Name field in the data
+      data['Event_Name'] = newEventName;
+
+      // Create new document with the new name
+      await eventsCollection.doc(newEventName).set(data);
+
+      // Delete the old document
+      await eventsCollection.doc(widget.eventName).delete();
+
+      setState(() => _isEditing = false);
+
+      if (mounted) {
+        // Clear the loading snackbar
+        ScaffoldMessenger.of(context).clearSnackBars();
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Event name updated successfully!'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Navigate to the new event page after a short delay
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EventEditPage(eventName: newEventName),
+              ),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      setState(() => _isEditing = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error renaming event: $e'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }
