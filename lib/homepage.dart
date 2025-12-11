@@ -1759,7 +1759,7 @@ class _WelcomeCardState extends State<_WelcomeCard>
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                 child: Row(
                   children: [
                     TweenAnimationBuilder<double>(
@@ -1780,7 +1780,7 @@ class _WelcomeCardState extends State<_WelcomeCard>
                         width: SizeConfig.screenWidth * 0.12,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                           border: Border.all(
                             color: Colors.white.withOpacity(0.3),
                             width: 2,
@@ -1793,14 +1793,14 @@ class _WelcomeCardState extends State<_WelcomeCard>
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.handshake_rounded,
                           color: Colors.white,
-                          size: 28,
+                          size: SizeConfig.screenWidth * 0.065,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: SizeConfig.screenWidth * 0.04),
                     Expanded(
                       child: TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
@@ -1818,11 +1818,11 @@ class _WelcomeCardState extends State<_WelcomeCard>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               "Welcome to AUST Robotics Club!",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 17,
+                                fontSize: SizeConfig.screenWidth * 0.0378,
                                 height: 1.3,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.3,
@@ -1834,7 +1834,7 @@ class _WelcomeCardState extends State<_WelcomeCard>
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            SizedBox(height: SizeConfig.screenHeight * 0.008),
                             Row(
                               children: [
                                 Container(
@@ -1845,13 +1845,13 @@ class _WelcomeCardState extends State<_WelcomeCard>
                                     borderRadius: BorderRadius.circular(2),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                const Expanded(
+                                SizedBox(width: SizeConfig.screenWidth * 0.02),
+                                Expanded(
                                   child: Text(
                                     "Explore our latest events and projects",
                                     style: TextStyle(
                                       color: Color(0xFFB8E6D5),
-                                      fontSize: 13.5,
+                                      fontSize: SizeConfig.screenWidth * 0.032,
                                       height: 1.3,
                                       fontWeight: FontWeight.w500,
                                       letterSpacing: 0.2,
@@ -2202,8 +2202,10 @@ class _PosterCard extends StatelessWidget {
                 alignment: Alignment.bottomRight,
                 child: Container(
                   width: double.infinity,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.screenWidth * 0.025,
+                    vertical: SizeConfig.screenHeight * 0.01
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.bottomCenter,
@@ -2216,10 +2218,10 @@ class _PosterCard extends StatelessWidget {
                   ),
                   child: Text(
                     item.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 17,
+                      fontSize: SizeConfig.screenWidth * 0.035,
                       shadows: [
                         Shadow(
                           blurRadius: 4,
@@ -2326,7 +2328,7 @@ class _ExploreEventsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 17),
+        SizedBox(height: SizeConfig.screenHeight * 0.01),
         Center(
           child: Container(
             decoration: BoxDecoration(
@@ -2371,7 +2373,7 @@ class _ExploreEventsButton extends StatelessWidget {
                           letterSpacing: 0.3,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: SizeConfig.screenWidth * 0.02),
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0, end: 1),
                         duration: const Duration(milliseconds: 1200),
@@ -2382,10 +2384,10 @@ class _ExploreEventsButton extends StatelessWidget {
                             child: child,
                           );
                         },
-                        child: const Icon(
+                        child: Icon(
                           Icons.arrow_forward_rounded,
                           color: Colors.white,
-                          size: 20,
+                          size: SizeConfig.screenHeight * 0.018,
                         ),
                       ),
                     ],
@@ -2395,7 +2397,7 @@ class _ExploreEventsButton extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 13),
+        SizedBox(height: SizeConfig.screenHeight * 0.005),
       ],
     );
   }
