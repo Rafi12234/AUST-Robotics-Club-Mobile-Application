@@ -3148,9 +3148,9 @@ class _EducationalProgramCardState extends State<_EducationalProgramCard> {
 
                 // Content
                 Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: 16,
+                  left: SizeConfig.screenWidth * 0.04,
+                  right: SizeConfig.screenWidth * 0.04,
+                  bottom: SizeConfig.screenHeight * 0.02,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -3159,9 +3159,9 @@ class _EducationalProgramCardState extends State<_EducationalProgramCard> {
                         widget.item.name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: SizeConfig.screenWidth * 0.038,
                           fontWeight: FontWeight.w800,
                           height: 1.3,
                           shadows: [
