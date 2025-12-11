@@ -203,6 +203,7 @@ class _InfoButtonState extends State<_InfoButton>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) {
@@ -218,8 +219,8 @@ class _InfoButtonState extends State<_InfoButton>
           animation: _pulseController,
           builder: (context, child) {
             return Container(
-              width: 40,
-              height: 40,
+              width: SizeConfig.screenWidth * 0.1,
+              height: SizeConfig.screenWidth * 0.05,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
@@ -235,11 +236,11 @@ class _InfoButtonState extends State<_InfoButton>
                   ),
                 ],
               ),
-              child: const Center(
+              child: Center(
                 child: Icon(
                   Icons.info_outline_rounded,
                   color: Colors.white,
-                  size: 22,
+                  size: SizeConfig.screenWidth * 0.04,
                 ),
               ),
             );
@@ -293,11 +294,12 @@ class _AboutDialogState extends State<_AboutDialog>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Center(
       child: SingleChildScrollView(
         child: Container(
-          margin: const EdgeInsets.all(24),
-          constraints: const BoxConstraints(maxWidth: 380),
+          margin:  EdgeInsets.all(24),
+          constraints:  BoxConstraints(maxWidth: SizeConfig.screenHeight * 0.9),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(28),
@@ -344,9 +346,9 @@ class _AboutDialogState extends State<_AboutDialog>
                             // AUST Logo
                             _LogoContainer(
                               imagePath: 'assets/images/AUST.png',
-                              size: 70,
+                              size: SizeConfig.screenHeight * 0.06,
                             ),
-                            const SizedBox(width: 20),
+                            SizedBox(width: SizeConfig.screenWidth * 0.03),
                             // Connecting Line with Glow
                             Container(
                               width: 40,
@@ -368,33 +370,33 @@ class _AboutDialogState extends State<_AboutDialog>
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 20),
+                            SizedBox(width: 20),
                             // AUSTRC Logo
                             _LogoContainer(
                               imagePath: 'assets/images/logo2.png',
-                              size: 70,
+                              size: SizeConfig.screenHeight * 0.06,
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
 
                       // Title
                       FadeTransition(
                         opacity: _logoAnimController,
                         child: Column(
                           children: [
-                            const Text(
+                            Text(
                               'AUST ROBOTICS CLUB',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 22,
+                                fontSize: SizeConfig.screenWidth * 0.043,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 1,
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -407,11 +409,11 @@ class _AboutDialogState extends State<_AboutDialog>
                                   color: Colors.white.withOpacity(0.3),
                                 ),
                               ),
-                              child: const Text(
+                              child: Text(
                                 '🤖 Robotics for Building a Safer Future',
                                 style: TextStyle(
                                   color: Color(0xFFB8E6D5),
-                                  fontSize: 12,
+                                  fontSize: SizeConfig.screenWidth * 0.028,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 0.3,
                                 ),
@@ -464,34 +466,34 @@ class _AboutDialogState extends State<_AboutDialog>
                                         color: kGreenMain.withOpacity(0.15),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.auto_awesome_rounded,
                                         color: kGreenMain,
-                                        size: 20,
+                                        size: SizeConfig.screenWidth * 0.04,
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
-                                    const Text(
+                                    SizedBox(width: 12),
+                                    Text(
                                       'About Us',
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: SizeConfig.screenWidth * 0.035,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F3D2E),
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 16),
-                                const Text(
+                                SizedBox(height: 16),
+                                Text(
                                   'AUST Robotics Club is a leading club for students at Ahsanullah University of Science and Technology.',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: SizeConfig.screenWidth * 0.028,
                                     color: Color(0xFF2D5A4A),
                                     height: 1.6,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                const SizedBox(height: 12),
+                                SizedBox(height: 12),
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
@@ -511,14 +513,14 @@ class _AboutDialogState extends State<_AboutDialog>
                                       Icon(
                                         Icons.format_quote_rounded,
                                         color: kGreenMain.withOpacity(0.6),
-                                        size: 24,
+                                        size: SizeConfig.screenWidth * 0.04,
                                       ),
                                       const SizedBox(width: 10),
-                                      const Expanded(
+                                      Expanded(
                                         child: Text(
                                           '"Robotics for Building a Safer Future"',
                                           style: TextStyle(
-                                            fontSize: 13,
+                                            fontSize: SizeConfig.screenWidth * 0.028,
                                             fontStyle: FontStyle.italic,
                                             fontWeight: FontWeight.w700,
                                             color: Color(0xFF0F3D2E),
@@ -529,53 +531,23 @@ class _AboutDialogState extends State<_AboutDialog>
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                const Text(
+                                Text(
                                   'AUSTRC has a vibrant student community dedicated to advancing innovation in robotics. From microcontroller projects, and autonomous robots to large-scale initiatives like the Mars Rover, AI and autonomous quadcopters, we empower collaboration and bring ideas to life on both national and international stages.',
                                   style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: SizeConfig.screenWidth * 0.028,
                                     color: Color(0xFF4A7A6A),
                                     height: 1.7,
-                                    fontWeight: FontWeight.w400,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                           const SizedBox(height: 20),
-
-                          // Highlights
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _HighlightChip(
-                                  icon: Icons.precision_manufacturing_rounded,
-                                  label: 'Mars Rover',
-                                  color: const Color(0xFF2563EB),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _HighlightChip(
-                                  icon: Icons.smart_toy_rounded,
-                                  label: 'AI Projects',
-                                  color: const Color(0xFF7C3AED),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _HighlightChip(
-                                  icon: Icons.flight_rounded,
-                                  label: 'Quadcopters',
-                                  color: const Color(0xFFDC2626),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-
                           // Close Button
                           SizedBox(
-                            width: double.infinity,
+                            width: SizeConfig.screenWidth * 0.9,
+                            height: SizeConfig.screenHeight * 0.05,
                             child: ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               style: ElevatedButton.styleFrom(
@@ -589,15 +561,15 @@ class _AboutDialogState extends State<_AboutDialog>
                                 elevation: 4,
                                 shadowColor: kGreenDark.withOpacity(0.4),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.check_circle_rounded, size: 20),
-                                  SizedBox(width: 10),
+                                  Icon(Icons.check_circle_rounded, size: SizeConfig.screenWidth * 0.03),
+                                  SizedBox(width: SizeConfig.screenWidth * 0.02),
                                   Text(
                                     'Got It!',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: SizeConfig.screenWidth * 0.03,
                                       fontWeight: FontWeight.w700,
                                       letterSpacing: 0.5,
                                     ),
@@ -729,13 +701,14 @@ class HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return ListView(
-      padding: EdgeInsets.zero,
+      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.0001),
       physics: const BouncingScrollPhysics(),
       children: [
         // Main content with padding
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          padding:  EdgeInsets.fromLTRB(SizeConfig.screenWidth*0.03 , SizeConfig.screenHeight*0.014, SizeConfig.screenWidth*0.03, 0),
           child: Column(
             children: [
               const _WelcomeCard(),
@@ -1744,6 +1717,7 @@ class _WelcomeCardState extends State<_WelcomeCard>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return FadeTransition(
       opacity: _fadeAnimation,
       child: ScaleTransition(
@@ -2119,8 +2093,8 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel>
         _ensureStartPosition(events.length);
         _ensureAutoTimer(events.length);
 
-        return SizedBox(
-          height: SizeConfig.screenHeight * 0.19,
+        return AspectRatio(
+          aspectRatio: 2.0,
           child: PageView.builder(
             controller: _controller,
             allowImplicitScrolling: true,
