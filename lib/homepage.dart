@@ -1006,31 +1006,31 @@ class _OurSponsorsSection extends StatelessWidget {
                     color: Colors.white.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.handshake_rounded,
                     color: Colors.white,
-                    size: 28,
+                    size: SizeConfig.screenWidth * 0.07,
                   ),
                 ),
-                const SizedBox(width: 15),
-                const Expanded(
+                SizedBox(width: SizeConfig.screenWidth * 0.04),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Our Sponsors',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: SizeConfig.screenWidth * 0.0378,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
                           letterSpacing: 0.3,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      SizedBox(height: SizeConfig.screenHeight * 0.0045),
                       Text(
                         'Partners powering our innovation',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: SizeConfig.screenWidth * 0.032,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFFB8E6D5),
                           letterSpacing: 0.2,
@@ -1042,7 +1042,7 @@ class _OurSponsorsSection extends StatelessWidget {
                 Icon(
                   Icons.star_rounded,
                   color: Colors.amber.withOpacity(0.8),
-                  size: 24,
+                  size: SizeConfig.screenWidth * 0.06,
                 ),
               ],
             ),
@@ -1255,31 +1255,31 @@ class _CollaboratedClubsSection extends StatelessWidget {
                     color: Colors.white.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.handshake_rounded,
                     color: Colors.white,
-                    size: 28,
+                    size: SizeConfig.screenWidth * 0.07,
                   ),
                 ),
-                const SizedBox(width: 15),
-                const Expanded(
+                SizedBox(width: SizeConfig.screenWidth * 0.04),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Collaborated Clubs',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: SizeConfig.screenWidth * 0.0378,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
                           letterSpacing: 0.3,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      SizedBox(height: SizeConfig.screenHeight * 0.0045),
                       Text(
                         'Building together with amazing teams',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: SizeConfig.screenWidth * 0.032,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFFBFDBFE),
                           letterSpacing: 0.2,
@@ -1291,7 +1291,7 @@ class _CollaboratedClubsSection extends StatelessWidget {
                 Icon(
                   Icons.star_rounded,
                   color: Colors.amber.withOpacity(0.8),
-                  size: 24,
+                  size: SizeConfig.screenWidth * 0.06,
                 ),
               ],
             ),
@@ -2428,7 +2428,7 @@ class _QuickActionsRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
@@ -2442,10 +2442,10 @@ class _QuickActionsRow extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.smart_button_sharp, color: Colors.white, size: 28),
-                SizedBox(width: 15),
+                Icon(Icons.smart_button_sharp, color: Colors.white, size: SizeConfig.screenWidth * 0.07),
+                SizedBox(width: SizeConfig.screenWidth * 0.04),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2453,17 +2453,17 @@ class _QuickActionsRow extends StatelessWidget {
                       Text(
                         'Quick Action Buttons',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: SizeConfig.screenWidth * 0.0378,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
                           letterSpacing: 0.3,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      SizedBox(height: SizeConfig.screenHeight * 0.0045),
                       Text(
                         'All important options are in one place ',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: SizeConfig.screenWidth * 0.032,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFFB8E6D5),
                           letterSpacing: 0.2,
@@ -2475,7 +2475,7 @@ class _QuickActionsRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: SizeConfig.screenHeight * 0.015),
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
@@ -2853,10 +2853,10 @@ class _EducationalMentorshipSection extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.support_agent_rounded, color: Colors.white, size: 28),
-                SizedBox(width: 15),
+                Icon(Icons.support_agent_rounded, color: Colors.white, size: SizeConfig.screenWidth * 0.07),
+                SizedBox(width: SizeConfig.screenWidth * 0.04),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2864,17 +2864,17 @@ class _EducationalMentorshipSection extends StatelessWidget {
                       Text(
                         'Educational & Mentorship',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: SizeConfig.screenWidth * 0.0378,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
                           letterSpacing: 0.3,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      SizedBox(height: SizeConfig.screenHeight * 0.0045),
                       Text(
                         'Training Programs',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: SizeConfig.screenWidth * 0.032,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFFB8E6D5),
                           letterSpacing: 0.2,
@@ -3406,10 +3406,10 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
               ),
             ],
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.record_voice_over, color: Colors.white, size: 28),
-              SizedBox(width: 15),
+              Icon(Icons.record_voice_over, color: Colors.white, size: SizeConfig.screenWidth * 0.07),
+              SizedBox(width: SizeConfig.screenWidth * 0.04),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -3417,17 +3417,17 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
                     Text(
                       'Voice of AUSTRC',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: SizeConfig.screenWidth * 0.0378,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
                         letterSpacing: 0.3,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    SizedBox(height: SizeConfig.screenHeight * 0.0045),
                     Text(
                       'Voices from our dedicated members',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: SizeConfig.screenWidth * 0.032,
                         fontWeight: FontWeight.w500,
                         color: Color(0xFFB8E6D5),
                         letterSpacing: 0.2,
