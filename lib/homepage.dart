@@ -984,7 +984,7 @@ class _OurSponsorsSection extends StatelessWidget {
             );
           },
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
@@ -1093,10 +1093,10 @@ class _OurSponsorsSection extends StatelessWidget {
                 ),
                 child: ContinuousMovingCarousel(
                   imageUrls: urls,
-                  height: 100,
-                  itemWidth: 140,
-                  speed: 35,
-                  itemSpacing: 20,
+                  height: SizeConfig.screenHeight * 0.10,
+                  itemWidth: SizeConfig.screenWidth * 0.25,
+                  speed: 50,
+                  itemSpacing: SizeConfig.screenWidth * 0.04,
                   borderRadius: BorderRadius.circular(12),
                   imageFit: BoxFit.contain,
                 ),
@@ -1233,7 +1233,7 @@ class _CollaboratedClubsSection extends StatelessWidget {
             );
           },
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
@@ -1347,11 +1347,11 @@ class _CollaboratedClubsSection extends StatelessWidget {
                 ),
                 child: ContinuousMovingCarousel(
                   imageUrls: urls,
-                  height: 90,
-                  itemWidth: 90,
-                  speed: 40,
-                  itemSpacing: 16,
-                  borderRadius: BorderRadius.circular(45),
+                  height: SizeConfig.screenHeight * 0.12,
+                  itemWidth: SizeConfig.screenWidth * 0.27,
+                  speed: 50,
+                  itemSpacing: SizeConfig.screenWidth * 0.045,
+                  borderRadius: BorderRadius.circular(12),
                   imageFit: BoxFit.cover,
                 ),
               ),
@@ -3398,7 +3398,7 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
       children: [
         // Section header
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
