@@ -2839,7 +2839,7 @@ class _EducationalMentorshipSection extends StatelessWidget {
             );
           },
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
@@ -2887,7 +2887,7 @@ class _EducationalMentorshipSection extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: SizeConfig.screenHeight * 0.01),
 
         // StreamBuilder for Collection
         StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -2924,7 +2924,8 @@ class _EducationalMentorshipSection extends StatelessWidget {
             }
 
             return SizedBox(
-              height: 240,
+              height: SizeConfig.screenHeight * 0.23,
+              width: SizeConfig.screenWidth ,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
@@ -2940,7 +2941,7 @@ class _EducationalMentorshipSection extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: SizeConfig.screenHeight * 0.015),
 
         // Explore All Programs Button
         TweenAnimationBuilder<double>(
@@ -3000,7 +3001,7 @@ class _EducationalMentorshipSection extends StatelessWidget {
                             letterSpacing: 0.3,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: SizeConfig.screenWidth * 0.02),
                         TweenAnimationBuilder<double>(
                           tween: Tween(begin: 0, end: 1),
                           duration: const Duration(milliseconds: 1200),
@@ -3011,10 +3012,10 @@ class _EducationalMentorshipSection extends StatelessWidget {
                               child: child,
                             );
                           },
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_forward_rounded,
                             color: Colors.white,
-                            size: 20,
+                            size: SizeConfig.screenHeight * 0.018,
                           ),
                         ),
                       ],
@@ -3068,8 +3069,13 @@ class _EducationalProgramCardState extends State<_EducationalProgramCard> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
-          margin: const EdgeInsets.only(right: 16, bottom: 8, top: 8),
-          width: 280,
+          margin: EdgeInsets.only(
+            right: SizeConfig.screenWidth * 0.04,
+            bottom: SizeConfig.screenHeight * 0.01,
+            top: SizeConfig.screenHeight * 0.01
+          ),
+          width: SizeConfig.screenWidth * 0.7,
+          height: SizeConfig.screenWidth * 0.7,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
