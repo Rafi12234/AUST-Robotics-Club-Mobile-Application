@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:async';
+import 'size_config.dart';
 
 // ============================================
 // AUST RC BRAND COLORS
@@ -174,6 +175,7 @@ class _ContactUsPageState extends State<ContactUsPage>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF0FBF6),
       body: Stack(
@@ -232,7 +234,7 @@ class _ContactUsPageState extends State<ContactUsPage>
         end: Offset.zero,
       ).animate(_headerAnimation),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.03, vertical: SizeConfig.screenHeight*0.01),
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border(
@@ -276,10 +278,10 @@ class _ContactUsPageState extends State<ContactUsPage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Contact Us',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: SizeConfig.screenWidth*0.038,
                         fontWeight: FontWeight.w900,
                         color: kGreenDark,
                         letterSpacing: 0.2,
@@ -288,7 +290,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                     Text(
                       'Get in touch with our team',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: SizeConfig.screenWidth*0.027,
                         color: Colors.grey[600],
                       ),
                     ),
@@ -309,9 +311,9 @@ class _ContactUsPageState extends State<ContactUsPage>
                 );
               },
               child: Container(
-                width: 44,
-                height: 44,
-                padding: const EdgeInsets.all(6),
+                width: SizeConfig.screenWidth*0.1,
+                height: SizeConfig.screenWidth*0.1,
+                padding: EdgeInsets.all(SizeConfig.screenWidth*0.005),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -327,10 +329,10 @@ class _ContactUsPageState extends State<ContactUsPage>
                 child: Image.asset(
                   'assets/images/logo2.png',
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.smart_toy_rounded,
                     color: kGreenMain,
-                    size: 22,
+                    size: SizeConfig.screenWidth*0.07,
                   ),
                 ),
               ),
@@ -604,10 +606,10 @@ class _ContactUsPageState extends State<ContactUsPage>
           end: Offset.zero,
         ).animate(_headerAnimation),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(SizeConfig.screenWidth*0.033),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(SizeConfig.screenWidth*0.04),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
@@ -636,34 +638,34 @@ class _ContactUsPageState extends State<ContactUsPage>
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding:  EdgeInsets.all(SizeConfig.screenWidth*0.03),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Icon(
+                    child:  Icon(
                       Icons.support_agent_rounded,
                       color: Colors.white,
-                      size: 40,
+                      size: SizeConfig.screenWidth*0.1,
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                const Text(
+                SizedBox(height: SizeConfig.screenHeight*0.008),
+                Text(
                   'Meet Our Team',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: SizeConfig.screenWidth*0.047,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: SizeConfig.screenHeight*0.008),
                 Text(
                   'Connect with our dedicated team members for any queries or assistance',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: SizeConfig.screenWidth*0.032,
                     color: Colors.white.withOpacity(0.85),
                     height: 1.5,
                   ),
@@ -679,36 +681,36 @@ class _ContactUsPageState extends State<ContactUsPage>
 
   Widget _buildQuickActions() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding:  EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.03),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(SizeConfig.screenWidth*0.02),
                 decoration: BoxDecoration(
                   color: Colors.blue.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.bolt_rounded,
                   color: Colors.blue,
-                  size: 18,
+                  size: SizeConfig.screenWidth*0.045,
                 ),
               ),
-              const SizedBox(width: 10),
-              const Text(
+              SizedBox(width: SizeConfig.screenWidth*0.025),
+               Text(
                 'Quick Actions',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: SizeConfig.screenWidth*0.038,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF1F2937),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: SizeConfig.screenHeight*0.015),
           Row(
             children: [
               Expanded(
@@ -720,7 +722,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                   onTap: () => _sendEmail('austrc@aust.edu'),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: SizeConfig.screenWidth*0.03),
               Expanded(
                 child: _QuickActionButton(
                   icon: Icons.location_on_rounded,
@@ -732,7 +734,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: SizeConfig.screenWidth*0.03),
               Expanded(
                 child: _QuickActionButton(
                   icon: Icons.public_rounded,
@@ -744,7 +746,7 @@ class _ContactUsPageState extends State<ContactUsPage>
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: SizeConfig.screenHeight*0.01),
         ],
       ),
     );
@@ -752,33 +754,33 @@ class _ContactUsPageState extends State<ContactUsPage>
 
   Widget _buildTeamSectionTitle() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.03, vertical: SizeConfig.screenHeight*0.01),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(SizeConfig.screenWidth*0.025),
             decoration: BoxDecoration(
               color: kGreenMain.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.people_alt_rounded,
               color: kGreenMain,
-              size: 18,
+              size: SizeConfig.screenWidth*0.045,
             ),
           ),
-          const SizedBox(width: 10),
-          const Text(
+          SizedBox(width:  SizeConfig.screenWidth*0.025),
+          Text(
             'Our Team',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: SizeConfig.screenWidth*0.038,
               fontWeight: FontWeight.w800,
               color: Color(0xFF1F2937),
             ),
           ),
           const Spacer(),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.03, vertical: SizeConfig.screenHeight*0.01),
             decoration: BoxDecoration(
               color: kGreenMain.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
@@ -786,7 +788,7 @@ class _ContactUsPageState extends State<ContactUsPage>
             child: Text(
               'Tap to view details',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: SizeConfig.screenWidth*0.024,
                 fontWeight: FontWeight.w600,
                 color: kGreenMain.withOpacity(0.8),
               ),
@@ -842,9 +844,9 @@ class _ContactUsPageState extends State<ContactUsPage>
                 children: [
                   // Handle Bar
                   Container(
-                    margin: const EdgeInsets.only(top: 12),
-                    width: 40,
-                    height: 4,
+                    margin: EdgeInsets.only(top: SizeConfig.screenHeight*0.012, bottom: SizeConfig.screenHeight*0.008),
+                    width: SizeConfig.screenWidth*0.15,
+                    height: SizeConfig.screenHeight*0.006,
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(2),
@@ -852,7 +854,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                   ),
 
                   Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: EdgeInsets.all(SizeConfig.screenWidth*0.015),
                     child: Column(
                       children: [
                         // Close Button - Top Right
@@ -861,7 +863,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                           child: GestureDetector(
                             onTap: _closeContactDetail,
                             child: Container(
-                              padding: const EdgeInsets.all(10),
+                              padding: EdgeInsets.all(SizeConfig.screenWidth*0.025),
                               decoration: BoxDecoration(
                                 color: Colors.grey[100],
                                 borderRadius: BorderRadius.circular(12),
@@ -869,7 +871,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                               child: Icon(
                                 Icons.close_rounded,
                                 color: Colors.grey[600],
-                                size: 22,
+                                size: SizeConfig.screenWidth*0.05,
                               ),
                             ),
                           ),
@@ -877,8 +879,8 @@ class _ContactUsPageState extends State<ContactUsPage>
 
                         // Large Circular Image - INCREASED SIZE
                         Container(
-                          width: 120, // Increased from 100
-                          height: 120, // Increased from 100
+                          width: SizeConfig.screenWidth*0.25, // Increased from 100
+                          height: SizeConfig.screenWidth*0.25, // Increased from 100
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
@@ -898,7 +900,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                             ],
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(4),
+                            padding: EdgeInsets.all(SizeConfig.screenWidth*0.015),
                             child: ClipOval(
                               child: imageUrl.isNotEmpty
                                   ? CachedNetworkImage(
@@ -913,27 +915,27 @@ class _ContactUsPageState extends State<ContactUsPage>
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        SizedBox(height: SizeConfig.screenHeight*0.012),
 
                         // Name
                         Text(
                           name,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 24,
+                          style: TextStyle(
+                            fontSize: SizeConfig.screenWidth*0.045,
                             fontWeight: FontWeight.w900,
                             color: Color(0xFF1F2937),
                           ),
                         ),
 
-                        const SizedBox(height: 10),
+                        SizedBox(height: SizeConfig.screenHeight*0.006),
 
                         // Designation Badge
                         if (designation.isNotEmpty)
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 8,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: SizeConfig.screenWidth*0.03,
+                              vertical: SizeConfig.screenHeight*0.004,
                             ),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
@@ -943,8 +945,8 @@ class _ContactUsPageState extends State<ContactUsPage>
                             ),
                             child: Text(
                               designation,
-                              style: const TextStyle(
-                                fontSize: 14,
+                              style:  TextStyle(
+                                fontSize: SizeConfig.screenWidth*0.032,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -952,20 +954,20 @@ class _ContactUsPageState extends State<ContactUsPage>
                           ),
 
                         if (department.isNotEmpty) ...[
-                          const SizedBox(height: 10),
+                          SizedBox(height: SizeConfig.screenHeight*0.008),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
                                 Icons.business_rounded,
-                                size: 18,
+                                size: SizeConfig.screenWidth*0.04,
                                 color: Colors.grey[500],
                               ),
-                              const SizedBox(width: 6),
+                               SizedBox(width: SizeConfig.screenWidth*0.02),
                               Text(
                                 department,
                                 style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize: SizeConfig.screenWidth*0.03,
                                   color: Colors.grey[600],
                                 ),
                               ),
@@ -973,7 +975,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                           ),
                         ],
 
-                        const SizedBox(height: 24),
+                        SizedBox(height: SizeConfig.screenHeight*0.02),
 
                         // Divider
                         Container(
@@ -981,7 +983,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                           color: Colors.grey[200],
                         ),
 
-                        const SizedBox(height: 24),
+                        SizedBox(height: SizeConfig.screenHeight*0.02),
 
                         // Action Buttons - NO PULSE ANIMATION
                         Row(
@@ -997,7 +999,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                                 ),
                               ),
                             if (phone.isNotEmpty && email.isNotEmpty)
-                              const SizedBox(width: 12),
+                               SizedBox(width: SizeConfig.screenWidth*0.03),
                             if (email.isNotEmpty)
                               Expanded(
                                 child: _DetailActionButton(
@@ -1011,7 +1013,7 @@ class _ContactUsPageState extends State<ContactUsPage>
                           ],
                         ),
 
-                        const SizedBox(height: 16),
+                        SizedBox(height: SizeConfig.screenHeight*0.02),
 
                         // Copy Buttons
                         Row(
@@ -1107,6 +1109,7 @@ class _MemberCardState extends State<_MemberCard> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     final name = widget.data['Name']?.toString() ?? 'Unnamed';
     final designation = widget.data['Designation']?.toString() ?? '';
     final department = widget.data['Department']?.toString() ?? '';
@@ -1153,14 +1156,14 @@ class _MemberCardState extends State<_MemberCard> {
             transform: Matrix4.identity()..scale(_isPressed ? 0.96 : 1.0),
             transformAlignment: Alignment.center,
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(SizeConfig.screenWidth*0.035),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Circular Profile Image - INCREASED SIZE
                   Container(
-                    width: 120, // Increased from 70
-                    height: 120, // Increased from 70
+                    width: SizeConfig.screenWidth*0.22, // Increased from 70
+                    height: SizeConfig.screenWidth*0.22,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
@@ -1180,7 +1183,7 @@ class _MemberCardState extends State<_MemberCard> {
                       ],
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(3),
+                      padding: EdgeInsets.all(SizeConfig.screenWidth*0.012),
                       child: ClipOval(
                         child: imageUrl.isNotEmpty
                             ? CachedNetworkImage(
@@ -1188,10 +1191,10 @@ class _MemberCardState extends State<_MemberCard> {
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
                             color: kGreenMain.withOpacity(0.1),
-                            child: const Center(
+                            child: Center(
                               child: SizedBox(
-                                width: 54,
-                                height: 54,
+                                width: SizeConfig.screenWidth*0.135,
+                                height: SizeConfig.screenWidth*0.135,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(kGreenMain),
@@ -1206,7 +1209,7 @@ class _MemberCardState extends State<_MemberCard> {
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                SizedBox(height: SizeConfig.screenHeight*0.01),
 
                   // Name
                   Text(
@@ -1214,21 +1217,21 @@ class _MemberCardState extends State<_MemberCard> {
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: SizeConfig.screenWidth*0.036,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF1F2937),
                     ),
                   ),
 
-                  const SizedBox(height: 6),
+                  SizedBox(height: SizeConfig.screenHeight*0.006),
 
                   // Designation
                   if (designation.isNotEmpty)
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.screenWidth*0.025,
+                        vertical: SizeConfig.screenHeight*0.002,
                       ),
                       decoration: BoxDecoration(
                         color: kGreenMain.withOpacity(0.1),
@@ -1239,15 +1242,15 @@ class _MemberCardState extends State<_MemberCard> {
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 15,
+                        style: TextStyle(
+                          fontSize: SizeConfig.screenWidth*0.028,
                           color: kGreenDark,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
 
-                  const SizedBox(height: 4),
+                  SizedBox(height: SizeConfig.screenHeight*0.004),
 
                   // Department
                   if (department.isNotEmpty)
@@ -1257,7 +1260,7 @@ class _MemberCardState extends State<_MemberCard> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: SizeConfig.screenWidth*0.026,
                         color: Colors.grey[600],
                       ),
                     ),
@@ -1275,7 +1278,7 @@ class _MemberCardState extends State<_MemberCard> {
                           onTap: widget.onCall,
                         ),
                       if (phone.isNotEmpty && email.isNotEmpty)
-                        const SizedBox(width: 12),
+                        SizedBox(width: SizeConfig.screenWidth*0.03),
                       if (email.isNotEmpty)
                         _SmallActionButton(
                           icon: Icons.email_rounded,
@@ -1296,11 +1299,11 @@ class _MemberCardState extends State<_MemberCard> {
   Widget _buildPlaceholder() {
     return Container(
       color: kGreenMain.withOpacity(0.12),
-      child: const Center(
+      child: Center(
         child: Icon(
           Icons.person_rounded,
           color: kGreenMain,
-          size: 35,
+          size: SizeConfig.screenWidth*0.135,
         ),
       ),
     );
@@ -1514,7 +1517,7 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: widget.color.withOpacity(_isPressed ? 0.4 : 0.15),
-                width: 1.5,
+                width: 2.5,
               ),
             ),
             transform: Matrix4.identity()..scale(_isPressed ? 0.95 : 1.0),
@@ -1524,13 +1527,13 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
                 Icon(
                   widget.icon,
                   color: widget.color,
-                  size: 26,
+                  size: SizeConfig.screenWidth*0.06,
                 ),
-                const SizedBox(height: 8),
+                 SizedBox(height: SizeConfig.screenHeight*0.008),
                 Text(
                   widget.label,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: SizeConfig.screenWidth*0.03,
                     fontWeight: FontWeight.w700,
                     color: widget.color,
                   ),
@@ -1607,24 +1610,25 @@ class _DetailActionButtonState extends State<_DetailActionButton> {
             Icon(
               widget.icon,
               color: Colors.white,
-              size: 30,
+              size: SizeConfig.screenWidth*0.05,
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: SizeConfig.screenHeight*0.008),
             Text(
               widget.label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 15,
+                fontSize: SizeConfig.screenWidth*0.033,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: SizeConfig.screenHeight*0.004),
             Text(
               widget.sublabel,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: Colors.white.withOpacity(0.85),
-                fontSize: 11,
+                fontSize: SizeConfig.screenWidth*0.028,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -1700,17 +1704,17 @@ class _CopyButtonState extends State<_CopyButton> {
                 _copied ? Icons.check_rounded : widget.icon,
                 key: ValueKey(_copied),
                 color: _copied ? kGreenMain : Colors.grey[600],
-                size: 18,
+                size: SizeConfig.screenWidth*0.03,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: SizeConfig.screenWidth*0.02),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: Text(
                 _copied ? 'Copied!' : widget.label,
                 key: ValueKey(_copied),
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: SizeConfig.screenWidth*0.03,
                   fontWeight: FontWeight.w600,
                   color: _copied ? kGreenMain : Colors.grey[600],
                 ),
