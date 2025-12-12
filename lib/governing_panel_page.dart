@@ -498,7 +498,7 @@ class _PanelCategoriesList extends StatelessWidget {
 
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
       children: [
         // Back Section
         TweenAnimationBuilder<double>(
@@ -514,7 +514,7 @@ class _PanelCategoriesList extends StatelessWidget {
           child: GestureDetector(
             onTap: onBack,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.05, vertical: SizeConfig.screenWidth*0.03),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
@@ -529,14 +529,14 @@ class _PanelCategoriesList extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.arrow_back_rounded, color: kBrandStart, size: 20),
-                  const SizedBox(width: 8),
+                  Icon(Icons.arrow_back_rounded, color: kBrandStart, size: SizeConfig.screenWidth * 0.04),
+                  SizedBox(width: SizeConfig.screenWidth * 0.02),
                   Text(
                     'Back to Semesters',
                     style: TextStyle(
                       color: kBrandStart,
                       fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                      fontSize: SizeConfig.screenWidth * 0.03,
                     ),
                   ),
                 ],
@@ -544,8 +544,7 @@ class _PanelCategoriesList extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 24),
-
+        SizedBox(height: SizeConfig.screenHeight * 0.015),
         // Section Header
         TweenAnimationBuilder<double>(
           tween: Tween(begin: 0, end: 1),
@@ -557,29 +556,29 @@ class _PanelCategoriesList extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                 decoration: BoxDecoration(
                   color: kBrandStart.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(Icons.category_rounded, color: kBrandStart, size: 24),
+                child: Icon(Icons.history_rounded, color: kBrandStart, size: SizeConfig.screenWidth * 0.06),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: SizeConfig.screenWidth * 0.04),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Panel Categories',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: SizeConfig.screenWidth * 0.04,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF1B4332),
                     ),
                   ),
                   Text(
-                    'Choose a panel to explore',
+                    'Choose a Panel to explore',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: SizeConfig.screenWidth * 0.03,
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w500,
                     ),
@@ -589,8 +588,7 @@ class _PanelCategoriesList extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 24),
-
+        SizedBox(height: SizeConfig.screenHeight * 0.015),
         // Category Cards
         ...categories.asMap().entries.map((entry) {
           final index = entry.key;
@@ -602,7 +600,7 @@ class _PanelCategoriesList extends StatelessWidget {
           );
         }).toList(),
 
-        const SizedBox(height: 20),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
       ],
     );
   }
@@ -655,7 +653,7 @@ class _PanelCategoryCardState extends State<_PanelCategoryCard> {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+        padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.015),
         child: GestureDetector(
           onTapDown: (_) => setState(() => _isPressed = true),
           onTapUp: (_) {
@@ -694,11 +692,11 @@ class _PanelCategoryCardState extends State<_PanelCategoryCard> {
                 ),
                 // Content
                 Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.25),
                           borderRadius: BorderRadius.circular(18),
@@ -710,29 +708,29 @@ class _PanelCategoryCardState extends State<_PanelCategoryCard> {
                         child: Icon(
                           widget.category.icon,
                           color: Colors.white,
-                          size: 32,
+                          size: SizeConfig.screenWidth * 0.07,
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      SizedBox(width: SizeConfig.screenWidth * 0.04),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               widget.category.title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: SizeConfig.screenWidth * 0.045,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.3,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            SizedBox(height: SizeConfig.screenHeight * 0.005),
                             Text(
                               widget.category.subtitle,
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.9),
-                                fontSize: 13,
+                                fontSize: SizeConfig.screenWidth * 0.032,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -740,15 +738,15 @@ class _PanelCategoryCardState extends State<_PanelCategoryCard> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.arrow_forward_rounded,
                           color: Colors.white,
-                          size: 22,
+                          size: SizeConfig.screenWidth * 0.05,
                         ),
                       ),
                     ],
@@ -903,7 +901,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
           child: Opacity(
             opacity: _headerFade.value.clamp(0.0, 1.0),
             child: Container(
-              padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 24),
+              height: SizeConfig.screenHeight*0.13,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: gradientColors,
@@ -914,85 +912,78 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
                   bottomLeft: Radius.circular(40),
                   bottomRight: Radius.circular(40),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: gradientColors[0].withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
               ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      // Back Button
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(SizeConfig.screenWidth*0.03, SizeConfig.screenHeight*0.047, SizeConfig.screenWidth*0.035, SizeConfig.screenHeight*0.02),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        // Back Button
+                        _AnimatedBackButton(onTap: () => Navigator.pop(context)),
+                        SizedBox(width: SizeConfig.screenWidth*0.03),
+                        // Title
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0, end: 1),
+                                duration: const Duration(milliseconds: 800),
+                                curve: Curves.easeOutCubic,
+                                builder: (context, value, child) {
+                                  return Transform.translate(
+                                    offset: Offset(30 * (1 - value), 0),
+                                    child: Opacity(
+                                      opacity: value.clamp(0.0, 1.0),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  _getPanelTitle(),
+                                  style: TextStyle(
+                                    fontSize: SizeConfig.screenWidth*0.05,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: SizeConfig.screenHeight*0.005),
+                              Text(
+                                widget.semesterId,
+                                style: TextStyle(
+                                  fontSize: SizeConfig.screenWidth*0.035,
+                                  color: Colors.white.withOpacity(0.85),
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Icon Badge
+                        Container(
+                          padding: EdgeInsets.all(SizeConfig.screenWidth*0.025),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(14),
+                            shape: BoxShape.circle,
                             border: Border.all(
                               color: Colors.white.withOpacity(0.3),
                               width: 2,
                             ),
                           ),
                           child: Icon(
-                            Icons.arrow_back_ios_new_rounded,
+                            _getPanelIcon(),
                             color: Colors.white,
-                            size: 20,
+                            size: SizeConfig.screenWidth*0.055,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      // Title
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _getPanelTitle(),
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              widget.semesterId,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white.withOpacity(0.9),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Icon Badge
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 2,
-                          ),
-                        ),
-                        child: Icon(
-                          _getPanelIcon(),
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
