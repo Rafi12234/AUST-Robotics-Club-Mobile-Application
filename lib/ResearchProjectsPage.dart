@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
 import 'Exclusive_Content_Page.dart';
+import 'size_config.dart';
 // Main Research Projects List Page
 class ResearchProjectsPage extends StatefulWidget {
   const ResearchProjectsPage({Key? key}) : super(key: key);
@@ -205,8 +206,8 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
               _buildProjectsList(),
 
               // Bottom padding for FAB
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 100),
+              SliverToBoxAdapter(
+                child: SizedBox(height: SizeConfig.screenHeight * 0.12),
               ),
             ],
           ),
@@ -225,26 +226,18 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
 
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 220,
+      expandedHeight: SizeConfig.screenHeight * 0.21,
       floating: false,
       pinned: true,
       stretch: true,
       elevation: 0,
       backgroundColor: const Color(0xFF1B5E20),
       leading: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.023),
         child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1.5,
-            ),
-          ),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new,
-                color: Colors.white, size: 20),
+            icon: Icon(Icons.arrow_back_ios_new,
+                color: Colors.white, size: SizeConfig.screenWidth * 0.05),
             onPressed: () => Navigator.pop(context),
             padding: EdgeInsets.zero,
           ),
@@ -252,7 +245,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
       ),
       flexibleSpace: LayoutBuilder(
         builder: (context, constraints) {
-          final expandedHeight = 220.0;
+          final expandedHeight = SizeConfig.screenHeight * 0.25;
           final collapsedHeight =
               kToolbarHeight + MediaQuery.of(context).padding.top;
           final currentHeight = constraints.maxHeight;
@@ -291,62 +284,62 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
 
                 // Content
                 Positioned(
-                  left: 24 + (48 * collapseRatio),
+                  left: SizeConfig.screenWidth*0.05 + (48 * collapseRatio),
                   right: 24,
-                  bottom: 20,
+                  bottom: SizeConfig.screenHeight*0.015,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (collapseRatio < 0.5) ...[
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 7,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.screenWidth*0.03,
+                            vertical: SizeConfig.screenHeight*0.007,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth*0.04),
                             border: Border.all(
                               color: Colors.white.withOpacity(0.4),
                               width: 1.5,
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.science,
-                                  color: Colors.white, size: 16),
-                              SizedBox(width: 6),
+                                  color: Colors.white, size: SizeConfig.screenWidth*0.025),
+                              SizedBox(width: SizeConfig.screenWidth*0.012),
                               Text(
                                 'Innovation Hub',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 12,
+                                  fontSize: SizeConfig.screenWidth*0.024,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: SizeConfig.screenHeight*0.008),
                       ],
                       Text(
                         'Research & Projects',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 32 - (12 * collapseRatio),
+                          fontSize: SizeConfig.screenWidth*0.06 - (SizeConfig.screenWidth*0.01 * collapseRatio),
                           fontWeight: FontWeight.bold,
                           height: 1.1,
                         ),
                       ),
                       if (collapseRatio < 0.5) ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: SizeConfig.screenHeight*0.006),
                         Text(
                           'Explore groundbreaking innovations',
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.9),
-                            fontSize: 14,
+                            fontSize: SizeConfig.screenWidth*0.03,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -469,7 +462,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(30),
+                    padding: EdgeInsets.all(30),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1B5E20).withOpacity(0.1),
                       shape: BoxShape.circle,
@@ -541,7 +534,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
 
         // Display Regular (Non-Premium) Projects
         return SliverPadding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.034),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -563,7 +556,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
                     );
                   },
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
+                    padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.012),
                     child: _ProjectCard(
                       projectName: projectName,
                       data: data,
@@ -617,8 +610,8 @@ class _FabOverlay extends StatelessWidget {
 
             // FAB Menu Items
             Positioned(
-              right: 16,
-              bottom: 90,
+              right: SizeConfig.screenWidth * 0.036,
+              bottom: SizeConfig.screenHeight * 0.08,
               child: IgnorePointer(
                 ignoring: !isOpen,
                 child: Opacity(
@@ -637,7 +630,7 @@ class _FabOverlay extends StatelessWidget {
                           animationValue: fabController.value,
                           delay: 0.0,
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: SizeConfig.screenHeight * 0.01),
                         // Submit Proposal Button
                         _FabMenuItem(
                           icon: Icons.add_circle_outline,
@@ -656,13 +649,13 @@ class _FabOverlay extends StatelessWidget {
 
             // Main FAB
             Positioned(
-              right: 16,
-              bottom: 24,
+              right: SizeConfig.screenWidth * 0.03,
+              bottom: SizeConfig.screenHeight * 0.02,
               child: GestureDetector(
                 onTap: onToggle,
                 child: Container(
-                  width: 60,
-                  height: 60,
+                  width: SizeConfig.screenWidth * 0.12,
+                  height: SizeConfig.screenWidth * 0.12,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: fabController.value > 0.5
@@ -685,10 +678,10 @@ class _FabOverlay extends StatelessWidget {
                   ),
                   child: Transform.rotate(
                     angle: fabController.value * (math.pi / 4),
-                    child: const Icon(
+                    child:  Icon(
                       Icons.add,
                       color: Colors.white,
-                      size: 30,
+                      size: SizeConfig.screenWidth * 0.05,
                     ),
                   ),
                 ),
@@ -739,10 +732,10 @@ class _FabMenuItem extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.025, vertical: SizeConfig.screenWidth*0.015),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth*0.04),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.15),
@@ -756,14 +749,14 @@ class _FabMenuItem extends StatelessWidget {
                   style: TextStyle(
                     color: color,
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    fontSize: SizeConfig.screenWidth * 0.028,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: SizeConfig.screenWidth * 0.02),
               Container(
-                width: 50,
-                height: 50,
+                width: SizeConfig.screenWidth * 0.12,
+                height: SizeConfig.screenWidth * 0.12,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [color, color.withOpacity(0.8)],
@@ -782,7 +775,7 @@ class _FabMenuItem extends StatelessWidget {
                 child: Icon(
                   icon,
                   color: Colors.white,
-                  size: 24,
+                  size: SizeConfig.screenWidth * 0.06,
                 ),
               ),
             ],
@@ -848,14 +841,14 @@ class _ProjectCard extends StatelessWidget {
       },
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        height: 120,
+        height:SizeConfig.screenHeight * 0.09,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: gradient,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
           boxShadow: [
             BoxShadow(
               color: gradient[1].withOpacity(0.4),
@@ -878,13 +871,13 @@ class _ProjectCard extends StatelessWidget {
 
             // Content
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.036),
               child: Row(
                 children: [
                   // Cover image box
                   Container(
-                    width: 70,
-                    height: 70,
+                    width: SizeConfig.screenWidth * 0.13,
+                    height:  SizeConfig.screenWidth * 0.15,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(18),
@@ -894,7 +887,7 @@ class _ProjectCard extends StatelessWidget {
                       ),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                       child: coverUrl.isNotEmpty
                           ? GestureDetector(
                         onTap: () {
@@ -944,8 +937,8 @@ class _ProjectCard extends StatelessWidget {
                       children: [
                         Text(
                           projectName,
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: SizeConfig.screenWidth * 0.04,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             height: 1.3,
@@ -953,27 +946,27 @@ class _ProjectCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: SizeConfig.screenHeight * 0.006),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.screenWidth * 0.025,
+                            vertical: SizeConfig.screenHeight * 0.004,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.arrow_forward,
-                                  color: Colors.white, size: 12),
-                              SizedBox(width: 4),
+                                  color: Colors.white, size: SizeConfig.screenWidth * 0.025),
+                              SizedBox(width: SizeConfig.screenWidth * 0.01),
                               Text(
                                 'View Details',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 11,
+                                  fontSize: SizeConfig.screenWidth * 0.02,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -1042,17 +1035,17 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
         );
       },
       child: Container(
-        margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        margin: EdgeInsets.fromLTRB(SizeConfig.screenWidth*0.035, SizeConfig.screenHeight*0.015,SizeConfig.screenWidth*0.035 , 0),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth*0.06),
             child: AnimatedBuilder(
               animation: widget.pulseController,
               builder: (context, child) {
                 return Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [
@@ -1063,7 +1056,7 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                     boxShadow: [
                       BoxShadow(
                         color: const Color(0xFF4A148C).withOpacity(
@@ -1078,7 +1071,7 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                       // Shimmer Effect
                       Positioned.fill(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                           child: AnimatedBuilder(
                             animation: _shimmerController,
                             builder: (context, child) {
@@ -1095,7 +1088,7 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                       // Floating Particles
                       Positioned.fill(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                           child: CustomPaint(
                             painter: _FloatingParticlesPainter(
                               animation: widget.pulseController.value,
@@ -1109,8 +1102,8 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                         children: [
                           // Premium Icon with Glow
                           Container(
-                            width: 70,
-                            height: 70,
+                            width: SizeConfig.screenWidth * 0.13,
+                            height: SizeConfig.screenWidth * 0.13,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -1118,7 +1111,7 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                   Colors.orange.withOpacity(0.2),
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                               border: Border.all(
                                 color: Colors.amber.withOpacity(0.5),
                                 width: 2,
@@ -1138,7 +1131,7 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                 Icon(
                                   Icons.workspace_premium,
                                   color: Colors.amber[300],
-                                  size: 36,
+                                  size: SizeConfig.screenWidth * 0.07,
                                 ),
                                 // Sparkle Effect
                                 Positioned(
@@ -1148,10 +1141,10 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                     scale: 0.5 + (0.5 * widget.pulseController.value),
                                     child: Opacity(
                                       opacity: widget.pulseController.value.clamp(0.0, 1.0),
-                                      child: const Icon(
+                                      child:  Icon(
                                         Icons.auto_awesome,
                                         color: Colors.white,
-                                        size: 14,
+                                        size: SizeConfig.screenWidth * 0.03,
                                       ),
                                     ),
                                   ),
@@ -1159,7 +1152,7 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                               ],
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(width: SizeConfig.screenWidth * 0.04),
 
                           // Text Content
                           Expanded(
@@ -1169,13 +1162,13 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                 Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: SizeConfig.screenWidth * 0.02,
+                                        vertical: SizeConfig.screenHeight * 0.002,
                                       ),
                                       decoration: BoxDecoration(
                                         color: Colors.amber.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
                                         border: Border.all(
                                           color: Colors.amber.withOpacity(0.4),
                                         ),
@@ -1186,14 +1179,14 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                           Icon(
                                             Icons.star,
                                             color: Colors.amber[300],
-                                            size: 12,
+                                            size: SizeConfig.screenWidth * 0.03,
                                           ),
-                                          const SizedBox(width: 4),
+                                          SizedBox(width: SizeConfig.screenWidth * 0.01),
                                           Text(
                                             'MEMBERS ONLY',
                                             style: TextStyle(
                                               color: Colors.amber[300],
-                                              fontSize: 10,
+                                              fontSize: SizeConfig.screenWidth * 0.02,
                                               fontWeight: FontWeight.bold,
                                               letterSpacing: 1,
                                             ),
@@ -1203,22 +1196,22 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
-                                const Text(
+                                SizedBox(height: SizeConfig.screenHeight * 0.006),
+                                Text(
                                   'Exclusive Research & Educational Content',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 16,
+                                    fontSize: SizeConfig.screenWidth * 0.033,
                                     fontWeight: FontWeight.bold,
                                     height: 1.3,
                                   ),
                                 ),
-                                const SizedBox(height: 6),
+                                SizedBox(height: SizeConfig.screenHeight * 0.004),
                                 Text(
                                   'Access premium materials with your AUSTRC ID',
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.7),
-                                    fontSize: 12,
+                                    fontSize: SizeConfig.screenWidth * 0.025,
                                     height: 1.4,
                                   ),
                                 ),
@@ -1228,16 +1221,16 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
 
                           // Arrow
                           Container(
-                            width: 40,
-                            height: 40,
+                            width: SizeConfig.screenWidth * 0.08,
+                            height: SizeConfig.screenWidth * 0.08,
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.15),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child:  Icon(
                               Icons.arrow_forward_rounded,
                               color: Colors.white,
-                              size: 20,
+                              size: SizeConfig.screenWidth * 0.04,
                             ),
                           ),
                         ],
@@ -2178,7 +2171,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(20),
+      insetPadding: EdgeInsets.all(20),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         decoration: BoxDecoration(
