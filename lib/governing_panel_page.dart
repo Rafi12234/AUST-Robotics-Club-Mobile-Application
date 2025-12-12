@@ -2377,7 +2377,7 @@ class _SemestersList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
       children: [
         // Back Section
         TweenAnimationBuilder<double>(
@@ -2393,7 +2393,7 @@ class _SemestersList extends StatelessWidget {
           child: GestureDetector(
             onTap: onBack,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.05, vertical: SizeConfig.screenWidth*0.03),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
@@ -2408,14 +2408,14 @@ class _SemestersList extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.arrow_back_rounded, color: kBrandStart, size: 20),
-                  const SizedBox(width: 8),
+                  Icon(Icons.arrow_back_rounded, color: kBrandStart, size: SizeConfig.screenWidth * 0.04),
+                  SizedBox(width: SizeConfig.screenWidth * 0.02),
                   Text(
                     'Back to Overview',
                     style: TextStyle(
                       color: kBrandStart,
                       fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                      fontSize: SizeConfig.screenWidth * 0.03,
                     ),
                   ),
                 ],
@@ -2423,7 +2423,7 @@ class _SemestersList extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: SizeConfig.screenHeight * 0.015),
 
         // Section Header
         TweenAnimationBuilder<double>(
@@ -2436,21 +2436,21 @@ class _SemestersList extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                 decoration: BoxDecoration(
                   color: kBrandStart.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(Icons.history_rounded, color: kBrandStart, size: 24),
+                child: Icon(Icons.history_rounded, color: kBrandStart, size: SizeConfig.screenWidth * 0.06),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: SizeConfig.screenWidth * 0.04),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Available Semesters',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: SizeConfig.screenWidth * 0.04,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF1B4332),
                     ),
@@ -2458,7 +2458,7 @@ class _SemestersList extends StatelessWidget {
                   Text(
                     '${sortedDocs.length} semester${sortedDocs.length > 1 ? 's' : ''} found',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: SizeConfig.screenWidth * 0.03,
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w500,
                     ),
@@ -2468,7 +2468,7 @@ class _SemestersList extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: SizeConfig.screenHeight * 0.03),
 
         // Semester Cards
         ...sortedDocs.asMap().entries.map((entry) {
@@ -2482,7 +2482,7 @@ class _SemestersList extends StatelessWidget {
           );
         }).toList(),
 
-        const SizedBox(height: 20),
+        SizedBox(height: SizeConfig.screenHeight * 0.01),
       ],
     );
   }
@@ -2545,7 +2545,7 @@ class _SemesterCardState extends State<_SemesterCard> {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+        padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.01),
         child: GestureDetector(
           onTapDown: (_) => setState(() => _isPressed = true),
           onTapUp: (_) {
@@ -2590,12 +2590,12 @@ class _SemesterCardState extends State<_SemesterCard> {
 
                 // Content
                 Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                   child: Row(
                     children: [
                       // Icon
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.25),
                           borderRadius: BorderRadius.circular(18),
@@ -2607,10 +2607,10 @@ class _SemesterCardState extends State<_SemesterCard> {
                         child: Icon(
                           _getSeasonIcon(widget.label),
                           color: Colors.white,
-                          size: 32,
+                          size: SizeConfig.screenWidth * 0.05,
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      SizedBox(width: SizeConfig.screenWidth * 0.04),
 
                       // Text Content
                       Expanded(
@@ -2619,29 +2619,29 @@ class _SemesterCardState extends State<_SemesterCard> {
                           children: [
                             if (isLatest)
                               Container(
-                                margin: const EdgeInsets.only(bottom: 8),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
+                                margin: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.005),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.screenWidth * 0.025,
+                                  vertical: SizeConfig.screenHeight * 0.0025,
                                 ),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.25),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
                                       Icons.star_rounded,
                                       color: Colors.white,
-                                      size: 14,
+                                      size: SizeConfig.screenWidth * 0.03,
                                     ),
-                                    SizedBox(width: 4),
+                                    SizedBox(width: SizeConfig.screenWidth * 0.015),
                                     Text(
                                       'LATEST',
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 10,
+                                        fontSize: SizeConfig.screenWidth * 0.025,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 1,
                                       ),
@@ -2651,19 +2651,19 @@ class _SemesterCardState extends State<_SemesterCard> {
                               ),
                             Text(
                               widget.label,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 22,
+                                fontSize: SizeConfig.screenWidth * 0.04,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.5,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            SizedBox(height: SizeConfig.screenHeight * 0.005),
                             Text(
                               'Tap to view panel categories',
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.9),
-                                fontSize: 13,
+                                fontSize: SizeConfig.screenWidth * 0.03,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -2673,15 +2673,15 @@ class _SemesterCardState extends State<_SemesterCard> {
 
                       // Arrow
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.arrow_forward_rounded,
                           color: Colors.white,
-                          size: 22,
+                          size: SizeConfig.screenWidth * 0.04,
                         ),
                       ),
                     ],
