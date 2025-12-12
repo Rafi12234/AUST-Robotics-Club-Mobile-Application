@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
 import 'executive_panel_page.dart';
+import 'size_config.dart';
 
 // Brand colors
 const Color kBrandStart = Color(0xFF0B6B3A);
@@ -267,7 +268,7 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
           child: Opacity(
             opacity: _headerFade.value.clamp(0.0, 1.0),
             child: Container(
-              height: 140 + topInset,
+              height: SizeConfig.screenHeight*0.13,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF064E3B), kBrandStart, kBrandEnd],
@@ -293,13 +294,13 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 20),
+                    padding: EdgeInsets.fromLTRB(SizeConfig.screenWidth*0.03, SizeConfig.screenHeight*0.047, SizeConfig.screenWidth*0.035, SizeConfig.screenHeight*0.02),
                     child: Column(
                       children: [
                         Row(
                           children: [
                             _AnimatedBackButton(onTap: _handleBackPress),
-                            const SizedBox(width: 12),
+                            SizedBox(width: SizeConfig.screenWidth*0.03),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,15 +322,15 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                                       _showPanelCategories && _selectedSemester != null
                                           ? _selectedSemester!
                                           : 'Governing Panel',
-                                      style: const TextStyle(
-                                        fontSize: 26,
+                                      style: TextStyle(
+                                        fontSize: SizeConfig.screenWidth*0.05,
                                         fontWeight: FontWeight.w900,
                                         color: Colors.white,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
+                                  SizedBox(height: SizeConfig.screenHeight*0.005),
                                   AnimatedSwitcher(
                                     duration: const Duration(milliseconds: 300),
                                     transitionBuilder: (child, animation) {
@@ -348,7 +349,7 @@ class _GoverningPanelPageState extends State<GoverningPanelPage>
                                       _getHeaderSubtitle(),
                                       key: ValueKey(_getHeaderSubtitle()),
                                       style: TextStyle(
-                                        fontSize: 14,
+                                        fontSize: SizeConfig.screenWidth*0.03,
                                         color: Colors.white.withOpacity(0.9),
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -938,7 +939,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
                               width: 2,
                             ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back_ios_new_rounded,
                             color: Colors.white,
                             size: 20,
@@ -1833,7 +1834,7 @@ class _AnimatedBackButtonState extends State<_AnimatedBackButton> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         transform: Matrix4.identity()..scale(_isPressed ? 0.9 : 1.0),
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(_isPressed ? 0.3 : 0.2),
           borderRadius: BorderRadius.circular(14),
@@ -1842,10 +1843,10 @@ class _AnimatedBackButtonState extends State<_AnimatedBackButton> {
             width: 2,
           ),
         ),
-        child: const Icon(
+        child: Icon(
           Icons.arrow_back_ios_new_rounded,
           color: Colors.white,
-          size: 20,
+          size: SizeConfig.screenWidth * 0.035,
         ),
       ),
     );
@@ -1866,7 +1867,7 @@ class _HeaderBadge extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         return Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.023),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.15 + animation.value * 0.1),
             shape: BoxShape.circle,
@@ -1882,10 +1883,10 @@ class _HeaderBadge extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(
+          child:  Icon(
             Icons.groups_rounded,
             color: Colors.white,
-            size: 24,
+            size: SizeConfig.screenWidth * 0.04,
           ),
         );
       },
@@ -1914,25 +1915,23 @@ class _WelcomeSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all( SizeConfig.screenWidth * 0.05),
       child: Column(
         children: [
-          const SizedBox(height: 20),
-          _WelcomeIllustration(
-            floatingController: floatingController,
-            isAnimationComplete: isAnimationComplete,
-          ),
-          const SizedBox(height: 40),
+          SizedBox(height: SizeConfig.screenHeight * 0.05),
+          // _WelcomeIllustration(
+          //   floatingController: floatingController,
+          //   isAnimationComplete: isAnimationComplete,
+          // ),
+          SizedBox(height: SizeConfig.screenHeight * 0.04),
           _WelcomeText(isAnimationComplete: isAnimationComplete),
-          const SizedBox(height: 40),
-          _FeaturesSection(isAnimationComplete: isAnimationComplete),
-          const SizedBox(height: 40),
+          SizedBox(height: SizeConfig.screenHeight * 0.06),
           _ExploreButton(
             pulseController: pulseController,
             onTap: onExplore,
             isAnimationComplete: isAnimationComplete,
           ),
-          const SizedBox(height: 30),
+          SizedBox(height: SizeConfig.screenHeight * 0.05),
         ],
       ),
     );
@@ -1972,8 +1971,8 @@ class _WelcomeIllustration extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 Container(
-                  width: 200,
-                  height: 200,
+                  width: SizeConfig.screenWidth * 0.36,
+                  height: SizeConfig.screenWidth * 0.36,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
@@ -1989,8 +1988,8 @@ class _WelcomeIllustration extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: 160,
-                  height: 160,
+                  width: SizeConfig.screenWidth * 0.1,
+                  height: SizeConfig.screenWidth * 0.1,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
@@ -2002,8 +2001,8 @@ class _WelcomeIllustration extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: 120,
-                  height: 120,
+                  width: SizeConfig.screenWidth * 0.18,
+                  height: SizeConfig.screenWidth * 0.18,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const LinearGradient(
@@ -2019,10 +2018,10 @@ class _WelcomeIllustration extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.diversity_3_rounded,
                     color: Colors.white,
-                    size: 56,
+                    size: SizeConfig.screenWidth * 0.08,
                   ),
                 ),
                 ..._buildOrbitingElements(floatingController.value),
@@ -2095,11 +2094,11 @@ class _WelcomeText extends StatelessWidget {
               child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
             );
           },
-          child: const Text(
+          child: Text(
             'Explore Our Leadership',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 28,
+              fontSize: SizeConfig.screenWidth * 0.065,
               fontWeight: FontWeight.w900,
               color: Color(0xFF1B4332),
               letterSpacing: 0.5,
@@ -2107,7 +2106,7 @@ class _WelcomeText extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+         SizedBox(height: SizeConfig.screenHeight * 0.015),
         TweenAnimationBuilder<double>(
           tween: Tween(begin: 0, end: isAnimationComplete ? 1 : 0),
           duration: const Duration(milliseconds: 700),
@@ -2122,7 +2121,7 @@ class _WelcomeText extends StatelessWidget {
             'Discover the dedicated individuals who guide\nour club towards excellence',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: SizeConfig.screenWidth * 0.033,
               color: Colors.grey[600],
               height: 1.6,
               fontWeight: FontWeight.w500,
@@ -2133,62 +2132,6 @@ class _WelcomeText extends StatelessWidget {
     );
   }
 }
-
-// ============================================
-// FEATURES SECTION
-// ============================================
-class _FeaturesSection extends StatelessWidget {
-  final bool isAnimationComplete;
-
-  const _FeaturesSection({required this.isAnimationComplete});
-
-  @override
-  Widget build(BuildContext context) {
-    final features = [
-      _FeatureData(
-        icon: Icons.people_alt_rounded,
-        title: 'Executive Panel',
-        description: 'Meet our leaders',
-        color: kBrandStart,
-      ),
-      _FeatureData(
-        icon: Icons.history_edu_rounded,
-        title: 'Semester Archives',
-        description: 'Past panels',
-        color: kBrandEnd,
-      ),
-      _FeatureData(
-        icon: Icons.workspace_premium_rounded,
-        title: 'Achievements',
-        description: 'Our milestones',
-        color: kAccentGold,
-      ),
-    ];
-
-    return Row(
-      children: features.asMap().entries.map((entry) {
-        final index = entry.key;
-        final feature = entry.value;
-
-        return Expanded(
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: isAnimationComplete ? 1 : 0),
-            duration: Duration(milliseconds: 500 + (index * 150)),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              return Transform.translate(
-                offset: Offset(0, 40 * (1 - value)),
-                child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
-              );
-            },
-            child: _FeatureCard(feature: feature, index: index),
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
 class _FeatureData {
   final IconData icon;
   final String title;
@@ -2334,7 +2277,7 @@ class _ExploreButtonState extends State<_ExploreButton> {
               transform: Matrix4.identity()..scale(_isPressed ? 0.95 : 1.0),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 20),
+                padding: EdgeInsets.symmetric(vertical: SizeConfig.screenWidth * 0.04, horizontal: SizeConfig.screenWidth * 0.05),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF064E3B), kBrandStart, kBrandEnd],
@@ -2357,25 +2300,25 @@ class _ExploreButtonState extends State<_ExploreButton> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.033),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.calendar_month_rounded,
                         color: Colors.white,
-                        size: 24,
+                        size: SizeConfig.screenWidth * 0.05,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    const Column(
+                    SizedBox(width: SizeConfig.screenWidth * 0.04),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Select Semester',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: SizeConfig.screenWidth * 0.043,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
                             letterSpacing: 0.5,
@@ -2384,24 +2327,24 @@ class _ExploreButtonState extends State<_ExploreButton> {
                         Text(
                           'View panel information',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: SizeConfig.screenWidth * 0.033,
                             color: Colors.white70,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: SizeConfig.screenWidth * 0.03),
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_forward_rounded,
                         color: Colors.white,
-                        size: 20,
+                        size: SizeConfig.screenWidth * 0.04,
                       ),
                     ),
                   ],
