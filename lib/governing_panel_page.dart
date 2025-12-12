@@ -943,7 +943,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
                                 child: Text(
                                   _getPanelTitle(),
                                   style: TextStyle(
-                                    fontSize: SizeConfig.screenWidth*0.05,
+                                    fontSize: SizeConfig.screenWidth*0.045,
                                     fontWeight: FontWeight.w900,
                                     color: Colors.white,
                                     letterSpacing: 0.5,
@@ -965,7 +965,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
                         ),
                         // Icon Badge
                         Container(
-                          padding: EdgeInsets.all(SizeConfig.screenWidth*0.025),
+                          padding: EdgeInsets.all(SizeConfig.screenWidth*0.02),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
@@ -977,7 +977,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
                           child: Icon(
                             _getPanelIcon(),
                             color: Colors.white,
-                            size: SizeConfig.screenWidth*0.055,
+                            size: SizeConfig.screenWidth*0.05,
                           ),
                         ),
                       ],
@@ -1011,7 +1011,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
                 CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation(gradientColors[0]),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Text(
                   'Loading posters...',
                   style: TextStyle(
@@ -1066,7 +1066,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
   Widget _buildPosterGrid(List<String> imageUrls, List<Color> gradientColors) {
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
       children: [
         // Stats Card
         TweenAnimationBuilder<double>(
@@ -1080,10 +1080,10 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
             );
           },
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
               boxShadow: [
                 BoxShadow(
                   color: gradientColors[0].withOpacity(0.1),
@@ -1095,25 +1095,25 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(colors: gradientColors),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.photo_library_rounded,
                     color: Colors.white,
-                    size: 28,
+                    size: SizeConfig.screenWidth * 0.045,
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: SizeConfig.screenWidth * 0.03),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '${imageUrls.length} Poster${imageUrls.length > 1 ? 's' : ''}',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: SizeConfig.screenWidth * 0.04,
                         fontWeight: FontWeight.w900,
                         color: gradientColors[0],
                       ),
@@ -1121,7 +1121,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
                     Text(
                       'Tap any poster to view full size',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: SizeConfig.screenWidth * 0.03,
                         color: Colors.grey[600],
                         fontWeight: FontWeight.w500,
                       ),
@@ -1132,7 +1132,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         // Poster Grid
         ...imageUrls.asMap().entries.map((entry) {
@@ -1145,7 +1145,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
           );
         }).toList(),
 
-        const SizedBox(height: 20),
+        SizedBox(height: SizeConfig.screenHeight * 0.01),
       ],
     );
   }
@@ -1153,7 +1153,7 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
   Widget _buildEmptyWidget(List<Color> gradientColors) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.08),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1168,19 +1168,19 @@ class _PanelPosterGalleryPageState extends State<_PanelPosterGalleryPage>
                 );
               },
               child: Container(
-                padding: const EdgeInsets.all(32),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.06),
                 decoration: BoxDecoration(
                   color: gradientColors[0].withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.image_not_supported_rounded,
-                  size: 80,
+                  size: SizeConfig.screenWidth * 0.15,
                   color: gradientColors[0].withOpacity(0.5),
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: SizeConfig.screenHeight * 0.03),
             const Text(
               'No Posters Yet',
               style: TextStyle(
@@ -1311,7 +1311,7 @@ class _PosterCardState extends State<_PosterCard> {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 20),
+        padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.02),
         child: GestureDetector(
           onTapDown: (_) => setState(() => _isPressed = true),
           onTapUp: (_) {
@@ -1323,7 +1323,7 @@ class _PosterCardState extends State<_PosterCard> {
             duration: const Duration(milliseconds: 200),
             transform: Matrix4.identity()..scale(_isPressed ? 0.98 : 1.0),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
               boxShadow: [
                 BoxShadow(
                   color: widget.gradientColors[0].withOpacity(_isPressed ? 0.3 : 0.15),
@@ -1333,7 +1333,7 @@ class _PosterCardState extends State<_PosterCard> {
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
               child: Stack(
                 children: [
                   // Image
@@ -1342,10 +1342,10 @@ class _PosterCardState extends State<_PosterCard> {
                     width: double.infinity,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
-                      height: 300,
+                      height: SizeConfig.screenHeight * 0.3,
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
                       ),
                       child: Center(
                         child: CircularProgressIndicator(
@@ -1399,48 +1399,6 @@ class _PosterCardState extends State<_PosterCard> {
                       ),
                     ),
                   ),
-
-                  // Poster number badge
-                  Positioned(
-                    top: 16,
-                    left: 16,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: widget.gradientColors),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: widget.gradientColors[0].withOpacity(0.4),
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.photo_rounded,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Poster ${widget.index + 1}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
                   // Tap to view indicator
                   Positioned(
                     bottom: 16,
