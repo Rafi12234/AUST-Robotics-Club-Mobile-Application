@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
+import 'size_config.dart';
 
 // Main Achievement Page
 class AchievementPage extends StatefulWidget {
@@ -32,50 +33,51 @@ class _AchievementPageState extends State<AchievementPage>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
+        physics: BouncingScrollPhysics(),
         slivers: [
           // Modern Sliver App Bar
           SliverAppBar(
-            expandedHeight: 200,
+            expandedHeight: SizeConfig.screenHeight * 0.2,
             floating: false,
             pinned: true,
             stretch: true,
             elevation: 0,
             backgroundColor: const Color(0xFF1B5E20),
             leading: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
+              padding:  EdgeInsets.only(left: SizeConfig.screenWidth * 0.03),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios,
-                    color: Colors.white, size: 22),
+                icon: Icon(Icons.arrow_back_ios,
+                    color: Colors.white, size:SizeConfig.screenWidth * 0.045),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
             flexibleSpace: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
                 // Calculate collapse ratio
-                final expandedHeight = 200.0;
+                final expandedHeight = SizeConfig.screenHeight * 0.2;
                 final collapsedHeight = kToolbarHeight + MediaQuery.of(context).padding.top;
                 final currentHeight = constraints.maxHeight;
                 final collapseRatio = ((expandedHeight - currentHeight) /
                     (expandedHeight - collapsedHeight)).clamp(0.0, 1.0);
 
                 // Calculate left padding based on collapse ratio
-                final leftPadding = 20.0 + (40.0 * collapseRatio); // Starts at 20, goes to 60 when collapsed
+                final leftPadding = SizeConfig.screenWidth*0.04+ (40.0 * collapseRatio); // Starts at 20, goes to 60 when collapsed
 
                 return FlexibleSpaceBar(
                   centerTitle: false,
                   titlePadding: EdgeInsets.only(
                     left: leftPadding,
-                    bottom: 16,
+                    bottom: SizeConfig.screenWidth * 0.03,
                   ),
                   title: Text(
                     'Achievements of AUSTRC',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 28 - (5 * collapseRatio), // Shrinks from 28 to 16
+                      fontSize: SizeConfig.screenWidth*0.055 - (5 * collapseRatio), // Shrinks from 28 to 16
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
                       fontFamily: "font1",
@@ -85,7 +87,7 @@ class _AchievementPageState extends State<AchievementPage>
                     fit: StackFit.expand,
                     children: [
                       Container(
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -146,19 +148,19 @@ class _AchievementPageState extends State<AchievementPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(20),
+                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.01),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF2E7D32).withOpacity(0.3),
+                                color: Color(0xFF2E7D32).withOpacity(0.3),
                                 blurRadius: 20,
                                 spreadRadius: 5,
                               ),
                             ],
                           ),
-                          child: const CircularProgressIndicator(
+                          child: CircularProgressIndicator(
                             color: Color(0xFF2E7D32),
                             strokeWidth: 3,
                           ),
@@ -177,7 +179,7 @@ class _AchievementPageState extends State<AchievementPage>
                       children: [
                         Icon(
                           Icons.error_outline_rounded,
-                          size: 70,
+                          size: SizeConfig.screenWidth * 0.25,
                           color: Colors.red[300],
                         ),
                         const SizedBox(height: 16),
@@ -232,7 +234,7 @@ class _AchievementPageState extends State<AchievementPage>
               final achievements = snapshot.data!.docs;
 
               return SliverPadding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -265,7 +267,7 @@ class _AchievementPageState extends State<AchievementPage>
                           );
                         },
                         child: Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
+                          padding:  EdgeInsets.only(bottom: SizeConfig.screenWidth * 0.04),
                           child: InkWell(
                             onTap: () {
                               Navigator.push(
@@ -353,7 +355,7 @@ class _AchievementPageState extends State<AchievementPage>
                                                   (context, url, error) =>
                                                   Container(
                                                     color: Colors.grey[200],
-                                                    child: const Icon(
+                                                    child:  Icon(
                                                       Icons.emoji_events,
                                                       size: 50,
                                                       color: Colors.grey,
@@ -364,8 +366,8 @@ class _AchievementPageState extends State<AchievementPage>
                                         ),
                                         // Trophy Badge
                                         Positioned(
-                                          top: 16,
-                                          right: 16,
+                                          top: SizeConfig.screenWidth * 0.03,
+                                          right: SizeConfig.screenWidth * 0.03,
                                           child: Container(
                                             padding: const EdgeInsets.all(10),
                                             decoration: BoxDecoration(
@@ -385,10 +387,10 @@ class _AchievementPageState extends State<AchievementPage>
                                                 ),
                                               ],
                                             ),
-                                            child: const Icon(
+                                            child:  Icon(
                                               Icons.emoji_events,
                                               color: Colors.white,
-                                              size: 24,
+                                              size: SizeConfig.screenWidth * 0.04,
                                             ),
                                           ),
                                         ),
@@ -396,7 +398,7 @@ class _AchievementPageState extends State<AchievementPage>
                                     )
                                   else
                                     Container(
-                                      height: 200,
+                                      height: SizeConfig.screenWidth * 0.4,
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
@@ -411,10 +413,10 @@ class _AchievementPageState extends State<AchievementPage>
                                           topRight: Radius.circular(20),
                                         ),
                                       ),
-                                      child: const Center(
+                                      child: Center(
                                         child: Icon(
                                           Icons.emoji_events,
-                                          size: 70,
+                                          size: SizeConfig.screenWidth * 0.1,
                                           color: Color(0xFF2E7D32),
                                         ),
                                       ),
@@ -422,7 +424,7 @@ class _AchievementPageState extends State<AchievementPage>
 
                                   // Content Section
                                   Padding(
-                                    padding: const EdgeInsets.all(20),
+                                    padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                                     child: Column(
                                       crossAxisAlignment:
                                       CrossAxisAlignment.start,
@@ -432,8 +434,8 @@ class _AchievementPageState extends State<AchievementPage>
                                             Expanded(
                                               child: Text(
                                                 name,
-                                                style: const TextStyle(
-                                                  fontSize: 20,
+                                                style: TextStyle(
+                                                  fontSize: SizeConfig.screenWidth * 0.045,
                                                   fontWeight: FontWeight.bold,
                                                   color: Color(0xFF1B5E20),
                                                   height: 1.3,
@@ -442,19 +444,19 @@ class _AchievementPageState extends State<AchievementPage>
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
-                                            const SizedBox(width: 8),
+                                            SizedBox(width: SizeConfig.screenWidth * 0.02),
                                             Container(
-                                              padding: const EdgeInsets.all(8),
+                                              padding: EdgeInsets.all(8),
                                               decoration: BoxDecoration(
                                                 color: const Color(0xFF2E7D32)
                                                     .withOpacity(0.1),
                                                 borderRadius:
                                                 BorderRadius.circular(10),
                                               ),
-                                              child: const Icon(
+                                              child:  Icon(
                                                 Icons.arrow_forward_rounded,
                                                 color: Color(0xFF2E7D32),
-                                                size: 20,
+                                                size: SizeConfig.screenWidth * 0.04,
                                               ),
                                             ),
                                           ],
@@ -464,7 +466,7 @@ class _AchievementPageState extends State<AchievementPage>
                                           Text(
                                             description,
                                             style: TextStyle(
-                                              fontSize: 14,
+                                              fontSize: SizeConfig.screenWidth * 0.033,
                                               color: Colors.grey[700],
                                               height: 1.5,
                                             ),
@@ -568,28 +570,28 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
         slivers: [
           // Modern Header with Achievement Name
           SliverAppBar(
-            expandedHeight: 180,
+            expandedHeight: SizeConfig.screenHeight * 0.2,
             floating: false,
             pinned: true,
             stretch: true,
             elevation: 0,
             leading: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
+              padding: EdgeInsets.only(left: SizeConfig.screenWidth * 0.03),
               child: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
+                // margin: const EdgeInsets.all(8),
+                // decoration: BoxDecoration(
+                //   color: Colors.white,
+                //   shape: BoxShape.circle,
+                //   boxShadow: [
+                //     BoxShadow(
+                //       color: Colors.black.withOpacity(0.1),
+                //       blurRadius: 8,
+                //     ),
+                //   ],
+                // ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios,
-                      color: Color(0xFF1B5E20), size: 18),
+                  icon: Icon(Icons.arrow_back_ios,
+                      color: Color(0xFFFFFFFF), size: SizeConfig.screenWidth * 0.045),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                 ),
@@ -630,9 +632,9 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                         title: isCollapsed
                             ? Text(
                           name,
-                          style: const TextStyle(
+                          style:  TextStyle(
                             color: Colors.white,
-                            fontSize: 16,
+                            fontSize: SizeConfig.screenWidth * 0.045,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 1,
@@ -641,7 +643,7 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                             : null,
                         background: SafeArea(
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 70, 24, 24),
+                            padding: EdgeInsets.fromLTRB(SizeConfig.screenWidth*0.07, SizeConfig.screenWidth*0.02, SizeConfig.screenWidth*0.1,SizeConfig.screenWidth*0.04),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -655,9 +657,9 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                                     return Transform.scale(
                                       scale: value,
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 8,
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: SizeConfig.screenWidth * 0.03,
+                                          vertical: SizeConfig.screenWidth * 0.015,
                                         ),
                                         decoration: BoxDecoration(
                                           gradient: const LinearGradient(
@@ -678,18 +680,18 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
-                                          children: const [
+                                          children: [
                                             Icon(
                                               Icons.emoji_events,
                                               color: Colors.white,
-                                              size: 18,
+                                              size: SizeConfig.screenWidth * 0.03,
                                             ),
-                                            SizedBox(width: 6),
+                                            SizedBox(width: SizeConfig.screenWidth * 0.015),
                                             Text(
                                               'Achievement Unlocked',
                                               style: TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 13,
+                                                fontSize: SizeConfig.screenWidth * 0.026,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
@@ -699,7 +701,7 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                                     );
                                   },
                                 ),
-                                const SizedBox(height: 12),
+                                SizedBox(height: SizeConfig.screenWidth * 0.02),
                                 // Achievement Name
                                 TweenAnimationBuilder<double>(
                                   duration: const Duration(milliseconds: 800),
@@ -716,9 +718,9 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                                   },
                                   child: Text(
                                     name,
-                                    style: const TextStyle(
+                                    style:  TextStyle(
                                       color: Colors.white,
-                                      fontSize: 24,
+                                      fontSize: SizeConfig.screenWidth * 0.05,
                                       fontWeight: FontWeight.bold,
                                       height: 1.2,
                                       shadows: [
@@ -752,13 +754,13 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 16),
+                  SizedBox(height: SizeConfig.screenWidth * 0.001),
 
                   // Image Gallery
                   if (images.isNotEmpty) ...[
-                    const SizedBox(height: 24),
+                    SizedBox(height: SizeConfig.screenWidth * 0.04),
                     SizedBox(
-                      height: 350,
+                      height: SizeConfig.screenHeight * 0.3,
                       child: PageView.builder(
                         controller: _pageController,
                         onPageChanged: (index) {
@@ -778,9 +780,9 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                               );
                             },
                             child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                              margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.025),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.01),
                                 boxShadow: [
                                   BoxShadow(
                                     color: const Color(0xFF2E7D32)
@@ -791,7 +793,7 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                                 ],
                               ),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                                 child: Stack(
                                   fit: StackFit.expand,
                                   children: [
@@ -809,21 +811,21 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                                       errorWidget: (context, url, error) =>
                                           Container(
                                             color: Colors.grey[200],
-                                            child: const Icon(
+                                            child: Icon(
                                               Icons.broken_image,
-                                              size: 60,
+                                              size: SizeConfig.screenWidth * 0.1,
                                               color: Colors.grey,
                                             ),
                                           ),
                                     ),
                                     // Image Counter Badge
                                     Positioned(
-                                      bottom: 16,
-                                      right: 16,
+                                      bottom: SizeConfig.screenWidth * 0.03,
+                                      right: SizeConfig.screenWidth * 0.03,
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: SizeConfig.screenWidth * 0.03,
+                                          vertical: SizeConfig.screenWidth * 0.01,
                                         ),
                                         decoration: BoxDecoration(
                                           color: Colors.black.withOpacity(0.6),
@@ -831,9 +833,9 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                                         ),
                                         child: Text(
                                           '${index + 1}/${images.length}',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Colors.white,
-                                            fontSize: 12,
+                                            fontSize: SizeConfig.screenWidth * 0.02,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -847,7 +849,7 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                         },
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: SizeConfig.screenWidth * 0.01),
                     // Page Indicators
                     if (images.length > 1)
                       Row(
@@ -879,9 +881,9 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                   ],
 
                   // Description Section
-                  const SizedBox(height: 32),
+                  SizedBox(height: SizeConfig.screenWidth * 0.06),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.03),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -903,20 +905,20 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                                 BorderRadius.all(Radius.circular(3)),
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            const Text(
+                           SizedBox(width: SizeConfig.screenWidth * 0.02),
+                            Text(
                               'About This Achievement',
                               style: TextStyle(
-                                fontSize: 22,
+                                fontSize: SizeConfig.screenWidth * 0.045,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF1B5E20),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: SizeConfig.screenWidth * 0.03),
                         Container(
-                          padding: const EdgeInsets.all(20),
+                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
                           decoration: BoxDecoration(
                             color: const Color(0xFF2E7D32).withOpacity(0.05),
                             borderRadius: BorderRadius.circular(16),
@@ -928,7 +930,7 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                           child: Text(
                             description,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: SizeConfig.screenWidth * 0.033,
                               color: Colors.grey[800],
                               height: 1.7,
                               letterSpacing: 0.3,
@@ -936,7 +938,7 @@ class _AchievementDetailPageState extends State<AchievementDetailPage>
                             textAlign: TextAlign.justify,
                           ),
                         ),
-                        const SizedBox(height: 40),
+                        SizedBox(height: SizeConfig.screenWidth * 0.1),
                       ],
                     ),
                   ),
