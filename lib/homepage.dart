@@ -2062,7 +2062,7 @@ class _HighlightsOfAUSTRCState extends State<_HighlightsOfAUSTRC>
                   gradient: const LinearGradient(
                     colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                   boxShadow: [
                     BoxShadow(
                       color: kGreenDark.withOpacity(0.2),
@@ -2121,7 +2121,7 @@ class _HighlightsOfAUSTRCState extends State<_HighlightsOfAUSTRC>
     if (_pageController == null) return const SizedBox.shrink();
 
     return SizedBox(
-      height: SizeConfig.screenHeight * 0.28,
+      height: SizeConfig.screenHeight * 0.38,
       child: PageView.builder(
         controller: _pageController!,
         onPageChanged: (index) {
@@ -2157,7 +2157,7 @@ class _HighlightsOfAUSTRCState extends State<_HighlightsOfAUSTRC>
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
         child: Stack(
           fit: StackFit.expand,
           children: [
