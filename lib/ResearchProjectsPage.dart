@@ -1358,8 +1358,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 12),
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: SizeConfig.screenWidth * 0.03),
             Text('Welcome $_verifiedId! Accessing exclusive content...'),
           ],
         ),
@@ -1419,10 +1419,10 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
           );
         },
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
+          constraints: BoxConstraints(maxWidth: SizeConfig.screenWidth * 0.8),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.07),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.2),
@@ -1437,8 +1437,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
               children: [
                 // Header
                 Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: const BoxDecoration(
+                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.05),
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
                         Color(0xFF1A237E),
@@ -1448,7 +1448,7 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(28),
+                      top: Radius.circular(SizeConfig.screenWidth * 0.07),
                     ),
                   ),
                   child: Stack(
@@ -1464,53 +1464,53 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(12),
+                                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                                 ),
                                 child: Icon(
                                   _isVerified
                                       ? Icons.verified_user
                                       : Icons.workspace_premium,
                                   color: Colors.amber[300],
-                                  size: 32,
+                                  size: SizeConfig.screenWidth * 0.07,
                                 ),
                               ),
                               IconButton(
                                 onPressed: () => Navigator.pop(context),
                                 icon: Container(
-                                  padding: const EdgeInsets.all(8),
+                                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.2),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.close,
                                     color: Colors.white,
-                                    size: 20,
+                                    size: SizeConfig.screenWidth * 0.04,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: SizeConfig.screenHeight * 0.015),
                           Text(
                             _isVerified ? 'Access Granted!' : 'Exclusive Access',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 24,
+                              fontSize: SizeConfig.screenWidth * 0.05,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: SizeConfig.screenHeight * 0.008),
                           Text(
                             _isVerified
                                 ? 'Welcome to AUSTRC premium content'
                                 : 'Verify your AUSTRC membership',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.8),
-                              fontSize: 14,
+                              fontSize: SizeConfig.screenWidth * 0.035,
                             ),
                           ),
                         ],
@@ -1521,7 +1521,7 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
 
                 // Content
                 Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.05),
                   child: _isVerified
                       ? _buildSuccessContent()
                       : _buildVerificationContent(),
@@ -1539,7 +1539,7 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
           decoration: BoxDecoration(
             color: const Color(0xFFF3E5F5),
             borderRadius: BorderRadius.circular(16),
@@ -1550,37 +1550,37 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                 decoration: BoxDecoration(
                   color: const Color(0xFF4A148C).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
                 ),
-                child: const Icon(
+                child:Icon(
                   Icons.info_outline,
                   color: Color(0xFF4A148C),
-                  size: 24,
+                  size: SizeConfig.screenWidth * 0.05,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: SizeConfig.screenWidth * 0.04),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Members Only Content',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF4A148C),
-                        fontSize: 14,
+                        fontSize: SizeConfig.screenWidth * 0.03,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                     SizedBox(height: SizeConfig.screenHeight * 0.007),
                     Text(
                       'Enter your AUSTRC ID to access exclusive research projects and educational materials.',
                       style: TextStyle(
                         color: Colors.grey[700],
-                        fontSize: 12,
-                        height: 1.4,
+                        fontSize: SizeConfig.screenWidth * 0.03,
+                        height: SizeConfig.screenHeight * 0.0012,
                       ),
                     ),
                   ],
@@ -1589,17 +1589,17 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
-        const Text(
+        Text(
           'AUSTRC Member ID',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            fontSize:SizeConfig.screenWidth * 0.035,
             color: Color(0xFF1A237E),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: SizeConfig.screenHeight * 0.01),
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
@@ -1615,30 +1615,30 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
           ),
           child: TextField(
             controller: _idController,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: SizeConfig.screenWidth * 0.035,
               fontWeight: FontWeight.w600,
             ),
             decoration: InputDecoration(
-              hintText: 'e.g., AUSTRC001',
+              hintText: 'e.g., AUSTRC-11-11-1111',
               hintStyle: TextStyle(color: Colors.grey[400]),
               prefixIcon: Container(
-                margin: const EdgeInsets.all(8),
-                padding: const EdgeInsets.all(8),
+                margin: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
+                padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.02),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4A148C).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: Color(0xFF4A148C).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.badge_outlined,
                   color: Color(0xFF4A148C),
-                  size: 20,
+                  size: SizeConfig.screenWidth * 0.04,
                 ),
               ),
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                 borderSide: BorderSide(
                   color: _errorMessage.isNotEmpty
                       ? Colors.red
@@ -1647,7 +1647,7 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                 ),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                 borderSide: BorderSide(
                   color: _errorMessage.isNotEmpty
                       ? Colors.red.withOpacity(0.5)
@@ -1656,15 +1656,15 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                 ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                borderSide: BorderSide(
                   color: Color(0xFF4A148C),
                   width: 2,
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.screenWidth * 0.04,
+                vertical: SizeConfig.screenHeight * 0.02,
               ),
             ),
             textInputAction: TextInputAction.done,
@@ -1715,8 +1715,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
         const SizedBox(height: 24),
 
         SizedBox(
-          width: double.infinity,
-          height: 56,
+          width: SizeConfig.screenWidth*0.7,
+          height: SizeConfig.screenHeight * 0.045,
           child: ElevatedButton(
             onPressed: _isVerifying ? null : _verifyId,
             style: ElevatedButton.styleFrom(
@@ -1729,23 +1729,23 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
               shadowColor: const Color(0xFF4A148C).withOpacity(0.4),
             ),
             child: _isVerifying
-                ? const SizedBox(
-              width: 24,
-              height: 24,
+                ? SizedBox(
+              width: SizeConfig.screenWidth * 0.06,
+              height: SizeConfig.screenWidth * 0.06,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
                 color: Colors.white,
               ),
             )
-                : const Row(
+                : Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.verified_user_outlined, size: 22),
-                SizedBox(width: 10),
+                Icon(Icons.verified_user_outlined, size: SizeConfig.screenWidth * 0.05),
+                SizedBox(width: SizeConfig.screenWidth * 0.02),
                 Text(
                   'Verify ID',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: SizeConfig.screenWidth * 0.03,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1753,10 +1753,10 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
           decoration: BoxDecoration(
             color: Colors.grey[50],
             borderRadius: BorderRadius.circular(16),
@@ -1764,8 +1764,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
           ),
           child: Row(
             children: [
-              Icon(Icons.help_outline, color: Colors.grey[600], size: 20),
-              const SizedBox(width: 12),
+              Icon(Icons.help_outline, color: Colors.grey[600], size: SizeConfig.screenWidth * 0.045),
+              SizedBox(width: SizeConfig.screenWidth * 0.03),
               Expanded(
                 child: RichText(
                   text: TextSpan(
@@ -1808,8 +1808,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
             return Transform.scale(
               scale: value.clamp(0.0, 2.0),
               child: Container(
-                width: 100,
-                height: 100,
+                width: SizeConfig.screenWidth*0.2,
+                height: SizeConfig.screenWidth*0.2,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF43A047), Color(0xFF66BB6A)],
@@ -1823,63 +1823,63 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.check_rounded,
                   color: Colors.white,
-                  size: 50,
+                  size: SizeConfig.screenWidth*0.1,
                 ),
               ),
             );
           },
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.01, vertical: SizeConfig.screenHeight*0.008),
           decoration: BoxDecoration(
-            color: const Color(0xFF43A047).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
+            color: Color(0xFF43A047).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth*0.04),
             border: Border.all(
-              color: const Color(0xFF43A047).withOpacity(0.3),
+              color:  Color(0xFF43A047).withOpacity(0.3),
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.verified,
                 color: Color(0xFF43A047),
-                size: 20,
+                size: SizeConfig.screenWidth*0.04,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: SizeConfig.screenWidth*0.02),
               Text(
                 _verifiedId,
-                style: const TextStyle(
+                style:TextStyle(
                   color: Color(0xFF43A047),
-                  fontSize: 16,
+                  fontSize: SizeConfig.screenWidth*0.03,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight * 0.015),
 
         Text(
           'Your membership has been verified!',
           style: TextStyle(
             color: Colors.grey[700],
-            fontSize: 14,
+            fontSize: SizeConfig.screenWidth*0.033,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
           decoration: BoxDecoration(
             color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
           ),
           child: Column(
             children: [
@@ -1894,20 +1894,14 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                 'Educational Materials',
                 'Premium learning resources',
               ),
-              const Divider(height: 20),
-              _buildFeatureItem(
-                Icons.video_library_outlined,
-                'Tutorial Videos',
-                'Step-by-step project guides',
-              ),
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         SizedBox(
           width: double.infinity,
-          height: 56,
+          height: SizeConfig.screenHeight * 0.045,
           child: ElevatedButton(
             onPressed: _proceedToExclusiveContent,
             style: ElevatedButton.styleFrom(
@@ -1919,18 +1913,18 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
               elevation: 4,
               shadowColor: const Color(0xFF43A047).withOpacity(0.4),
             ),
-            child: const Row(
+            child:  Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   'Access Exclusive Content',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: SizeConfig.screenWidth * 0.03,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 10),
-                Icon(Icons.arrow_forward_rounded, size: 22),
+                SizedBox(width: SizeConfig.screenWidth * 0.02),
+                Icon(Icons.arrow_forward_rounded, size: SizeConfig.screenWidth * 0.05),
               ],
             ),
           ),
@@ -1943,34 +1937,34 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
           decoration: BoxDecoration(
-            color: const Color(0xFF4A148C).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
+            color: Color(0xFF4A148C).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
           ),
           child: Icon(
             icon,
-            color: const Color(0xFF4A148C),
-            size: 22,
+            color: Color(0xFF4A148C),
+            size: SizeConfig.screenWidth * 0.05,
           ),
         ),
-        const SizedBox(width: 14),
+        SizedBox(width: SizeConfig.screenWidth * 0.04),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: SizeConfig.screenWidth * 0.033,
                   color: Color(0xFF1A237E),
                 ),
               ),
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: SizeConfig.screenWidth * 0.025,
                   color: Colors.grey[600],
                 ),
               ),
@@ -1979,8 +1973,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
         ),
         Icon(
           Icons.check_circle,
-          color: const Color(0xFF43A047).withOpacity(0.7),
-          size: 20,
+          color:  Color(0xFF43A047).withOpacity(0.7),
+          size: SizeConfig.screenWidth * 0.045,
         ),
       ],
     );
@@ -2171,12 +2165,12 @@ class _ProposalDialogState extends State<ProposalDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: EdgeInsets.all(20),
+      insetPadding: EdgeInsets.all(SizeConfig.screenWidth * 0.05),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 400),
+        constraints: BoxConstraints(maxWidth: SizeConfig.screenWidth * 0.7),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
@@ -2187,7 +2181,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
         ),
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.05),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2198,24 +2192,24 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
+                            gradient:  LinearGradient(
                               colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
                             ),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                           ),
-                          child: const Icon(
+                          child:  Icon(
                             Icons.add_circle_outline,
                             color: Colors.white,
-                            size: 24,
+                            size: SizeConfig.screenWidth * 0.05,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        const Text(
+                        SizedBox(width: SizeConfig.screenWidth * 0.02),
+                        Text(
                           'Submit Proposal',
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: SizeConfig.screenWidth * 0.04,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF1B5E20),
                           ),
@@ -2224,44 +2218,44 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     ),
                     IconButton(
                       icon: Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.close, size: 20),
+                        child:  Icon(Icons.close, size: SizeConfig.screenWidth * 0.04),
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: SizeConfig.screenHeight * 0.02),
 
                 if (!_isVerified) ...[
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E9),
-                      borderRadius: BorderRadius.circular(16),
+                      color: Color(0xFFE8F5E9),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Step 1: Verify Your Identity',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: SizeConfig.screenWidth * 0.03,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF1B5E20),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: SizeConfig.screenHeight * 0.01),
                         TextField(
                           controller: _idController,
                           decoration: InputDecoration(
                             hintText: 'Enter AUSTRC ID',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                               borderSide: BorderSide.none,
                             ),
                             filled: true,
@@ -2272,10 +2266,10 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: SizeConfig.screenHeight * 0.023),
                   SizedBox(
                     width: double.infinity,
-                    height: 52,
+                    height: SizeConfig.screenHeight * 0.044,
                     child: ElevatedButton(
                       onPressed: _isVerifying ? null : _verifyId,
                       style: ElevatedButton.styleFrom(
@@ -2293,15 +2287,15 @@ class _ProposalDialogState extends State<ProposalDialog> {
                           color: Colors.white,
                         ),
                       )
-                          : const Row(
+                          : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.verified_user, color: Colors.white),
-                          SizedBox(width: 8),
+                          SizedBox(width: SizeConfig.screenWidth * 0.02),
                           Text(
                             'Verify ID',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: SizeConfig.screenWidth * 0.035,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
@@ -2312,7 +2306,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
                   ),
                 ] else ...[
                   Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                     decoration: BoxDecoration(
                       color: Colors.green[50],
                       borderRadius: BorderRadius.circular(14),
@@ -2321,7 +2315,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     child: Row(
                       children: [
                         const Icon(Icons.check_circle, color: Colors.green),
-                        const SizedBox(width: 10),
+                         SizedBox(width: SizeConfig.screenWidth * 0.02),
                         Text(
                           'Verified: $_verifiedId',
                           style: const TextStyle(
@@ -2332,16 +2326,16 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                   SizedBox(height: 20),
 
-                  const Text(
+                  Text(
                     'Proposal Type',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: SizeConfig.screenWidth * 0.035,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                   SizedBox(height: SizeConfig.screenHeight * 0.01),
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[50],
@@ -2351,8 +2345,8 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       children: [
                         Expanded(
                           child: RadioListTile<String>(
-                            title: const Text('Research',
-                                style: TextStyle(fontSize: 14)),
+                            title:  Text('Research',
+                                style: TextStyle(fontSize: SizeConfig.screenWidth * 0.03)),
                             value: 'Research',
                             groupValue: _proposalType,
                             onChanged: (value) {
@@ -2364,8 +2358,8 @@ class _ProposalDialogState extends State<ProposalDialog> {
                         ),
                         Expanded(
                           child: RadioListTile<String>(
-                            title: const Text('Project',
-                                style: TextStyle(fontSize: 14)),
+                            title: Text('Project',
+                                style: TextStyle(fontSize: SizeConfig.screenWidth * 0.03)),
                             value: 'Project',
                             groupValue: _proposalType,
                             onChanged: (value) {
@@ -2378,7 +2372,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: SizeConfig.screenHeight * 0.02),
 
                   _buildInputField(
                     label: 'Title',
@@ -2386,7 +2380,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     hint: 'Enter project/research title',
                     icon: Icons.title,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: SizeConfig.screenHeight * 0.02),
 
                   _buildInputField(
                     label: 'Institutional Mail',
@@ -2395,16 +2389,16 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     icon: Icons.email,
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: SizeConfig.screenHeight * 0.02),
 
-                  const Text(
+                  Text(
                     'Short Description (Max 100 words)',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: SizeConfig.screenWidth * 0.035,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                   SizedBox(height: SizeConfig.screenHeight * 0.01),
                   TextField(
                     controller: _descriptionController,
                     maxLines: 4,
@@ -2415,44 +2409,44 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
+                        borderSide: BorderSide(
                           color: Color(0xFF2E7D32),
                           width: 2,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: SizeConfig.screenHeight * 0.03),
 
                   SizedBox(
                     width: double.infinity,
-                    height: 52,
+                    height: SizeConfig.screenHeight * 0.044,
                     child: ElevatedButton(
                       onPressed: _isSubmitting ? null : _submitProposal,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2E7D32),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
                         ),
                       ),
                       child: _isSubmitting
-                          ? const SizedBox(
-                        height: 22,
-                        width: 22,
+                          ? SizedBox(
+                        height: SizeConfig.screenWidth * 0.06,
+                        width: SizeConfig.screenWidth * 0.06,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: Colors.white,
                         ),
                       )
-                          : const Row(
+                          :  Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.send, color: Colors.white),
-                          SizedBox(width: 8),
+                          SizedBox(width: SizeConfig.screenWidth * 0.02),
                           Text(
                             'Submit Proposal',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: SizeConfig.screenWidth * 0.035,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
@@ -2482,23 +2476,23 @@ class _ProposalDialogState extends State<ProposalDialog> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            fontSize: SizeConfig.screenWidth * 0.033,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: SizeConfig.screenHeight * 0.01),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hint,
-            prefixIcon: Icon(icon, color: const Color(0xFF2E7D32)),
+            prefixIcon: Icon(icon, color:  Color(0xFF2E7D32)),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
               borderSide: const BorderSide(
                 color: Color(0xFF2E7D32),
                 width: 2,
@@ -2643,26 +2637,18 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
         slivers: [
           // Cover Photo Header
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: SizeConfig.screenHeight * 0.25,
             floating: false,
             pinned: true,
             stretch: true,
             elevation: 0,
-            backgroundColor: const Color(0xFF1B5E20),
+            backgroundColor: Color(0xFF1B5E20),
             leading: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.03),
               child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 1.5,
-                  ),
-                ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new,
-                      color: Colors.white, size: 20),
+                  icon:  Icon(Icons.arrow_back_ios_new,
+                      color: Colors.white, size: SizeConfig.screenWidth * 0.045),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                 ),
@@ -2678,21 +2664,21 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         color: Colors.grey[300],
-                        child: const Center(
+                        child: Center(
                           child: CircularProgressIndicator(
                             color: Color(0xFF2E7D32),
                           ),
                         ),
                       ),
                       errorWidget: (context, url, error) => Container(
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
                           ),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.science,
-                          size: 80,
+                          size: SizeConfig.screenWidth * 0.2,
                           color: Colors.white,
                         ),
                       ),
@@ -2704,9 +2690,9 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                           colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.science,
-                        size: 80,
+                        size: SizeConfig.screenWidth * 0.2,
                         color: Colors.white,
                       ),
                     ),
@@ -2737,11 +2723,11 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                 children: [
                   // Title & Subtitle Card
                   Container(
-                    margin: const EdgeInsets.all(20),
-                    padding: const EdgeInsets.all(24),
+                    margin:  EdgeInsets.all(SizeConfig.screenWidth * 0.03),
+                    padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFF1B5E20).withOpacity(0.1),
@@ -2755,20 +2741,20 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                       children: [
                         Text(
                           title,
-                          style: const TextStyle(
-                            fontSize: 26,
+                          style: TextStyle(
+                            fontSize: SizeConfig.screenWidth * 0.05,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF1B5E20),
                             height: 1.3,
                           ),
                         ),
                         if (subtitle.isNotEmpty) ...[
-                          const SizedBox(height: 12),
+                          SizedBox(height: SizeConfig.screenHeight * 0.01),
                           Text(
                             subtitle,
                             style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[700],
+                              fontSize: SizeConfig.screenWidth * 0.033,
+                              color: Colors.grey[800],
                               height: 1.5,
                             ),
                           ),
@@ -2780,11 +2766,11 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                   // Owners Section
                   if (owners.isNotEmpty) ...[
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.04),
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.023),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
