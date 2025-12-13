@@ -713,6 +713,10 @@ class HomeBody extends StatelessWidget {
             children: [
               const _WelcomeCard(),
               SizedBox(height: SizeConfig.screenHeight * 0.015),
+              const _HighlightsOfAUSTRC(),
+              SizedBox(height: SizeConfig.screenHeight * 0.015),
+              const _RecentEventsSectionHeader(),
+              SizedBox(height: SizeConfig.screenHeight * 0.015),
               const _RecentEventsCarousel(),
               SizedBox(height: SizeConfig.screenHeight * 0.001),
               Align(
@@ -1687,19 +1691,14 @@ class _WelcomeCard extends StatefulWidget {
 class _WelcomeCardState extends State<_WelcomeCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -1720,171 +1719,131 @@ class _WelcomeCardState extends State<_WelcomeCard>
     SizeConfig.init(context);
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFF0F3D2E),
-                Color(0xFF1A5C43),
-                Color(0xFF267556),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: kGreenDark.withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-                spreadRadius: 2,
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+      child: Container(
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.05),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0A2E1F), Color(0xFF0F3D2E), Color(0xFF1A5C43)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: CustomPaint(
-                    painter: _WelcomePatternPainter(),
-                  ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: kGreenDark.withOpacity(0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Decorative circles in background
+            Positioned(
+              right: -20,
+              top: -20,
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: kGreenMain.withOpacity(0.15),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
-                child: Row(
-                  children: [
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0, end: 1),
-                      duration: const Duration(milliseconds: 800),
-                      curve: Curves.elasticOut,
-                      builder: (context, value, child) {
-                        return Transform.scale(
-                          scale: value,
-                          child: Transform.rotate(
-                            angle: (1 - value) * 0.5,
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        height: SizeConfig.screenHeight * 0.054,
-                        width: SizeConfig.screenWidth * 0.12,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.2),
-                              blurRadius: 12,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.handshake_rounded,
-                          color: Colors.white,
-                          size: SizeConfig.screenWidth * 0.065,
+            ),
+            Positioned(
+              right: 30,
+              bottom: -30,
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: kGreenMain.withOpacity(0.1),
+                ),
+              ),
+            ),
+            // Main content
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
+                  decoration: BoxDecoration(
+                    color: kGreenMain.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: kGreenMain.withOpacity(0.4),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.waving_hand_rounded,
+                    color: Colors.amber,
+                    size: SizeConfig.screenWidth * 0.07,
+                  ),
+                ),
+                SizedBox(width: SizeConfig.screenWidth * 0.04),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome to',
+                        style: TextStyle(
+                          fontSize: SizeConfig.screenWidth * 0.032,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFFB8E6D5),
+                          letterSpacing: 0.3,
                         ),
                       ),
-                    ),
-                    SizedBox(width: SizeConfig.screenWidth * 0.04),
-                    Expanded(
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end: 1),
-                        duration: const Duration(milliseconds: 900),
-                        curve: Curves.easeOutCubic,
-                        builder: (context, value, child) {
-                          return Opacity(
-                            opacity: value,
-                            child: Transform.translate(
-                              offset: Offset(30 * (1 - value), 0),
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      SizedBox(height: SizeConfig.screenHeight * 0.003),
+                      Text(
+                        'AUST Robotics Club!',
+                        style: TextStyle(
+                          fontSize: SizeConfig.screenWidth * 0.045,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      SizedBox(height: SizeConfig.screenHeight * 0.008),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: kGreenMain.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: kGreenMain.withOpacity(0.5),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
+                            Icon(
+                              Icons.rocket_launch_rounded,
+                              color: Colors.amber,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 6),
                             Text(
-                              "Welcome to AUST Robotics Club!",
+                              'Explore events & projects',
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: SizeConfig.screenWidth * 0.0378,
-                                height: 1.3,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.3,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black26,
-                                    blurRadius: 4,
-                                  ),
-                                ],
+                                fontSize: SizeConfig.screenWidth * 0.028,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFFB8E6D5),
+                                letterSpacing: 0.2,
                               ),
                             ),
-                            SizedBox(height: SizeConfig.screenHeight * 0.008),
-                            Row(
-                              children: [
-                                Container(
-                                  width: 3,
-                                  height: 16,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF7FE5A9),
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                ),
-                                SizedBox(width: SizeConfig.screenWidth * 0.02),
-                                Expanded(
-                                  child: Text(
-                                    "Explore our latest events and projects",
-                                    style: TextStyle(
-                                      color: Color(0xFFB8E6D5),
-                                      fontSize: SizeConfig.screenWidth * 0.032,
-                                      height: 1.3,
-                                      fontWeight: FontWeight.w500,
-                                      letterSpacing: 0.2,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween(begin: -1.0, end: 2.0),
-                    duration: const Duration(milliseconds: 2500),
-                    curve: Curves.easeInOut,
-                    builder: (context, shimmerValue, child) {
-                      return CustomPaint(
-                        painter: _WelcomeShimmerPainter(
-                            shimmerProgress: shimmerValue),
-                      );
-                    },
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -1954,6 +1913,514 @@ class _WelcomeShimmerPainter extends CustomPainter {
   @override
   bool shouldRepaint(_WelcomeShimmerPainter oldDelegate) =>
       oldDelegate.shimmerProgress != shimmerProgress;
+}
+
+// ============================================
+// HIGHLIGHTS OF AUSTRC SECTION
+// ============================================
+class _HighlightsOfAUSTRC extends StatefulWidget {
+  const _HighlightsOfAUSTRC();
+
+  @override
+  State<_HighlightsOfAUSTRC> createState() => _HighlightsOfAUSTRCState();
+}
+
+class _HighlightsOfAUSTRCState extends State<_HighlightsOfAUSTRC>
+    with AutomaticKeepAliveClientMixin {
+  PageController? _pageController;
+  Timer? _autoScrollTimer;
+  int _currentPage = 0;
+  List<String> _newsUrls = [];
+  bool _isInitialized = false;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _initializePageController(int itemCount) {
+    if (_isInitialized || itemCount <= 0) return;
+
+    final initialPage = itemCount * 1000;
+    _pageController = PageController(
+      viewportFraction: 0.85,
+      initialPage: initialPage,
+    );
+    _currentPage = 0;
+    _isInitialized = true;
+
+    _startAutoScroll(itemCount);
+  }
+
+  void _startAutoScroll(int itemCount) {
+    _autoScrollTimer?.cancel();
+    if (itemCount <= 1) return;
+
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted || _pageController == null || !_pageController!.hasClients) return;
+      _pageController!.nextPage(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOutCubic,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController?.dispose();
+    _autoScrollTimer?.cancel();
+    super.dispose();
+  }
+
+  List<String> _extractNewsUrls(Map<String, dynamic>? data) {
+    if (data == null) return [];
+    final urls = <String>[];
+    for (int i = 1; i <= 20; i++) {
+      final url = data['News_$i'] as String?;
+      if (url != null && url.trim().isNotEmpty) {
+        urls.add(url.trim());
+      }
+    }
+    return urls;
+  }
+
+  bool _listEquals(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('All_Data')
+          .doc('Top_News_of_AUSTRC')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _buildErrorWidget('Failed to load highlights');
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting && _newsUrls.isEmpty) {
+          return _buildLoadingWidget();
+        }
+
+        final newUrls = _extractNewsUrls(snapshot.data?.data());
+
+        if (newUrls.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        if (_newsUrls.length != newUrls.length || !_listEquals(_newsUrls, newUrls)) {
+          _newsUrls = newUrls;
+          if (!_isInitialized) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _initializePageController(newUrls.length);
+                setState(() {});
+              }
+            });
+          }
+        }
+
+        if (!_isInitialized && _newsUrls.isNotEmpty) {
+          _initializePageController(_newsUrls.length);
+        }
+
+        if (_pageController == null) {
+          return _buildLoadingWidget();
+        }
+
+        return TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeOut,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value.clamp(0.0, 1.0),
+              child: Transform.translate(
+                offset: Offset(0, 30 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Section Header - Same style as Quick Actions
+              Container(
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: kGreenDark.withOpacity(0.2),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.campaign_rounded, color: Colors.white, size: SizeConfig.screenWidth * 0.07),
+                    SizedBox(width: SizeConfig.screenWidth * 0.04),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Highlights of AUSTRC',
+                            style: TextStyle(
+                              fontSize: SizeConfig.screenWidth * 0.0378,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          SizedBox(height: SizeConfig.screenHeight * 0.0045),
+                          Text(
+                            'Latest news & updates from our club',
+                            style: TextStyle(
+                              fontSize: SizeConfig.screenWidth * 0.032,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFFB8E6D5),
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: SizeConfig.screenHeight * 0.015),
+              // News Carousel
+              _buildNewsCarousel(_newsUrls),
+              SizedBox(height: SizeConfig.screenHeight * 0.01),
+              // Page Indicator
+              _buildPageIndicator(_newsUrls.length),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildNewsCarousel(List<String> newsUrls) {
+    if (_pageController == null) return const SizedBox.shrink();
+
+    return SizedBox(
+      height: SizeConfig.screenHeight * 0.28,
+      child: PageView.builder(
+        controller: _pageController!,
+        onPageChanged: (index) {
+          if (mounted) {
+            setState(() {
+              _currentPage = index % newsUrls.length;
+            });
+          }
+        },
+        itemBuilder: (context, index) {
+          final actualIndex = index % newsUrls.length;
+          return _buildNewsCard(newsUrls[actualIndex], actualIndex);
+        },
+      ),
+    );
+  }
+
+  Widget _buildNewsCard(String imageUrl, int index) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: SizeConfig.screenWidth * 0.015,
+        vertical: SizeConfig.screenHeight * 0.01,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: kGreenDark.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(kGreenMain),
+                  ),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.image_not_supported_rounded,
+                      color: kGreenMain.withOpacity(0.5),
+                      size: 40,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Image unavailable',
+                      style: TextStyle(
+                        color: kGreenMain.withOpacity(0.7),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Gradient overlay at bottom
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.5),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Badge at top right
+            Positioned(
+              top: 12,
+              right: 12,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: kGreenMain.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.local_fire_department_rounded,
+                      color: Colors.amber,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Hot',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPageIndicator(int count) {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(count, (index) {
+          final isActive = _currentPage == index;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: isActive ? 24 : 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: isActive ? kGreenMain : kGreenMain.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(4),
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: kGreenMain.withOpacity(0.4),
+                        blurRadius: 6,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : null,
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildLoadingWidget() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 70,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F3F1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        const SizedBox(height: 15),
+        Container(
+          height: SizeConfig.screenHeight * 0.25,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F3F1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          alignment: Alignment.center,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(kGreenMain),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorWidget(String message) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF1F2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFFCDD2)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: Colors.redAccent),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: Color(0xFFB00020)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================
+// RECENT EVENTS SECTION HEADER
+// ============================================
+class _RecentEventsSectionHeader extends StatelessWidget {
+  const _RecentEventsSectionHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value.clamp(0.0, 1.0),
+          child: Transform.translate(
+            offset: Offset(0, 30 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: kGreenDark.withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.event_rounded, color: Colors.white, size: SizeConfig.screenWidth * 0.07),
+            SizedBox(width: SizeConfig.screenWidth * 0.04),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Recent Events of AUSTRC',
+                    style: TextStyle(
+                      fontSize: SizeConfig.screenWidth * 0.0378,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  SizedBox(height: SizeConfig.screenHeight * 0.0045),
+                  Text(
+                    'Explore our latest activities & programs',
+                    style: TextStyle(
+                      fontSize: SizeConfig.screenWidth * 0.032,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFFB8E6D5),
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // ============================================
