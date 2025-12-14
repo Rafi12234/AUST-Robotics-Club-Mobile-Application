@@ -25,9 +25,9 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
   bool _isOpen = false;
 
   // Configuration
-  final double _fabSize = 70.0;
-  final double _buttonSize = 60.0;
-  final double _radius = 140.0;
+  final double _fabSize = SizeConfig.screenWidth*0.014;
+  final double _buttonSize = SizeConfig.screenWidth*0.011;
+  final double _radius = SizeConfig.screenWidth*0.012;
   final Color _primaryColor = const Color(0xFF1A5C43);
 
   @override
@@ -160,8 +160,8 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
 
         // Floating button and menu
         Positioned(
-          right: 16,
-          bottom: 16,
+          right: SizeConfig.screenWidth*0.01,
+          bottom: SizeConfig.screenWidth*0.01,
           child: SizedBox(
             width: _radius * 2 + _fabSize,
             height: _radius * 2 + _fabSize,
@@ -272,18 +272,18 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
                     width: 2.0,
                   ),
                 ),
-                child: Icon(item.icon, color: Colors.white, size: 26),
+                child: Icon(item.icon, color: Colors.white, size: SizeConfig.screenWidth*0.065),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.screenWidth*0.0025),
             AnimatedContainer(
               duration: const Duration(milliseconds: 500),
               curve: Curves.easeOutCubic,
-              constraints: const BoxConstraints(maxWidth: 120),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              constraints: BoxConstraints(maxWidth: SizeConfig.screenWidth*0.25),
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.008, vertical: SizeConfig.screenWidth*0.006),
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.80),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth*0.096),
                 border: Border.all(
                   color: Colors.white.withOpacity(0.28),
                   width: 1,
@@ -299,12 +299,12 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
               child: Text(
                 item.label,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 11,
+                  fontSize: SizeConfig.screenWidth*0.025,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.3,
-                  height: 1.2,
+                  height: SizeConfig.screenWidth*0.0025,
                 ),
               ),
             ),
@@ -325,9 +325,9 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
         ).value;
 
         return Transform.scale(
-          scale: SizeConfig.screenWidth*0.0017 + (scaleProgress * 0.08),
+          scale: SizeConfig.screenWidth*0.00167 + (scaleProgress * 0.08),
           child: Transform.rotate(
-            angle: rotationProgress * math.pi / 1.8, // < 90° for softness
+            angle: rotationProgress * math.pi / 1.0, // < 90° for softness
             child: child,
           ),
         );
@@ -377,7 +377,7 @@ class _FancyFloatingButtonState extends State<FancyFloatingButton>
                 _isOpen ? Icons.close_rounded : Icons.menu,
                 key: ValueKey<bool>(_isOpen),
                 color: Colors.white,
-                size: 32,
+                size: SizeConfig.screenWidth*0.075,
               ),
             ),
           ),
