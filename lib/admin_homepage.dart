@@ -15,6 +15,7 @@ import 'Admin_Voice_of_AUSTRC_Page.dart';
 import 'Admin_FAQ_Management_Page.dart';
 import 'Admin_AUSTRC_ID_Find_Page.dart';
 import 'Admin_ContactUs_Management_Page.dart';
+import 'Admin_Highlights_of_AUSTRC_Page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -179,6 +180,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       gradientColors: [Color(0xFF7C2D12), Color(0xFFEA580C), Color(0xFFFF7C2D)],
       accentColor: kAccentRed,
       destinationPage: const AdminContactUsPage(),
+    ),
+    AdminCardConfig(
+      title: 'Highlights of AUSTRC',
+      subtitle: 'Showcase highlights',
+      icon: Icons.highlight_rounded,
+      gradientColors: [Color(0xFF78350F), Color(0xFFF59E0B), Color(0xFFFFD54F)],
+      accentColor: kAccentGold,
+      destinationPage: const AdminHighlightsPage(),
     ),
 
 
