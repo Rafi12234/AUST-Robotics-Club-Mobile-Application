@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'FAQ_page.dart';
 import 'ContactUs_page.dart';
+import 'size_config.dart';
 
 /// ============================================
 /// AUST RC BRAND COLORS
@@ -133,6 +134,7 @@ class FooterPage extends StatelessWidget {
   }
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     final currentYear = DateTime.now().year;
 
     return Container(
@@ -149,12 +151,12 @@ class FooterPage extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 24),
+          SizedBox(height: SizeConfig.screenHeight * 0.025),
 
           // ======== LOGO & CLUB NAME ========
           _CompactHeader(),
 
-          const SizedBox(height: 20),
+          SizedBox(height: SizeConfig.screenHeight * 0.02),
 
           // ======== QUICK LINKS ========
           _QuickLinksRow(
@@ -169,7 +171,7 @@ class FooterPage extends StatelessWidget {
             onPolicyTap: () => _showComingSoon(context, 'Policies & Privacy'),
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: SizeConfig.screenHeight * 0.02),
 
           // ======== SOCIAL MEDIA - SIMPLE ICONS ========
           _SimpleSocialRow(
@@ -178,11 +180,11 @@ class FooterPage extends StatelessWidget {
             onLinkedInTap: () => _launchUrl(context, SocialLinks.linkedin),
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: SizeConfig.screenHeight * 0.015),
 
           // ======== DIVIDER ========
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 40),
+            margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.10),
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -197,19 +199,19 @@ class FooterPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: SizeConfig.screenHeight * 0.015),
 
           // ======== DEVELOPERS SECTION ========
           _DevelopersSection(
             onInfoTap: () => _navigateToCreditsPage(context),
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: SizeConfig.screenHeight * 0.012),
 
           // ======== COPYRIGHT ========
           _CompactCopyright(year: currentYear),
 
-          const SizedBox(height: 16),
+          SizedBox(height: SizeConfig.screenHeight * 0.015),
         ],
       ),
     );
@@ -227,21 +229,21 @@ class _CompactHeader extends StatelessWidget {
       children: [
         Container(
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.015),
             child: Image.asset(
               'assets/images/logo2.png',
-              width: 46,
-              height: 46,
+              width: SizeConfig.screenWidth * 0.10,
+              height: SizeConfig.screenWidth * 0.10,
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Icon(
+              errorBuilder: (_, __, ___) => Icon(
                 Icons.smart_toy_rounded,
-                size: 28,
+                size: SizeConfig.screenWidth * 0.06,
                 color: kGreenDark,
               ),
             ),
           ),
         ),
-        const SizedBox(width: 14),
+        SizedBox(width: SizeConfig.screenWidth * 0.03),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -249,21 +251,21 @@ class _CompactHeader extends StatelessWidget {
               shaderCallback: (bounds) => const LinearGradient(
                 colors: [Colors.white, kGreenLight],
               ).createShader(bounds),
-              child: const Text(
+              child: Text(
                 'AUST ROBOTICS CLUB',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: SizeConfig.screenWidth * 0.033,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1,
                   color: Colors.white,
                 ),
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: SizeConfig.screenHeight * 0.0022),
             Text(
               '🤖 Building a Safer Future',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: SizeConfig.screenWidth * 0.025,
                 color: Colors.white.withOpacity(0.6),
                 fontWeight: FontWeight.w500,
               ),
@@ -292,7 +294,7 @@ class _QuickLinksRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -323,9 +325,9 @@ class _VerticalDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 24,
+      height: SizeConfig.screenHeight * 0.025,
       width: 1,
-      margin: const EdgeInsets.symmetric(horizontal: 12),
+      margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.025),
       color: Colors.white.withOpacity(0.15),
     );
   }
@@ -361,25 +363,28 @@ class _FooterLinkButtonState extends State<_FooterLinkButton> {
       onTapCancel: () => setState(() => _isPressed = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: SizeConfig.screenWidth * 0.025,
+          vertical: SizeConfig.screenHeight * 0.008,
+        ),
         decoration: BoxDecoration(
           color:
           _isPressed ? Colors.white.withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.015),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               widget.icon,
-              size: 16,
+              size: SizeConfig.screenWidth * 0.035,
               color: _isPressed ? kGreenLight : Colors.white70,
             ),
-            const SizedBox(width: 6),
+            SizedBox(width: SizeConfig.screenWidth * 0.012),
             Text(
               widget.label,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: SizeConfig.screenWidth * 0.025,
                 fontWeight: FontWeight.w600,
                 color: _isPressed ? kGreenLight : Colors.white70,
               ),
@@ -415,13 +420,13 @@ class _SimpleSocialRow extends StatelessWidget {
           imagePath: 'assets/images/facebook.png',
           onTap: onFacebookTap,
         ),
-        const SizedBox(width: 32),
+        SizedBox(width: SizeConfig.screenWidth * 0.07),
         // Instagram
         _SimpleSocialIcon(
           imagePath: 'assets/images/instagram.png',
           onTap: onInstagramTap,
         ),
-        const SizedBox(width: 32),
+        SizedBox(width: SizeConfig.screenWidth * 0.07),
         // LinkedIn
         _SimpleSocialIcon(
           imagePath: 'assets/images/linkedin.png',
@@ -469,13 +474,13 @@ class _SimpleSocialIconState extends State<_SimpleSocialIcon> {
           duration: const Duration(milliseconds: 150),
           child: Image.asset(
             widget.imagePath,
-            width: 36,
-            height: 36,
+            width: SizeConfig.screenWidth * 0.075,
+            height: SizeConfig.screenWidth * 0.075,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const Icon(
+            errorBuilder: (_, __, ___) => Icon(
               Icons.link,
               color: Colors.white,
-              size: 36,
+              size: SizeConfig.screenWidth * 0.075,
             ),
           ),
         ),
@@ -495,8 +500,11 @@ class _DevelopersSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
+      padding: EdgeInsets.symmetric(
+        horizontal: SizeConfig.screenWidth * 0.04,
+        vertical: SizeConfig.screenHeight * 0.015,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -504,7 +512,7 @@ class _DevelopersSection extends StatelessWidget {
             kGreenDark.withOpacity(0.1),
           ],
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
         border: Border.all(
           color: kGreenMain.withOpacity(0.2),
         ),
@@ -516,14 +524,14 @@ class _DevelopersSection extends StatelessWidget {
             children: [
               Icon(
                 Icons.code_rounded,
-                size: 16,
+                size: SizeConfig.screenWidth * 0.035,
                 color: kGreenLight.withOpacity(0.8),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: SizeConfig.screenWidth * 0.015),
               Text(
                 'Developed by',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: SizeConfig.screenWidth * 0.025,
                   fontWeight: FontWeight.w600,
                   color: kGreenLight.withOpacity(0.9),
                   letterSpacing: 0.3,
@@ -531,58 +539,61 @@ class _DevelopersSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: SizeConfig.screenHeight * 0.008),
+          Text(
             'AUST Robotics Club',
             style: TextStyle(
-              fontSize: 15,
+              fontSize: SizeConfig.screenWidth * 0.032,
               fontWeight: FontWeight.w800,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: SizeConfig.screenHeight * 0.004),
           Text(
             'Web Development Team',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: SizeConfig.screenWidth * 0.025,
               fontWeight: FontWeight.w500,
               color: Colors.white.withOpacity(0.6),
             ),
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: SizeConfig.screenHeight * 0.015),
           GestureDetector(
             onTap: onInfoTap,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.screenWidth * 0.02,
+                vertical: SizeConfig.screenHeight * 0.0075,
+              ),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [kGreenMain, kGreenDark],
                 ),
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                 boxShadow: [
                   BoxShadow(
                     color: kGreenMain.withOpacity(0.4),
-                    blurRadius: 10,
+                    blurRadius: SizeConfig.screenWidth * 0.02,
                     spreadRadius: 1,
-                    offset: const Offset(0, 4),
+                    offset: Offset(0, SizeConfig.screenHeight * 0.004),
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.info_outline_rounded,
                     color: Colors.white,
-                    size: 18,
+                    size: SizeConfig.screenWidth * 0.04,
                   ),
-                  SizedBox(width: 8),
+                  SizedBox(width: SizeConfig.screenWidth * 0.011),
                   Text(
                     'Meet the Developers',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: SizeConfig.screenWidth * 0.025,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
                       letterSpacing: 0.3,
@@ -616,65 +627,68 @@ class _CompactCopyright extends StatelessWidget {
             Text(
               'Made for',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: SizeConfig.screenWidth * 0.025,
                 color: Colors.white.withOpacity(0.4),
               ),
             ),
             Text(
               ' AUST Robotics Club',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: SizeConfig.screenWidth * 0.025,
                 color: Colors.white.withOpacity(0.4),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: SizeConfig.screenHeight * 0.006),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 18,
-              height: 18,
+              width: SizeConfig.screenWidth * 0.04,
+              height: SizeConfig.screenWidth * 0.04,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.008),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.008),
                 child: Image.asset(
                   'assets/images/AUST.png',
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.school,
-                    size: 12,
+                    size: SizeConfig.screenWidth * 0.025,
                     color: kGreenDark,
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: SizeConfig.screenWidth * 0.015),
             Text(
               '© $year AUST RC • AUST, Dhaka',
               style: TextStyle(
-                fontSize: 10,
+                fontSize: SizeConfig.screenWidth * 0.022,
                 color: Colors.white.withOpacity(0.35),
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: SizeConfig.screenWidth * 0.015),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.screenWidth * 0.012,
+                vertical: SizeConfig.screenHeight * 0.002,
+              ),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Colors.white.withOpacity(0.15),
                 ),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.008),
               ),
               child: Text(
                 'v1.0.0',
                 style: TextStyle(
-                  fontSize: 8,
+                  fontSize: SizeConfig.screenWidth * 0.018,
                   color: Colors.white.withOpacity(0.3),
                   fontWeight: FontWeight.w600,
                 ),
@@ -751,6 +765,7 @@ class DeveloperCreditsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
@@ -758,14 +773,14 @@ class DeveloperCreditsPage extends StatelessWidget {
           children: [
             // App Bar
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.035),
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
+                    blurRadius: SizeConfig.screenWidth * 0.02,
+                    offset: Offset(0, SizeConfig.screenHeight * 0.002),
                   ),
                 ],
               ),
@@ -777,24 +792,24 @@ class DeveloperCreditsPage extends StatelessWidget {
                       Navigator.pop(context);
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
                       decoration: BoxDecoration(
                         color: kGreenMain.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_back_ios_rounded,
                         color: kGreenDark,
-                        size: 20,
+                        size: SizeConfig.screenWidth * 0.045,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  const Expanded(
+                  SizedBox(width: SizeConfig.screenWidth * 0.03),
+                  Expanded(
                     child: Text(
                       'Development Team',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: SizeConfig.screenWidth * 0.045,
                         fontWeight: FontWeight.w800,
                         color: kGreenDark,
                       ),
@@ -802,21 +817,21 @@ class DeveloperCreditsPage extends StatelessWidget {
                   ),
                   // Club Logo
                   Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: EdgeInsets.all(SizeConfig.screenWidth * 0.012),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
                       border: Border.all(
                         color: kGreenMain.withOpacity(0.2),
                       ),
                     ),
                     child: Image.asset(
                       'assets/images/logo2.png',
-                      width: 28,
-                      height: 28,
-                      errorBuilder: (_, __, ___) => const Icon(
+                      width: SizeConfig.screenWidth * 0.06,
+                      height: SizeConfig.screenWidth * 0.06,
+                      errorBuilder: (_, __, ___) => Icon(
                         Icons.smart_toy_rounded,
-                        size: 24,
+                        size: SizeConfig.screenWidth * 0.05,
                         color: kGreenDark,
                       ),
                     ),
@@ -831,51 +846,51 @@ class DeveloperCreditsPage extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
+                    SizedBox(height: SizeConfig.screenHeight * 0.02),
 
                     // Header
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.04),
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(20),
+                        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [kGreenMain, kGreenDark],
                           ),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                           boxShadow: [
                             BoxShadow(
                               color: kGreenMain.withOpacity(0.3),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
+                              blurRadius: SizeConfig.screenWidth * 0.03,
+                              offset: Offset(0, SizeConfig.screenHeight * 0.008),
                             ),
                           ],
                         ),
                         child: Column(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.code_rounded,
                               color: Colors.white,
-                              size: 40,
+                              size: SizeConfig.screenWidth * 0.08,
                             ),
-                            const SizedBox(height: 12),
-                            const Text(
+                            SizedBox(height: SizeConfig.screenHeight * 0.012),
+                            Text(
                               'AUST Robotics Club',
                               style: TextStyle(
-                                fontSize: 22,
+                                fontSize: SizeConfig.screenWidth * 0.05,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white,
                                 letterSpacing: 0.5,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: SizeConfig.screenHeight * 0.004),
                             Text(
                               'Web Development Team',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: SizeConfig.screenWidth * 0.03,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white.withOpacity(0.8),
                               ),
@@ -885,44 +900,44 @@ class DeveloperCreditsPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: SizeConfig.screenHeight * 0.025),
 
                     // Developers Section Title
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.04),
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.018),
                             decoration: BoxDecoration(
                               color: kGreenMain.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.people_alt_rounded,
                               color: kGreenMain,
-                              size: 20,
+                              size: SizeConfig.screenWidth * 0.045,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          const Text(
+                          SizedBox(width: SizeConfig.screenWidth * 0.025),
+                          Text(
                             'Our Developers',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: SizeConfig.screenWidth * 0.04,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF1F2937),
+                              color: const Color(0xFF1F2937),
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: SizeConfig.screenHeight * 0.015),
 
                     // Developer Cards
                     ...developers.map((dev) => Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 8),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.screenWidth * 0.04, vertical: SizeConfig.screenHeight * 0.008),
                       child: _DeveloperCardLight(
                         developer: dev,
                         onGithubTap: () =>
@@ -932,43 +947,43 @@ class DeveloperCreditsPage extends StatelessWidget {
                       ),
                     )),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: SizeConfig.screenHeight * 0.03),
 
                     // Appreciation Section Title
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.04),
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.018),
                             decoration: BoxDecoration(
                               color: Colors.amber.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.emoji_events_rounded,
                               color: Colors.amber,
-                              size: 20,
+                              size: SizeConfig.screenWidth * 0.045,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          const Text(
+                          SizedBox(width: SizeConfig.screenWidth * 0.025),
+                          Text(
                             'Words of Appreciation',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: SizeConfig.screenWidth * 0.04,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF1F2937),
+                              color: const Color(0xFF1F2937),
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: SizeConfig.screenHeight * 0.015),
 
                     // Directors Row
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.04),
                       child: Row(
                         children: appreciations
                             .map((appreciation) => Expanded(
@@ -980,28 +995,28 @@ class DeveloperCreditsPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    SizedBox(height: SizeConfig.screenHeight * 0.02),
 
                     // Appreciation Messages
                     ...appreciations.map((appreciation) => Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 8),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.screenWidth * 0.04, vertical: SizeConfig.screenHeight * 0.008),
                       child: _AppreciationCardLight(
                         appreciation: appreciation,
                       ),
                     )),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: SizeConfig.screenHeight * 0.03),
 
                     // Thank You Section
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.04),
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(24),
+                        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.05),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
                           border: Border.all(
                             color: kGreenMain.withOpacity(0.2),
                           ),
@@ -1009,32 +1024,32 @@ class DeveloperCreditsPage extends StatelessWidget {
                         child: Column(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                               decoration: BoxDecoration(
                                 color: kGreenMain.withOpacity(0.1),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Text(
+                              child: Text(
                                 '💚',
-                                style: TextStyle(fontSize: 28),
+                                style: TextStyle(fontSize: SizeConfig.screenWidth * 0.06),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            const Text(
+                            SizedBox(height: SizeConfig.screenHeight * 0.012),
+                            Text(
                               'Thank you for using the AUST Robotics Club Official Mobile App',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: SizeConfig.screenWidth * 0.035,
                                 fontWeight: FontWeight.w700,
                                 color: kGreenDark,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            SizedBox(height: SizeConfig.screenHeight * 0.006),
                             Text(
                               'Built with passion and dedication',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: SizeConfig.screenWidth * 0.028,
                                 color: Colors.grey[600],
                               ),
                             ),
@@ -1043,7 +1058,7 @@ class DeveloperCreditsPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 30),
+                    SizedBox(height: SizeConfig.screenHeight * 0.03),
                   ],
                 ),
               ),
@@ -1075,10 +1090,10 @@ class _DeveloperCardLight extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
         border: Border.all(
           color: isLead
               ? kGreenMain.withOpacity(0.3)
@@ -1090,8 +1105,8 @@ class _DeveloperCardLight extends StatelessWidget {
             color: isLead
                 ? kGreenMain.withOpacity(0.1)
                 : Colors.black.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            blurRadius: SizeConfig.screenWidth * 0.03,
+            offset: Offset(0, SizeConfig.screenHeight * 0.005),
           ),
         ],
       ),
@@ -1099,19 +1114,19 @@ class _DeveloperCardLight extends StatelessWidget {
         children: [
           // Profile Image - Larger
           Container(
-            width: isLead ? 120 : 100,
-            height: isLead ? 120 : 100,
+            width: isLead ? SizeConfig.screenWidth * 0.025 : SizeConfig.screenWidth * 0.022,
+            height: isLead ? SizeConfig.screenWidth * 0.025 : SizeConfig.screenWidth * 0.022,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
                 color: isLead ? kGreenMain : kGreenMain.withOpacity(0.5),
-                width: isLead ? 4 : 3,
+                width: isLead ? SizeConfig.screenWidth * 0.008 : SizeConfig.screenWidth * 0.006,
               ),
               boxShadow: [
                 BoxShadow(
                   color: kGreenMain.withOpacity(0.2),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
+                  blurRadius: SizeConfig.screenWidth * 0.03,
+                  offset: Offset(0, SizeConfig.screenHeight * 0.005),
                 ),
               ],
             ),
@@ -1123,7 +1138,7 @@ class _DeveloperCardLight extends StatelessWidget {
                   color: kGreenMain.withOpacity(0.1),
                   child: Icon(
                     Icons.person_rounded,
-                    size: isLead ? 60 : 50,
+                    size: isLead ? SizeConfig.screenWidth * 0.012 : SizeConfig.screenWidth * 0.10,
                     color: kGreenMain.withOpacity(0.5),
                   ),
                 ),
@@ -1131,11 +1146,14 @@ class _DeveloperCardLight extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: SizeConfig.screenHeight * 0.015),
 
           // Role Badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            padding: EdgeInsets.symmetric(
+              horizontal: SizeConfig.screenWidth * 0.03,
+              vertical: SizeConfig.screenHeight * 0.006,
+            ),
             decoration: BoxDecoration(
               gradient: isLead
                   ? const LinearGradient(
@@ -1147,21 +1165,21 @@ class _DeveloperCardLight extends StatelessWidget {
                   kGreenMain.withOpacity(0.1),
                 ],
               ),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   isLead ? Icons.star_rounded : Icons.code_rounded,
-                  size: 14,
+                  size: SizeConfig.screenWidth * 0.03,
                   color: isLead ? Colors.black87 : kGreenMain,
                 ),
-                const SizedBox(width: 6),
+                SizedBox(width: SizeConfig.screenWidth * 0.012),
                 Text(
                   developer.role,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: SizeConfig.screenWidth * 0.025,
                     fontWeight: FontWeight.w700,
                     color: isLead ? Colors.black87 : kGreenMain,
                   ),
@@ -1170,31 +1188,31 @@ class _DeveloperCardLight extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: SizeConfig.screenHeight * 0.012),
 
           // Name
           Text(
             developer.name,
-            style: const TextStyle(
-              fontSize: 20,
+            style: TextStyle(
+              fontSize: SizeConfig.screenWidth * 0.045,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF1F2937),
+              color: const Color(0xFF1F2937),
             ),
           ),
 
-          const SizedBox(height: 4),
+          SizedBox(height: SizeConfig.screenHeight * 0.004),
 
           // Department
           Text(
             developer.department,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: SizeConfig.screenWidth * 0.028,
               color: Colors.grey[600],
               fontWeight: FontWeight.w500,
             ),
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: SizeConfig.screenHeight * 0.02),
 
           // Social Links - Just Icons (No Background)
           Row(
@@ -1208,17 +1226,17 @@ class _DeveloperCardLight extends StatelessWidget {
                 },
                 child: Image.asset(
                   'assets/images/github.png',
-                  width: 36,
-                  height: 36,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  width: SizeConfig.screenWidth * 0.075,
+                  height: SizeConfig.screenWidth * 0.075,
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.code_rounded,
-                    size: 36,
-                    color: Color(0xFF333333),
+                    size: SizeConfig.screenWidth * 0.075,
+                    color: const Color(0xFF333333),
                   ),
                 ),
               ),
 
-              const SizedBox(width: 32),
+              SizedBox(width: SizeConfig.screenWidth * 0.07),
 
               // Facebook
               GestureDetector(
@@ -1228,12 +1246,12 @@ class _DeveloperCardLight extends StatelessWidget {
                 },
                 child: Image.asset(
                   'assets/images/facebook.png',
-                  width: 36,
-                  height: 36,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  width: SizeConfig.screenWidth * 0.075,
+                  height: SizeConfig.screenWidth * 0.075,
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.facebook_rounded,
-                    size: 36,
-                    color: Color(0xFF1877F2),
+                    size: SizeConfig.screenWidth * 0.075,
+                    color: const Color(0xFF1877F2),
                   ),
                 ),
               ),
@@ -1259,19 +1277,19 @@ class _DirectorAvatar extends StatelessWidget {
       children: [
         // Small Round Image
         Container(
-          width: 70,
-          height: 70,
+          width: SizeConfig.screenWidth * 0.015,
+          height: SizeConfig.screenWidth * 0.015,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
               color: Colors.amber.withOpacity(0.5),
-              width: 3,
+              width: SizeConfig.screenWidth * 0.006,
             ),
             boxShadow: [
               BoxShadow(
                 color: Colors.amber.withOpacity(0.2),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                blurRadius: SizeConfig.screenWidth * 0.02,
+                offset: Offset(0, SizeConfig.screenHeight * 0.004),
               ),
             ],
           ),
@@ -1283,7 +1301,7 @@ class _DirectorAvatar extends StatelessWidget {
                 color: Colors.amber.withOpacity(0.1),
                 child: Icon(
                   Icons.person_rounded,
-                  size: 35,
+                  size: SizeConfig.screenWidth * 0.075,
                   color: Colors.amber.withOpacity(0.5),
                 ),
               ),
@@ -1291,40 +1309,40 @@ class _DirectorAvatar extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 10),
+        SizedBox(height: SizeConfig.screenHeight * 0.01),
 
         // Name
         Text(
           appreciation.name,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            fontSize: SizeConfig.screenWidth * 0.03,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1F2937),
+            color: const Color(0xFF1F2937),
           ),
         ),
 
-        const SizedBox(height: 2),
+        SizedBox(height: SizeConfig.screenHeight * 0.002),
 
         // Position
         Text(
           appreciation.position,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: SizeConfig.screenWidth * 0.025,
             fontWeight: FontWeight.w600,
             color: Colors.grey[600],
           ),
         ),
 
-        const SizedBox(height: 2),
+        SizedBox(height: SizeConfig.screenHeight * 0.002),
 
         // Semester
         Text(
           '(${appreciation.semester})',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 10,
+            fontSize: SizeConfig.screenWidth * 0.022,
             fontWeight: FontWeight.w500,
             color: Colors.grey[500],
           ),
@@ -1358,18 +1376,18 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
       },
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.035),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
           border: Border.all(
             color: Colors.amber.withOpacity(0.2),
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              blurRadius: SizeConfig.screenWidth * 0.02,
+              offset: Offset(0, SizeConfig.screenHeight * 0.004),
             ),
           ],
         ),
@@ -1381,8 +1399,8 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
               children: [
                 // Small Avatar
                 Container(
-                  width: 45,
-                  height: 45,
+                  width: SizeConfig.screenWidth * 0.10,
+                  height: SizeConfig.screenWidth * 0.10,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
@@ -1396,9 +1414,9 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
                         color: Colors.amber.withOpacity(0.1),
-                        child: const Icon(
+                        child: Icon(
                           Icons.person_rounded,
-                          size: 25,
+                          size: SizeConfig.screenWidth * 0.055,
                           color: Colors.amber,
                         ),
                       ),
@@ -1406,7 +1424,7 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
                   ),
                 ),
 
-                const SizedBox(width: 12),
+                SizedBox(width: SizeConfig.screenWidth * 0.025),
 
                 // Name & Position
                 Expanded(
@@ -1415,26 +1433,26 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
                     children: [
                       Text(
                         widget.appreciation.name,
-                        style: const TextStyle(
-                          fontSize: 15,
+                        style: TextStyle(
+                          fontSize: SizeConfig.screenWidth * 0.032,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1F2937),
+                          color: const Color(0xFF1F2937),
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: SizeConfig.screenHeight * 0.002),
                       Row(
                         children: [
                           Text(
                             widget.appreciation.position,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: SizeConfig.screenWidth * 0.025,
                               color: Colors.grey[600],
                             ),
                           ),
                           Text(
                             ' (${widget.appreciation.semester})',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: SizeConfig.screenWidth * 0.023,
                               color: Colors.grey[500],
                             ),
                           ),
@@ -1446,25 +1464,25 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
 
                 // Expand Icon
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.015),
                   decoration: BoxDecoration(
                     color: Colors.amber.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.015),
                   ),
                   child: AnimatedRotation(
                     turns: _isExpanded ? 0.5 : 0,
                     duration: const Duration(milliseconds: 300),
-                    child: const Icon(
+                    child: Icon(
                       Icons.keyboard_arrow_down_rounded,
                       color: Colors.amber,
-                      size: 20,
+                      size: SizeConfig.screenWidth * 0.045,
                     ),
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: SizeConfig.screenHeight * 0.012),
 
             // Quote Icon
             Row(
@@ -1472,13 +1490,13 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
                 Icon(
                   Icons.format_quote_rounded,
                   color: Colors.amber.withOpacity(0.5),
-                  size: 20,
+                  size: SizeConfig.screenWidth * 0.045,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: SizeConfig.screenWidth * 0.015),
                 Text(
                   'Message',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: SizeConfig.screenWidth * 0.025,
                     fontWeight: FontWeight.w600,
                     color: Colors.amber[700],
                   ),
@@ -1486,7 +1504,7 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
               ],
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.screenHeight * 0.008),
 
             // Message
             AnimatedCrossFade(
@@ -1495,7 +1513,7 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: SizeConfig.screenWidth * 0.028,
                   color: Colors.grey[700],
                   height: 1.6,
                   fontStyle: FontStyle.italic,
@@ -1504,7 +1522,7 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
               secondChild: Text(
                 widget.appreciation.message,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: SizeConfig.screenWidth * 0.028,
                   color: Colors.grey[700],
                   height: 1.6,
                   fontStyle: FontStyle.italic,
@@ -1516,14 +1534,14 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
               duration: const Duration(milliseconds: 300),
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.screenHeight * 0.008),
 
             // Tap to expand/collapse hint
             Center(
               child: Text(
                 _isExpanded ? 'Tap to collapse' : 'Tap to read more',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: SizeConfig.screenWidth * 0.023,
                   color: Colors.amber[600],
                   fontWeight: FontWeight.w600,
                 ),
@@ -1535,4 +1553,9 @@ class _AppreciationCardLightState extends State<_AppreciationCardLight> {
     );
   }
 }
+
+
+
+
+
 
