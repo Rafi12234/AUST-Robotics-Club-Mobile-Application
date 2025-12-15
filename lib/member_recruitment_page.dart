@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'size_config.dart';
 
 class MemberRecruitmentPage extends StatefulWidget {
   const MemberRecruitmentPage({Key? key}) : super(key: key);
@@ -155,39 +156,39 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFFF6B6B), Color(0xFFEE5A6F)],
                 ),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.lock_rounded,
-                size: 50,
+                size: SizeConfig.screenWidth * 0.1,
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: SizeConfig.screenHeight * 0.025),
+            Text(
               'Form Currently Closed',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: SizeConfig.screenWidth * 0.032,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFFF6B6B),
+                color: const Color(0xFFFF6B6B),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: SizeConfig.screenHeight * 0.012),
             Text(
               _accessMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: SizeConfig.screenWidth * 0.025,
                 color: Colors.grey[700],
                 height: 1.5,
               ),
@@ -204,15 +205,15 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6B6B),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.016),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'Go Back',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: SizeConfig.screenWidth * 0.034,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -318,40 +319,40 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
                 ),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.check_rounded,
-                size: 50,
+                size: SizeConfig.screenWidth * 0.1,
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: SizeConfig.screenHeight * 0.025),
+            Text(
               'Registration Successful!',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: SizeConfig.screenWidth * 0.032,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1B5E20),
+                color: const Color(0xFF1B5E20),
               ),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: SizeConfig.screenHeight * 0.016),
             Text(
               'Welcome to the club! Your application has been submitted successfully for $_selectedCurrentSemester.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: SizeConfig.screenWidth * 0.025,
                 color: Colors.grey[700],
                 height: 1.5,
               ),
@@ -368,15 +369,15 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2E7D32),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.016),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'Done',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: SizeConfig.screenWidth * 0.034,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -390,6 +391,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: CustomScrollView(
@@ -397,28 +399,28 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
         slivers: [
           // Curved App Bar
           SliverAppBar(
-            expandedHeight: 180,
+            expandedHeight: SizeConfig.screenHeight * 0.18,
             floating: false,
             pinned: true,
             stretch: true,
             elevation: 0,
             backgroundColor: const Color(0xFF1B5E20),
             leading: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
+              padding: EdgeInsets.only(left: SizeConfig.screenWidth * 0.016),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios,
-                    color: Colors.white, size: 22),
+                icon: Icon(Icons.arrow_back_ios,
+                    color: Colors.white, size: SizeConfig.screenWidth * 0.045),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: false,
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
-              title: const Text(
+              titlePadding: EdgeInsets.only(left: SizeConfig.screenWidth * 0.08, bottom: SizeConfig.screenHeight * 0.013),
+              title: Text(
                 'Join Our Club',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 26,
+                  fontSize: SizeConfig.screenWidth * 0.045,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),
@@ -438,22 +440,22 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                 child: Stack(
                   children: [
                     Positioned(
-                      right: -30,
-                      top: 50,
+                      right: -SizeConfig.screenWidth * 0.08,
+                      top: SizeConfig.screenHeight * 0.025,
                       child: Icon(
                         Icons.group_add_rounded,
-                        size: 150,
+                        size: SizeConfig.screenWidth * 0.38,
                         color: Colors.white.withOpacity(0.1),
                       ),
                     ),
                     Positioned(
-                      left: 20,
-                      bottom: 50,
+                      left: SizeConfig.screenWidth * 0.089,
+                      bottom: SizeConfig.screenHeight * 0.05,
                       child: Text(
                         'New Member Registration',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.9),
-                          fontSize: 17,
+                          fontSize: SizeConfig.screenWidth * 0.038,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -467,10 +469,10 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
           // Form Content
           SliverToBoxAdapter(
             child: _isLoading
-                ? const Center(
+                ? Center(
               child: Padding(
-                padding: EdgeInsets.all(50.0),
-                child: CircularProgressIndicator(
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.08),
+                child: const CircularProgressIndicator(
                   color: Color(0xFF2E7D32),
                 ),
               ),
@@ -480,7 +482,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                 : FadeTransition(
               opacity: _fadeAnimation,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.034),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -489,7 +491,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                       // Personal Information Section
                       _buildSectionTitle(
                           'Personal Information', Icons.person_outline),
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
                       _buildAnimatedTextField(
                         controller: _nameController,
                         label: 'Full Name',
@@ -499,7 +501,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                             ? 'Name is required'
                             : null,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
                       _buildAnimatedTextField(
                         controller: _departmentController,
                         label: 'Department',
@@ -509,7 +511,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                             ? 'Department is required'
                             : null,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
                       _buildAnimatedTextField(
                         controller: _phoneController,
                         label: 'Phone Number',
@@ -522,10 +524,10 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                       ),
 
                       // Academic Information Section
-                      const SizedBox(height: 32),
+                      SizedBox(height: SizeConfig.screenHeight * 0.034),
                       _buildSectionTitle(
                           'Academic Information', Icons.menu_book),
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
 
                       // Semester Selection
                       _buildAnimatedCard(
@@ -533,56 +535,85 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Select Your Semester',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1B5E20),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: _semesterOptions.map((semester) {
-                                final isSelected =
-                                    _selectedSemester == semester;
-                                return ChoiceChip(
-                                  label: Text(semester),
-                                  selected: isSelected,
-                                  onSelected: (selected) {
-                                    setState(() {
-                                      _selectedSemester =
-                                      selected ? semester : null;
-                                    });
-                                  },
-                                  selectedColor: const Color(0xFF2E7D32),
-                                  labelStyle: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.grey[700],
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.school_rounded,
+                                  color: const Color(0xFF2E7D32),
+                                  size: SizeConfig.screenWidth * 0.05,
+                                ),
+                                SizedBox(width: SizeConfig.screenWidth * 0.02),
+                                Text(
+                                  'Select Your Semester',
+                                  style: TextStyle(
+                                    fontSize: SizeConfig.screenWidth * 0.038,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1B5E20),
                                   ),
-                                  backgroundColor: Colors.grey[100],
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                    side: BorderSide(
-                                      color: isSelected
-                                          ? const Color(0xFF2E7D32)
-                                          : Colors.grey[300]!,
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: SizeConfig.screenHeight * 0.015),
+                            DropdownButtonFormField<String>(
+                              value: _selectedSemester,
+                              decoration: InputDecoration(
+                                labelText: 'Choose Semester',
+                                prefixIcon: Icon(
+                                  Icons.format_list_numbered_rounded,
+                                  color: const Color(0xFF2E7D32),
+                                  size: SizeConfig.screenWidth * 0.05,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                                  borderSide: BorderSide(color: Colors.grey[300]!),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                                  borderSide: BorderSide(color: Colors.grey[300]!),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                                  borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 2),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey[50],
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.screenWidth * 0.04,
+                                  vertical: SizeConfig.screenHeight * 0.018,
+                                ),
+                              ),
+                              dropdownColor: Colors.white,
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                              icon: Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: const Color(0xFF2E7D32),
+                                size: SizeConfig.screenWidth * 0.06,
+                              ),
+                              items: _semesterOptions.map((semester) {
+                                return DropdownMenuItem(
+                                  value: semester,
+                                  child: Text(
+                                    'Semester $semester',
+                                    style: TextStyle(
+                                      fontSize: SizeConfig.screenWidth * 0.038,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey[800],
                                     ),
                                   ),
                                 );
                               }).toList(),
+                              onChanged: (value) {
+                                setState(() => _selectedSemester = value);
+                              },
+                              validator: (value) => value == null
+                                  ? 'Please select your semester'
+                                  : null,
                             ),
                           ],
                         ),
                       ),
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
 
                       // Current Semester Dropdown (Registration Semester)
                       _buildAnimatedCard(
@@ -592,29 +623,29 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                           children: [
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.calendar_today,
-                                  color: Color(0xFF2E7D32),
-                                  size: 20,
+                                  color: const Color(0xFF2E7D32),
+                                  size: SizeConfig.screenWidth * 0.025,
                                 ),
-                                const SizedBox(width: 8),
-                                const Text(
+                                SizedBox(width: SizeConfig.screenWidth * 0.016),
+                                Text(
                                   'Registration Semester',
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: SizeConfig.screenWidth * 0.038,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1B5E20),
+                                    color: const Color(0xFF1B5E20),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: SizeConfig.screenHeight * 0.012),
                             if (_availableSemesters.isEmpty)
                               Container(
-                                padding: const EdgeInsets.all(16),
+                                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.034),
                                 decoration: BoxDecoration(
                                   color: Colors.orange[50],
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                                   border: Border.all(
                                     color: Colors.orange,
                                     width: 2,
@@ -622,18 +653,18 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.warning_rounded,
                                       color: Colors.orange,
-                                      size: 24,
+                                      size: SizeConfig.screenWidth * 0.025,
                                     ),
-                                    const SizedBox(width: 12),
+                                    SizedBox(width: SizeConfig.screenWidth * 0.025),
                                     Expanded(
                                       child: Text(
                                         'No semesters available. Please contact admin.',
                                         style: TextStyle(
                                           color: Colors.orange[900],
-                                          fontSize: 14,
+                                          fontSize: SizeConfig.screenWidth * 0.025,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -646,19 +677,20 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                                 value: _selectedCurrentSemester,
                                 decoration: InputDecoration(
                                   labelText: 'Select Registration Semester',
-                                  prefixIcon: const Icon(
+                                  prefixIcon: Icon(
                                     Icons.event_available_rounded,
-                                    color: Color(0xFF2E7D32),
+                                    color: const Color(0xFF2E7D32),
+                                    size: SizeConfig.screenWidth * 0.032,
                                   ),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                                     borderSide: BorderSide.none,
                                   ),
                                   filled: true,
                                   fillColor: Colors.grey[50],
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 16,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: SizeConfig.screenWidth * 0.034,
+                                    vertical: SizeConfig.screenHeight * 0.016,
                                   ),
                                 ),
                                 items: _availableSemesters.map((semester) {
@@ -666,8 +698,8 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                                     value: semester,
                                     child: Text(
                                       semester,
-                                      style: const TextStyle(
-                                        fontSize: 16,
+                                      style: TextStyle(
+                                        fontSize: SizeConfig.screenWidth * 0.034,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -681,11 +713,11 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                                     ? 'Please select registration semester'
                                     : null,
                               ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: SizeConfig.screenHeight * 0.01),
                             Text(
                               'Select the semester you are registering for',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: SizeConfig.screenWidth * 0.025,
                                 color: Colors.grey[600],
                                 fontStyle: FontStyle.italic,
                               ),
@@ -695,10 +727,10 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                       ),
 
                       // Contact Information Section
-                      const SizedBox(height: 32),
+                      SizedBox(height: SizeConfig.screenHeight * 0.034),
                       _buildSectionTitle(
                           'Contact Information', Icons.email_outlined),
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
                       _buildAnimatedTextField(
                         controller: _personalEmailController,
                         label: 'Personal Email',
@@ -713,7 +745,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
                       _buildAnimatedTextField(
                         controller: _eduMailController,
                         label: 'Educational Email',
@@ -730,16 +762,16 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                       ),
 
                       // Payment Section
-                      const SizedBox(height: 32),
+                      SizedBox(height: SizeConfig.screenHeight * 0.034),
                       _buildSectionTitle(
                           'Payment Information', Icons.payment),
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
 
                       // Must Send Money Notice
                       _buildAnimatedCard(
                         delay: 500,
                         child: Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.034),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
@@ -747,7 +779,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                                 const Color(0xFFEE5A6F).withOpacity(0.1),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                             border: Border.all(
                               color: const Color(0xFFFF6B6B),
                               width: 2,
@@ -756,25 +788,25 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                           child: Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(8),
+                                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.016),
                                 decoration: const BoxDecoration(
                                   color: Color(0xFFFF6B6B),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.warning_rounded,
                                   color: Colors.white,
-                                  size: 24,
+                                  size: SizeConfig.screenWidth * 0.025,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              const Expanded(
+                              SizedBox(width: SizeConfig.screenWidth * 0.025),
+                              Expanded(
                                 child: Text(
                                   'MUST SEND MONEY\nBefore submitting the form',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: SizeConfig.screenWidth * 0.025,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFFFF6B6B),
+                                    color: const Color(0xFFFF6B6B),
                                     height: 1.4,
                                   ),
                                 ),
@@ -784,7 +816,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         ),
                       ),
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
 
                       // Payment Numbers
                       if (_bkashNumber != null)
@@ -797,7 +829,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                             Icons.account_balance_wallet,
                           ),
                         ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: SizeConfig.screenHeight * 0.012),
                       if (_nagadNumber != null)
                         _buildAnimatedCard(
                           delay: 600,
@@ -809,7 +841,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                           ),
                         ),
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
 
                       // Payment Method Selection
                       _buildAnimatedCard(
@@ -817,22 +849,22 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Payment Method Used',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: SizeConfig.screenWidth * 0.034,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF1B5E20),
+                                color: const Color(0xFF1B5E20),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: SizeConfig.screenHeight * 0.012),
                             Row(
                               children: [
                                 Expanded(
                                   child: _buildPaymentOption(
                                       'Bkash', Colors.pink),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: SizeConfig.screenWidth * 0.025),
                                 Expanded(
                                   child: _buildPaymentOption(
                                       'Nagad', Colors.orange),
@@ -843,7 +875,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         ),
                       ),
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: SizeConfig.screenHeight * 0.016),
                       _buildAnimatedTextField(
                         controller: _transactionIdController,
                         label: 'Transaction ID',
@@ -855,7 +887,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                       ),
 
                       // Submit Button
-                      const SizedBox(height: 32),
+                      SizedBox(height: SizeConfig.screenHeight * 0.034),
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 800),
                         tween: Tween(begin: 0.0, end: 1.0),
@@ -867,36 +899,37 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                         },
                         child: SizedBox(
                           width: double.infinity,
-                          height: 56,
+                          height: SizeConfig.screenHeight * 0.06,
                           child: ElevatedButton(
                             onPressed: _isSubmitting ? null : _submitForm,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2E7D32),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.034),
                               ),
                               elevation: 4,
                             ),
                             child: _isSubmitting
-                                ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
+                                ? SizedBox(
+                              height: SizeConfig.screenWidth * 0.025,
+                              width: SizeConfig.screenWidth * 0.025,
+                              child: const CircularProgressIndicator(
                                 color: Colors.white,
                                 strokeWidth: 2.5,
                               ),
                             )
-                                : const Row(
+                                : Row(
                               mainAxisAlignment:
                               MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.send_rounded,
-                                    color: Colors.white),
-                                SizedBox(width: 8),
+                                    color: Colors.white,
+                                    size: SizeConfig.screenWidth * 0.025),
+                                SizedBox(width: SizeConfig.screenWidth * 0.016),
                                 Text(
                                   'Submit Application',
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: SizeConfig.screenWidth * 0.032,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
@@ -906,7 +939,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                           ),
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      SizedBox(height: SizeConfig.screenHeight * 0.025),
                     ],
                   ),
                 ),
@@ -922,22 +955,22 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
             ),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
           ),
-          child: Icon(icon, color: Colors.white, size: 20),
+          child: Icon(icon, color: Colors.white, size: SizeConfig.screenWidth * 0.045),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: SizeConfig.screenWidth * 0.03),
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 20,
+          style: TextStyle(
+            fontSize: SizeConfig.screenWidth * 0.045,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1B5E20),
+            color: const Color(0xFF1B5E20),
           ),
         ),
       ],
@@ -959,7 +992,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
         return Opacity(
           opacity: value,
           child: Transform.translate(
-            offset: Offset(0, 20 * (1 - value)),
+            offset: Offset(0, SizeConfig.screenHeight * 0.025 * (1 - value)),
             child: child,
           ),
         );
@@ -967,12 +1000,12 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.034),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF2E7D32).withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              blurRadius: SizeConfig.screenWidth * 0.025,
+              offset: Offset(0, SizeConfig.screenHeight * 0.005),
             ),
           ],
         ),
@@ -980,17 +1013,21 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,
+          style: TextStyle(fontSize: SizeConfig.screenWidth * 0.038),
           decoration: InputDecoration(
             labelText: label,
-            prefixIcon: Icon(icon, color: const Color(0xFF2E7D32)),
+            labelStyle: TextStyle(fontSize: SizeConfig.screenWidth * 0.035),
+            prefixIcon: Icon(icon, color: const Color(0xFF2E7D32), size: SizeConfig.screenWidth * 0.05),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
               borderSide: BorderSide.none,
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: SizeConfig.screenWidth * 0.04,
+              vertical: SizeConfig.screenHeight * 0.018,
+            ),
           ),
         ),
       ),
@@ -1005,7 +1042,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
         return Opacity(
           opacity: value,
           child: Transform.translate(
-            offset: Offset(0, 20 * (1 - value)),
+            offset: Offset(0, SizeConfig.screenHeight * 0.025 * (1 - value)),
             child: child,
           ),
         );
@@ -1013,16 +1050,16 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.034),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF2E7D32).withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              blurRadius: SizeConfig.screenWidth * 0.025,
+              offset: Offset(0, SizeConfig.screenHeight * 0.005),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.034),
         child: child,
       ),
     );
@@ -1031,25 +1068,25 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
   Widget _buildPaymentNumberCard(
       String method, String number, Color color, IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.034),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
         border: Border.all(color: color, width: 2),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: Colors.white, size: SizeConfig.screenWidth * 0.025),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: SizeConfig.screenWidth * 0.025),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1057,19 +1094,19 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                 Text(
                   method,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: SizeConfig.screenWidth * 0.025,
                     fontWeight: FontWeight.bold,
                     color: color,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: SizeConfig.screenHeight * 0.005),
                 Row(
                   children: [
                     Expanded(
                       child: Text(
                         number,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: SizeConfig.screenWidth * 0.032,
                           fontWeight: FontWeight.bold,
                           color: Colors.grey[800],
                           letterSpacing: 1,
@@ -1077,7 +1114,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.copy, size: 20),
+                      icon: Icon(Icons.copy, size: SizeConfig.screenWidth * 0.025),
                       color: color,
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: number));
@@ -1105,12 +1142,12 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
     final isSelected = _selectedPaymentMethod == method;
     return InkWell(
       onTap: () => setState(() => _selectedPaymentMethod = method),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.012),
         decoration: BoxDecoration(
           color: isSelected ? color.withOpacity(0.1) : Colors.grey[100],
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
           border: Border.all(
             color: isSelected ? color : Colors.grey[300]!,
             width: 2,
@@ -1122,14 +1159,15 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
             Icon(
               isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
               color: isSelected ? color : Colors.grey,
+              size: SizeConfig.screenWidth * 0.032,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: SizeConfig.screenWidth * 0.016),
             Text(
               method,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: isSelected ? color : Colors.grey[700],
-                fontSize: 16,
+                fontSize: SizeConfig.screenWidth * 0.034,
               ),
             ),
           ],
@@ -1138,3 +1176,4 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
     );
   }
 }
+
