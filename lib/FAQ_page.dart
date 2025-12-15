@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'size_config.dart';
 
 /// ============================================
 /// AUST RC BRAND COLORS
@@ -412,6 +413,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
@@ -430,7 +432,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     children: [
-                      const SizedBox(height: 20),
+                      SizedBox(height: SizeConfig.screenHeight * 0.025),
 
                       // Header
                       SlideTransition(
@@ -438,12 +440,12 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                         child: _buildHeader(),
                       ),
 
-                      const SizedBox(height: 24),
+                      SizedBox(height: SizeConfig.screenHeight * 0.03),
 
                       // FAQ Section
                       _buildFAQSection(),
 
-                      const SizedBox(height: 32),
+                      SizedBox(height: SizeConfig.screenHeight * 0.04),
 
                       // Feedback Form
                       ScaleTransition(
@@ -451,7 +453,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                         child: _buildFeedbackForm(),
                       ),
 
-                      const SizedBox(height: 30),
+                      SizedBox(height: SizeConfig.screenHeight * 0.035),
                     ],
                   ),
                 ),
@@ -465,14 +467,14 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
 
   Widget _buildAppBar() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            blurRadius: SizeConfig.screenWidth * 0.025,
+            offset: Offset(0, SizeConfig.screenHeight * 0.002),
           ),
         ],
       ),
@@ -484,39 +486,39 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
               Navigator.pop(context);
             },
             child: Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
               decoration: BoxDecoration(
                 color: kGreenMain.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_ios_rounded,
                 color: kGreenDark,
-                size: 20,
+                size: SizeConfig.screenWidth * 0.035,
               ),
             ),
           ),
-          const SizedBox(width: 16),
-          const Expanded(
+          SizedBox(width: SizeConfig.screenWidth * 0.04),
+          Expanded(
             child: Text(
               'FAQ & Feedback',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: SizeConfig.screenWidth * 0.04,
                 fontWeight: FontWeight.w800,
                 color: kGreenDark,
               ),
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
             decoration: BoxDecoration(
               color: kGreenMain.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.question_answer_rounded,
               color: kGreenMain,
-              size: 22,
+              size: SizeConfig.screenWidth * 0.055,
             ),
           ),
         ],
@@ -526,55 +528,55 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.02),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.06),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [kGreenMain, kGreenDark],
           ),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
           boxShadow: [
             BoxShadow(
               color: kGreenMain.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              blurRadius: SizeConfig.screenWidth * 0.05,
+              offset: Offset(0, SizeConfig.screenHeight * 0.012),
             ),
           ],
         ),
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.support_agent_rounded,
                 color: Colors.white,
-                size: 40,
+                size: SizeConfig.screenWidth * 0.1,
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: SizeConfig.screenHeight * 0.02),
+            Text(
               'How can we help you?',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: SizeConfig.screenWidth * 0.06,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
                 letterSpacing: 0.5,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.screenHeight * 0.01),
             Text(
               'Find answers to common questions or share your valuable feedback with us',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: SizeConfig.screenWidth * 0.035,
                 color: Colors.white.withOpacity(0.85),
                 height: 1.5,
               ),
@@ -587,7 +589,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
 
   Widget _buildFAQSection() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.02),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -595,30 +597,30 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                 decoration: BoxDecoration(
                   color: Colors.blue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.quiz_rounded,
                   color: Colors.blue,
-                  size: 20,
+                  size: SizeConfig.screenWidth * 0.05,
                 ),
               ),
-              const SizedBox(width: 12),
-              const Text(
+              SizedBox(width: SizeConfig.screenWidth * 0.03),
+              Text(
                 'Frequently Asked Questions',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: SizeConfig.screenWidth * 0.045,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF1F2937),
+                  color: const Color(0xFF1F2937),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: SizeConfig.screenHeight * 0.02),
 
           // FAQ Items
           ...List.generate(_faqItems.length, (index) {
@@ -628,7 +630,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
               curve: Curves.easeOutCubic,
               builder: (context, value, child) {
                 return Transform.translate(
-                  offset: Offset(0, 20 * (1 - value)),
+                  offset: Offset(0, SizeConfig.screenHeight * 0.025 * (1 - value)),
                   child: Opacity(
                     opacity: value,
                     child: child,
@@ -636,7 +638,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                 );
               },
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.015),
                 child: _FAQItem(
                   question: _faqItems[index]['question']!,
                   answer: _faqItems[index]['answer']!,
@@ -652,18 +654,18 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
 
   Widget _buildFeedbackForm() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.02),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              blurRadius: SizeConfig.screenWidth * 0.05,
+              offset: Offset(0, SizeConfig.screenHeight * 0.012),
             ),
           ],
         ),
@@ -676,33 +678,33 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                     decoration: BoxDecoration(
                       color: Colors.orange.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.rate_review_rounded,
                       color: Colors.orange,
-                      size: 20,
+                      size: SizeConfig.screenWidth * 0.05,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  const Column(
+                  SizedBox(width: SizeConfig.screenWidth * 0.03),
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Share Your Feedback',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: SizeConfig.screenWidth * 0.045,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF1F2937),
+                          color: const Color(0xFF1F2937),
                         ),
                       ),
                       Text(
                         'Help us improve your experience',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: SizeConfig.screenWidth * 0.03,
                           color: Colors.grey,
                         ),
                       ),
@@ -711,12 +713,12 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                 ],
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: SizeConfig.screenHeight * 0.03),
 
               // Progress Indicator
               _buildProgressIndicator(),
 
-              const SizedBox(height: 24),
+              SizedBox(height: SizeConfig.screenHeight * 0.03),
 
               // Step Content
               AnimatedSwitcher(
@@ -736,7 +738,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                 child: _buildCurrentStep(),
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: SizeConfig.screenHeight * 0.03),
 
               // Navigation Buttons
               _buildNavigationButtons(),
@@ -751,7 +753,6 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
     return Row(
       children: List.generate(3, (index) {
         final isActive = index <= _currentStep;
-        final isCompleted = index < _currentStep;
 
         return Expanded(
           child: Row(
@@ -759,14 +760,14 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
               Expanded(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  height: 4,
+                  height: SizeConfig.screenHeight * 0.005,
                   decoration: BoxDecoration(
                     color: isActive ? kGreenMain : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.005),
                   ),
                 ),
               ),
-              if (index < 2) const SizedBox(width: 8),
+              if (index < 2) SizedBox(width: SizeConfig.screenWidth * 0.02),
             ],
           ),
         );
@@ -792,15 +793,15 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
       key: const ValueKey('step0'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Step 1: Personal Information',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: SizeConfig.screenWidth * 0.035,
             fontWeight: FontWeight.w700,
             color: kGreenMain,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         // Name Field
         _buildTextField(
@@ -819,7 +820,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
           },
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         // AUST ID Field
         _buildTextField(
@@ -847,21 +848,21 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
       key: const ValueKey('step1'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Step 2: Select Department',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: SizeConfig.screenWidth * 0.035,
             fontWeight: FontWeight.w700,
             color: kGreenMain,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         // Department Dropdown
         Container(
           decoration: BoxDecoration(
             color: const Color(0xFFF5F7FA),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
             border: Border.all(
               color: _selectedDepartment != null
                   ? kGreenMain.withOpacity(0.3)
@@ -882,13 +883,13 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                 color: Colors.grey[500],
               ),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.screenWidth * 0.04,
+                vertical: SizeConfig.screenHeight * 0.02,
               ),
             ),
             dropdownColor: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
             icon: Icon(
               Icons.keyboard_arrow_down_rounded,
               color: Colors.grey[500],
@@ -898,8 +899,8 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                 value: dept,
                 child: Text(
                   dept,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: SizeConfig.screenWidth * 0.035,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -918,14 +919,14 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
           ),
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         // Info Card
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
           decoration: BoxDecoration(
             color: Colors.blue.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
             border: Border.all(
               color: Colors.blue.withOpacity(0.2),
             ),
@@ -935,14 +936,14 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
               Icon(
                 Icons.info_outline_rounded,
                 color: Colors.blue[600],
-                size: 20,
+                size: SizeConfig.screenWidth * 0.05,
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: SizeConfig.screenWidth * 0.03),
               Expanded(
                 child: Text(
                   'Select the department you are currently enrolled in.',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: SizeConfig.screenWidth * 0.032,
                     color: Colors.blue[700],
                     height: 1.4,
                   ),
@@ -960,21 +961,21 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
       key: const ValueKey('step2'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Step 3: Your Feedback',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: SizeConfig.screenWidth * 0.035,
             fontWeight: FontWeight.w700,
             color: kGreenMain,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         // Feedback Field
         Container(
           decoration: BoxDecoration(
             color: const Color(0xFFF5F7FA),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
             border: Border.all(
               color: _feedbackController.text.isNotEmpty
                   ? kGreenMain.withOpacity(0.3)
@@ -995,17 +996,17 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
               hintText: 'Share your thoughts, suggestions, or questions...',
               hintStyle: TextStyle(
                 color: Colors.grey[400],
-                fontSize: 14,
+                fontSize: SizeConfig.screenWidth * 0.035,
               ),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.all(16),
+              contentPadding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
               counterStyle: TextStyle(
                 color: Colors.grey[500],
-                fontSize: 12,
+                fontSize: SizeConfig.screenWidth * 0.03,
               ),
             ),
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: SizeConfig.screenWidth * 0.035,
               fontWeight: FontWeight.w500,
               height: 1.5,
             ),
@@ -1022,14 +1023,14 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
           ),
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: SizeConfig.screenHeight * 0.02),
 
         // Preview Card
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
           decoration: BoxDecoration(
             color: kGreenMain.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
             border: Border.all(
               color: kGreenMain.withOpacity(0.2),
             ),
@@ -1042,20 +1043,20 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                   Icon(
                     Icons.preview_rounded,
                     color: kGreenMain,
-                    size: 18,
+                    size: SizeConfig.screenWidth * 0.045,
                   ),
-                  const SizedBox(width: 8),
-                  const Text(
+                  SizedBox(width: SizeConfig.screenWidth * 0.02),
+                  Text(
                     'Preview',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: SizeConfig.screenWidth * 0.032,
                       fontWeight: FontWeight.w700,
                       color: kGreenMain,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: SizeConfig.screenHeight * 0.015),
               _buildPreviewRow('Name', _nameController.text),
               _buildPreviewRow('Department', _selectedDepartment ?? '-'),
               _buildPreviewRow('AUST ID', _austIdController.text),
@@ -1068,16 +1069,16 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
 
   Widget _buildPreviewRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.005),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 90,
+            width: SizeConfig.screenWidth * 0.22,
             child: Text(
               '$label:',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: SizeConfig.screenWidth * 0.03,
                 color: Colors.grey[600],
               ),
             ),
@@ -1085,10 +1086,10 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
           Expanded(
             child: Text(
               value.isEmpty ? '-' : value,
-              style: const TextStyle(
-                fontSize: 12,
+              style: TextStyle(
+                fontSize: SizeConfig.screenWidth * 0.03,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1F2937),
+                color: const Color(0xFF1F2937),
               ),
             ),
           ),
@@ -1108,7 +1109,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F7FA),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
         border: Border.all(
           color: controller.text.isNotEmpty
               ? kGreenMain.withOpacity(0.3)
@@ -1128,20 +1129,20 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
           hintText: hint,
           hintStyle: TextStyle(
             color: Colors.grey[400],
-            fontSize: 14,
+            fontSize: SizeConfig.screenWidth * 0.035,
           ),
           prefixIcon: Icon(
             icon,
             color: Colors.grey[500],
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.screenWidth * 0.04,
+            vertical: SizeConfig.screenHeight * 0.013,
           ),
         ),
-        style: const TextStyle(
-          fontSize: 14,
+        style: TextStyle(
+          fontSize: SizeConfig.screenWidth * 0.035,
           fontWeight: FontWeight.w500,
         ),
         onChanged: (value) => setState(() {}),
@@ -1162,10 +1163,10 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                 setState(() => _currentStep--);
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.02),
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1173,13 +1174,13 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                     Icon(
                       Icons.arrow_back_rounded,
                       color: Colors.grey[700],
-                      size: 20,
+                      size: SizeConfig.screenWidth * 0.05,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: SizeConfig.screenWidth * 0.02),
                     Text(
                       'Back',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: SizeConfig.screenWidth * 0.035,
                         fontWeight: FontWeight.w700,
                         color: Colors.grey[700],
                       ),
@@ -1190,7 +1191,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
             ),
           ),
 
-        if (_currentStep > 0) const SizedBox(width: 12),
+        if (_currentStep > 0) SizedBox(width: SizeConfig.screenWidth * 0.03),
 
         // Next/Submit Button
         Expanded(
@@ -1202,7 +1203,6 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
               HapticFeedback.mediumImpact();
 
               if (_currentStep < 2) {
-                // Validate current step before proceeding
                 bool isValid = true;
 
                 if (_currentStep == 0) {
@@ -1230,17 +1230,17 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
             },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.02),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [kGreenMain, kGreenDark],
                 ),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                 boxShadow: [
                   BoxShadow(
                     color: kGreenMain.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    blurRadius: SizeConfig.screenWidth * 0.025,
+                    offset: Offset(0, SizeConfig.screenHeight * 0.005),
                   ),
                 ],
               ),
@@ -1248,10 +1248,10 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (_isLoading)
-                    const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
+                    SizedBox(
+                      width: SizeConfig.screenWidth * 0.05,
+                      height: SizeConfig.screenWidth * 0.05,
+                      child: const CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
@@ -1259,19 +1259,19 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                   else ...[
                     Text(
                       _currentStep < 2 ? 'Next' : 'Submit Feedback',
-                      style: const TextStyle(
-                        fontSize: 14,
+                      style: TextStyle(
+                        fontSize: SizeConfig.screenWidth * 0.035,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: SizeConfig.screenWidth * 0.02),
                     Icon(
                       _currentStep < 2
                           ? Icons.arrow_forward_rounded
                           : Icons.send_rounded,
                       color: Colors.white,
-                      size: 20,
+                      size: SizeConfig.screenWidth * 0.05,
                     ),
                   ],
                 ],
@@ -1288,7 +1288,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
       scale: _scaleAnimation,
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(40),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.1),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1304,8 +1304,8 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                   );
                 },
                 child: Container(
-                  width: 120,
-                  height: 120,
+                  width: SizeConfig.screenWidth * 0.3,
+                  height: SizeConfig.screenWidth * 0.3,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
@@ -1316,20 +1316,20 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                     boxShadow: [
                       BoxShadow(
                         color: kGreenMain.withOpacity(0.3),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
+                        blurRadius: SizeConfig.screenWidth * 0.075,
+                        offset: Offset(0, SizeConfig.screenHeight * 0.012),
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check_rounded,
                     color: Colors.white,
-                    size: 60,
+                    size: SizeConfig.screenWidth * 0.15,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: SizeConfig.screenHeight * 0.04),
 
               // Success Title
               TweenAnimationBuilder<double>(
@@ -1340,22 +1340,22 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                   return Opacity(
                     opacity: value,
                     child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
+                      offset: Offset(0, SizeConfig.screenHeight * 0.025 * (1 - value)),
                       child: child,
                     ),
                   );
                 },
-                child: const Text(
+                child: Text(
                   'Thank You!',
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: SizeConfig.screenWidth * 0.07,
                     fontWeight: FontWeight.w900,
                     color: kGreenDark,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 12),
+              SizedBox(height: SizeConfig.screenHeight * 0.015),
 
               // Success Message
               TweenAnimationBuilder<double>(
@@ -1372,14 +1372,14 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                   'Your feedback has been submitted successfully. We appreciate your time and input!',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: SizeConfig.screenWidth * 0.038,
                     color: Colors.grey[600],
                     height: 1.6,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 40),
+              SizedBox(height: SizeConfig.screenHeight * 0.05),
 
               // Action Buttons
               TweenAnimationBuilder<double>(
@@ -1390,7 +1390,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                   return Opacity(
                     opacity: value,
                     child: Transform.translate(
-                      offset: Offset(0, 30 * (1 - value)),
+                      offset: Offset(0, SizeConfig.screenHeight * 0.035 * (1 - value)),
                       child: child,
                     ),
                   );
@@ -1405,33 +1405,33 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                       },
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.02),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [kGreenMain, kGreenDark],
                           ),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                           boxShadow: [
                             BoxShadow(
                               color: kGreenMain.withOpacity(0.3),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                              blurRadius: SizeConfig.screenWidth * 0.025,
+                              offset: Offset(0, SizeConfig.screenHeight * 0.005),
                             ),
                           ],
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.add_comment_rounded,
                               color: Colors.white,
-                              size: 20,
+                              size: SizeConfig.screenWidth * 0.05,
                             ),
-                            SizedBox(width: 8),
+                            SizedBox(width: SizeConfig.screenWidth * 0.02),
                             Text(
                               'Submit Another Feedback',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: SizeConfig.screenWidth * 0.035,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
                               ),
@@ -1441,7 +1441,7 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    SizedBox(height: SizeConfig.screenHeight * 0.015),
 
                     // Go Back Button
                     GestureDetector(
@@ -1451,10 +1451,10 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                       },
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.02),
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -1462,13 +1462,13 @@ class _FAQFeedbackPageState extends State<FAQFeedbackPage>
                             Icon(
                               Icons.arrow_back_rounded,
                               color: Colors.grey[700],
-                              size: 20,
+                              size: SizeConfig.screenWidth * 0.05,
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: SizeConfig.screenWidth * 0.02),
                             Text(
                               'Back to Home',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: SizeConfig.screenWidth * 0.035,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.grey[700],
                               ),
@@ -1559,7 +1559,7 @@ class _FAQItemState extends State<_FAQItem>
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
           border: Border.all(
             color: _isExpanded
                 ? kGreenMain.withOpacity(0.3)
@@ -1571,35 +1571,35 @@ class _FAQItemState extends State<_FAQItem>
               color: _isExpanded
                   ? kGreenMain.withOpacity(0.1)
                   : Colors.black.withOpacity(0.03),
-              blurRadius: _isExpanded ? 15 : 10,
-              offset: const Offset(0, 4),
+              blurRadius: _isExpanded ? SizeConfig.screenWidth * 0.038 : SizeConfig.screenWidth * 0.025,
+              offset: Offset(0, SizeConfig.screenHeight * 0.005),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
           child: Column(
             children: [
               // Question Row
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                 child: Row(
                   children: [
                     // Question Number
                     Container(
-                      width: 32,
-                      height: 32,
+                      width: SizeConfig.screenWidth * 0.08,
+                      height: SizeConfig.screenWidth * 0.08,
                       decoration: BoxDecoration(
                         color: _isExpanded
                             ? kGreenMain
                             : kGreenMain.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                       ),
                       child: Center(
                         child: Text(
                           '${widget.index + 1}',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: SizeConfig.screenWidth * 0.035,
                             fontWeight: FontWeight.w700,
                             color: _isExpanded ? Colors.white : kGreenMain,
                           ),
@@ -1607,14 +1607,14 @@ class _FAQItemState extends State<_FAQItem>
                       ),
                     ),
 
-                    const SizedBox(width: 12),
+                    SizedBox(width: SizeConfig.screenWidth * 0.03),
 
                     // Question Text
                     Expanded(
                       child: Text(
                         widget.question,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: SizeConfig.screenWidth * 0.035,
                           fontWeight: FontWeight.w600,
                           color: _isExpanded
                               ? kGreenDark
@@ -1624,23 +1624,23 @@ class _FAQItemState extends State<_FAQItem>
                       ),
                     ),
 
-                    const SizedBox(width: 12),
+                    SizedBox(width: SizeConfig.screenWidth * 0.03),
 
                     // Expand Icon
                     RotationTransition(
                       turns: _rotateAnimation,
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
                         decoration: BoxDecoration(
                           color: _isExpanded
                               ? kGreenMain.withOpacity(0.1)
                               : Colors.grey.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
                         ),
                         child: Icon(
                           Icons.keyboard_arrow_down_rounded,
                           color: _isExpanded ? kGreenMain : Colors.grey[600],
-                          size: 20,
+                          size: SizeConfig.screenWidth * 0.05,
                         ),
                       ),
                     ),
@@ -1653,17 +1653,22 @@ class _FAQItemState extends State<_FAQItem>
                 sizeFactor: _expandAnimation,
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  padding: EdgeInsets.fromLTRB(
+                    SizeConfig.screenWidth * 0.04,
+                    0,
+                    SizeConfig.screenWidth * 0.04,
+                    SizeConfig.screenWidth * 0.04,
+                  ),
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                     decoration: BoxDecoration(
                       color: kGreenMain.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                     ),
                     child: Text(
                       widget.answer,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: SizeConfig.screenWidth * 0.032,
                         color: Colors.grey[700],
                         height: 1.6,
                       ),
@@ -1678,3 +1683,5 @@ class _FAQItemState extends State<_FAQItem>
     );
   }
 }
+
+
