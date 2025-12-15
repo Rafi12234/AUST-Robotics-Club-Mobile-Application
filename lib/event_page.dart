@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'size_config.dart';
 
 // Main Events Page
+
+const kGreenDark = Color(0xFF0B6B3A);
+const kGreenMain = Color(0xFF16A34A);
+const kGreenDeep = Color(0xFF0F3D2E);
+const kGreenAccent = Color(0xFF1A5C43);
+const kGreenLight = Color(0xFFB8E6D5);
+const kOnPrimary = Colors.white;
+
 class EventsPage extends StatelessWidget {
   const EventsPage({Key? key}) : super(key: key);
 
@@ -12,7 +21,7 @@ class EventsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(140),
+        preferredSize: Size.fromHeight(SizeConfig.screenWidth * 0.25),
         child: AppBar(
           elevation: 0,
           leading: Padding(
@@ -36,26 +45,26 @@ class EventsPage extends StatelessWidget {
             ),
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 10),
-                    const Text(
+                    SizedBox(height: SizeConfig.screenHeight * 0.02),
+                    Text(
                       'Club Events',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 24,
+                        fontSize: SizeConfig.screenWidth * 0.055,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: SizeConfig.screenHeight * 0.008),
                     Text(
                       'Discover our exciting events and activities',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.9),
-                        fontSize: 14,
+                        fontSize: SizeConfig.screenWidth * 0.035,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -88,15 +97,18 @@ class EventsPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.error_outline,
-                    size: 60,
+                    size: SizeConfig.screenWidth * 0.15,
                     color: Colors.red,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: SizeConfig.screenHeight * 0.02),
                   Text(
                     'Error: ${snapshot.error}',
-                    style: const TextStyle(color: Colors.red),
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: SizeConfig.screenWidth * 0.035,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -111,14 +123,14 @@ class EventsPage extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.event_outlined,
-                    size: 80,
+                    size: SizeConfig.screenWidth * 0.2,
                     color: Colors.grey[400],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: SizeConfig.screenHeight * 0.02),
                   Text(
                     'No events available',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: SizeConfig.screenWidth * 0.045,
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w500,
                     ),
@@ -160,11 +172,11 @@ class EventsPage extends StatelessWidget {
           }
 
           return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+              crossAxisSpacing: SizeConfig.screenWidth * 0.04,
+              mainAxisSpacing: SizeConfig.screenWidth * 0.04,
               childAspectRatio: 0.75,
             ),
             itemCount: events.length,
@@ -209,7 +221,7 @@ class EventsPage extends StatelessWidget {
                   child: Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: Container(
@@ -250,48 +262,48 @@ class EventsPage extends StatelessWidget {
                                   errorWidget: (context, url, error) =>
                                       Container(
                                         color: Colors.grey[300],
-                                        child: const Icon(
+                                        child: Icon(
                                           Icons.event,
-                                          size: 50,
+                                          size: SizeConfig.screenWidth * 0.12,
                                           color: Colors.grey,
                                         ),
                                       ),
                                 )
                                     : Container(
                                   color: Colors.grey[300],
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.event,
-                                    size: 50,
+                                    size: SizeConfig.screenWidth * 0.12,
                                     color: Colors.grey,
                                   ),
                                 ),
                                 // Order Number Badge
                                 Positioned(
-                                  top: 8,
-                                  right: 8,
+                                  top: SizeConfig.screenWidth * 0.02,
+                                  right: SizeConfig.screenWidth * 0.02,
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: SizeConfig.screenWidth * 0.02,
+                                      vertical: SizeConfig.screenHeight * 0.005,
                                     ),
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
                                         colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
                                       ),
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black.withOpacity(0.3),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
+                                          blurRadius: SizeConfig.screenWidth * 0.01,
+                                          offset: Offset(0, SizeConfig.screenHeight * 0.002),
                                         ),
                                       ],
                                     ),
                                     child: Text(
                                       '#$order',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 12,
+                                        fontSize: SizeConfig.screenWidth * 0.03,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -304,7 +316,7 @@ class EventsPage extends StatelessWidget {
                           Expanded(
                             flex: 1,
                             child: Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
@@ -318,10 +330,10 @@ class EventsPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     eventName,
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    style: TextStyle(
+                                      fontSize: SizeConfig.screenWidth * 0.035,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1B5E20),
+                                      color: const Color(0xFF1B5E20),
                                       height: 1.2,
                                     ),
                                     textAlign: TextAlign.center,
@@ -367,9 +379,17 @@ class _EventDetailPageState extends State<EventDetailPage>
   late Animation<double> _fadeAnimation;
   Map<int, int> _carouselIndices = {};
 
+  // Scroll controller for app bar title animation
+  late ScrollController _scrollController;
+  double _scrollOffset = 0;
+  bool _showAppBarTitle = false;
+
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -380,8 +400,20 @@ class _EventDetailPageState extends State<EventDetailPage>
     _animationController.forward();
   }
 
+  void _onScroll() {
+    final offset = _scrollController.offset;
+    final threshold = SizeConfig.screenHeight * 0.2; // When to show title
+
+    setState(() {
+      _scrollOffset = offset;
+      _showAppBarTitle = offset > threshold;
+    });
+  }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -436,29 +468,51 @@ class _EventDetailPageState extends State<EventDetailPage>
     return Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           // Curved App Bar with Cover Image
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: SizeConfig.screenHeight * 0.3,
             floating: false,
             pinned: true,
             elevation: 0,
             backgroundColor: const Color(0xFF1B5E20),
             leading: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
+              padding: EdgeInsets.only(left: SizeConfig.screenWidth * 0.02),
               child: Container(
-                margin: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
-                  shape: BoxShape.circle,
+                  color: kGreenMain.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: SizeConfig.screenWidth * 0.05),
                   onPressed: () => Navigator.pop(context),
-                  padding: EdgeInsets.zero,
                 ),
               ),
             ),
+            // Animated title in app bar
+            title: AnimatedOpacity(
+              opacity: _showAppBarTitle ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: AnimatedSlide(
+                offset: _showAppBarTitle ? Offset.zero : const Offset(0, 0.5),
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                child: Text(
+                  eventName,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: SizeConfig.screenWidth * 0.045,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            centerTitle: true,
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
@@ -480,18 +534,18 @@ class _EventDetailPageState extends State<EventDetailPage>
                       ),
                       errorWidget: (context, url, error) => Container(
                         color: Colors.grey[300],
-                        child: const Icon(
+                        child: Icon(
                           Icons.event,
-                          size: 80,
+                          size: SizeConfig.screenWidth * 0.2,
                           color: Colors.grey,
                         ),
                       ),
                     )
                         : Container(
                       color: Colors.grey[300],
-                      child: const Icon(
+                      child: Icon(
                         Icons.event,
-                        size: 80,
+                        size: SizeConfig.screenWidth * 0.2,
                         color: Colors.grey,
                       ),
                     ),
@@ -511,20 +565,20 @@ class _EventDetailPageState extends State<EventDetailPage>
                   ),
                   // Event Name at Bottom
                   Positioned(
-                    bottom: 60,
-                    left: 16,
-                    right: 16,
+                    bottom: SizeConfig.screenHeight * 0.025,
+                    left: SizeConfig.screenWidth * 0.04,
+                    right: SizeConfig.screenWidth * 0.04,
                     child: Text(
                       eventName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 24,
+                        fontSize: SizeConfig.screenWidth * 0.06,
                         fontWeight: FontWeight.bold,
                         shadows: [
                           Shadow(
                             color: Colors.black54,
-                            offset: Offset(0, 2),
-                            blurRadius: 4,
+                            offset: Offset(0, SizeConfig.screenHeight * 0.002),
+                            blurRadius: SizeConfig.screenWidth * 0.01,
                           ),
                         ],
                       ),
@@ -546,37 +600,37 @@ class _EventDetailPageState extends State<EventDetailPage>
                 children: [
                   // Introduction Section
                   if (introduction.isNotEmpty) ...[
-                    const SizedBox(height: 24),
+                    SizedBox(height: SizeConfig.screenHeight * 0.03),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: SizeConfig.screenWidth * 0.03,
+                              vertical: SizeConfig.screenHeight * 0.008,
                             ),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
                               ),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Overview',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: SizeConfig.screenWidth * 0.035,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: SizeConfig.screenHeight * 0.015),
                           Text(
                             introduction,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: SizeConfig.screenWidth * 0.04,
                               color: Colors.grey[800],
                               height: 1.6,
                               letterSpacing: 0.2,
@@ -586,12 +640,12 @@ class _EventDetailPageState extends State<EventDetailPage>
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: SizeConfig.screenHeight * 0.03),
                     Divider(
                       thickness: 1,
                       color: Colors.grey[300],
-                      indent: 20,
-                      endIndent: 20,
+                      indent: SizeConfig.screenWidth * 0.05,
+                      endIndent: SizeConfig.screenWidth * 0.05,
                     ),
                   ],
 
@@ -611,27 +665,26 @@ class _EventDetailPageState extends State<EventDetailPage>
                         return Opacity(
                           opacity: value,
                           child: Transform.translate(
-                            offset: Offset(0, 20 * (1 - value)),
+                            offset: Offset(0, SizeConfig.screenHeight * 0.025 * (1 - value)),
                             child: child,
                           ),
                         );
                       },
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.02),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Headline Title
                             Padding(
-                              padding:
-                              const EdgeInsets.symmetric(horizontal: 20),
+                              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
                               child: Row(
                                 children: [
                                   Container(
-                                    width: 4,
-                                    height: 24,
-                                    decoration: const BoxDecoration(
-                                      gradient: LinearGradient(
+                                    width: SizeConfig.screenWidth * 0.01,
+                                    height: SizeConfig.screenHeight * 0.03,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
                                         colors: [
                                           Color(0xFF1B5E20),
                                           Color(0xFF2E7D32)
@@ -640,18 +693,18 @@ class _EventDetailPageState extends State<EventDetailPage>
                                         end: Alignment.bottomCenter,
                                       ),
                                       borderRadius: BorderRadius.all(
-                                        Radius.circular(2),
+                                        Radius.circular(SizeConfig.screenWidth * 0.005),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  SizedBox(width: SizeConfig.screenWidth * 0.03),
                                   Expanded(
                                     child: Text(
                                       title,
-                                      style: const TextStyle(
-                                        fontSize: 20,
+                                      style: TextStyle(
+                                        fontSize: SizeConfig.screenWidth * 0.05,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF1B5E20),
+                                        color: const Color(0xFF1B5E20),
                                         height: 1.3,
                                       ),
                                     ),
@@ -662,10 +715,10 @@ class _EventDetailPageState extends State<EventDetailPage>
 
                             // Images Carousel
                             if (images.isNotEmpty) ...[
-                              const SizedBox(height: 16),
+                              SizedBox(height: SizeConfig.screenHeight * 0.02),
                               CarouselSlider(
                                 options: CarouselOptions(
-                                  height: 250,
+                                  height: SizeConfig.screenHeight * 0.3,
                                   viewportFraction: 0.85,
                                   enlargeCenterPage: true,
                                   enableInfiniteScroll: images.length > 1,
@@ -685,25 +738,24 @@ class _EventDetailPageState extends State<EventDetailPage>
                                   return Builder(
                                     builder: (BuildContext context) {
                                       return Container(
-                                        width:
-                                        MediaQuery.of(context).size.width,
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 5),
+                                        width: MediaQuery.of(context).size.width,
+                                        margin: EdgeInsets.symmetric(
+                                            horizontal: SizeConfig.screenWidth * 0.012),
                                         decoration: BoxDecoration(
                                           borderRadius:
-                                          BorderRadius.circular(16),
+                                          BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                                           boxShadow: [
                                             BoxShadow(
                                               color: const Color(0xFF1B5E20)
                                                   .withOpacity(0.3),
-                                              blurRadius: 12,
-                                              offset: const Offset(0, 6),
+                                              blurRadius: SizeConfig.screenWidth * 0.03,
+                                              offset: Offset(0, SizeConfig.screenHeight * 0.007),
                                             ),
                                           ],
                                         ),
                                         child: ClipRRect(
                                           borderRadius:
-                                          BorderRadius.circular(16),
+                                          BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                                           child: CachedNetworkImage(
                                             imageUrl: imageUrl,
                                             fit: BoxFit.cover,
@@ -721,9 +773,9 @@ class _EventDetailPageState extends State<EventDetailPage>
                                                 (context, url, error) =>
                                                 Container(
                                                   color: Colors.grey[300],
-                                                  child: const Icon(
+                                                  child: Icon(
                                                     Icons.broken_image,
-                                                    size: 60,
+                                                    size: SizeConfig.screenWidth * 0.15,
                                                     color: Colors.grey,
                                                   ),
                                                 ),
@@ -734,7 +786,7 @@ class _EventDetailPageState extends State<EventDetailPage>
                                   );
                                 }).toList(),
                               ),
-                              const SizedBox(height: 12),
+                              SizedBox(height: SizeConfig.screenHeight * 0.015),
                               // Carousel Indicators
                               if (images.length > 1)
                                 Row(
@@ -743,12 +795,14 @@ class _EventDetailPageState extends State<EventDetailPage>
                                     final currentIndex =
                                         _carouselIndices[headlineNumber] ?? 0;
                                     return Container(
-                                      width: currentIndex == entry.key ? 24 : 8,
-                                      height: 8,
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 4),
+                                      width: currentIndex == entry.key
+                                          ? SizeConfig.screenWidth * 0.06
+                                          : SizeConfig.screenWidth * 0.02,
+                                      height: SizeConfig.screenWidth * 0.02,
+                                      margin: EdgeInsets.symmetric(
+                                          horizontal: SizeConfig.screenWidth * 0.01),
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(4),
+                                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.01),
                                         color: currentIndex == entry.key
                                             ? const Color(0xFF2E7D32)
                                             : Colors.grey[400],
@@ -760,14 +814,13 @@ class _EventDetailPageState extends State<EventDetailPage>
 
                             // Description
                             if (description.isNotEmpty) ...[
-                              const SizedBox(height: 16),
+                              SizedBox(height: SizeConfig.screenHeight * 0.02),
                               Padding(
-                                padding:
-                                const EdgeInsets.symmetric(horizontal: 20),
+                                padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
                                 child: Text(
                                   description,
                                   style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: SizeConfig.screenWidth * 0.038,
                                     color: Colors.grey[800],
                                     height: 1.6,
                                     letterSpacing: 0.2,
@@ -779,12 +832,12 @@ class _EventDetailPageState extends State<EventDetailPage>
 
                             // Divider
                             if (index < headlines.length - 1) ...[
-                              const SizedBox(height: 24),
+                              SizedBox(height: SizeConfig.screenHeight * 0.03),
                               Divider(
                                 thickness: 1,
                                 color: Colors.grey[300],
-                                indent: 20,
-                                endIndent: 20,
+                                indent: SizeConfig.screenWidth * 0.05,
+                                endIndent: SizeConfig.screenWidth * 0.05,
                               ),
                             ],
                           ],
@@ -793,7 +846,7 @@ class _EventDetailPageState extends State<EventDetailPage>
                     );
                   }).toList(),
 
-                  const SizedBox(height: 40),
+                  SizedBox(height: SizeConfig.screenHeight * 0.05),
                 ],
               ),
             ),
