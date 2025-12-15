@@ -1114,13 +1114,13 @@ class _DeveloperCardLight extends StatelessWidget {
         children: [
           // Profile Image - Larger
           Container(
-            width: isLead ? SizeConfig.screenWidth * 0.025 : SizeConfig.screenWidth * 0.022,
-            height: isLead ? SizeConfig.screenWidth * 0.025 : SizeConfig.screenWidth * 0.022,
+            width: isLead ? SizeConfig.screenWidth * 0.28 : SizeConfig.screenWidth * 0.24,
+            height: isLead ? SizeConfig.screenWidth * 0.28 : SizeConfig.screenWidth * 0.24,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
                 color: isLead ? kGreenMain : kGreenMain.withOpacity(0.5),
-                width: isLead ? SizeConfig.screenWidth * 0.008 : SizeConfig.screenWidth * 0.006,
+                width: isLead ? SizeConfig.screenWidth * 0.01 : SizeConfig.screenWidth * 0.008,
               ),
               boxShadow: [
                 BoxShadow(
@@ -1138,7 +1138,7 @@ class _DeveloperCardLight extends StatelessWidget {
                   color: kGreenMain.withOpacity(0.1),
                   child: Icon(
                     Icons.person_rounded,
-                    size: isLead ? SizeConfig.screenWidth * 0.012 : SizeConfig.screenWidth * 0.10,
+                    size: isLead ? SizeConfig.screenWidth * 0.14 : SizeConfig.screenWidth * 0.12,
                     color: kGreenMain.withOpacity(0.5),
                   ),
                 ),
@@ -1277,19 +1277,19 @@ class _DirectorAvatar extends StatelessWidget {
       children: [
         // Small Round Image
         Container(
-          width: SizeConfig.screenWidth * 0.015,
-          height: SizeConfig.screenWidth * 0.015,
+          width: SizeConfig.screenWidth * 0.17,
+          height: SizeConfig.screenWidth * 0.17,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
               color: Colors.amber.withOpacity(0.5),
-              width: SizeConfig.screenWidth * 0.006,
+              width: SizeConfig.screenWidth * 0.008,
             ),
             boxShadow: [
               BoxShadow(
                 color: Colors.amber.withOpacity(0.2),
-                blurRadius: SizeConfig.screenWidth * 0.02,
-                offset: Offset(0, SizeConfig.screenHeight * 0.004),
+                blurRadius: SizeConfig.screenWidth * 0.025,
+                offset: Offset(0, SizeConfig.screenHeight * 0.005),
               ),
             ],
           ),
@@ -1301,7 +1301,7 @@ class _DirectorAvatar extends StatelessWidget {
                 color: Colors.amber.withOpacity(0.1),
                 child: Icon(
                   Icons.person_rounded,
-                  size: SizeConfig.screenWidth * 0.075,
+                  size: SizeConfig.screenWidth * 0.085,
                   color: Colors.amber.withOpacity(0.5),
                 ),
               ),
