@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
+import 'size_config.dart';
 
 class ExecutivePanelPage extends StatefulWidget {
   final String semesterId;
@@ -48,6 +49,8 @@ class _ExecutivePanelPageState extends State<ExecutivePanelPage>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
+
     final query = FirebaseFirestore.instance
         .collection('All_Data')
         .doc('Governing_Panel')
@@ -111,9 +114,14 @@ class _ExecutivePanelPageState extends State<ExecutivePanelPage>
 
                     return ListView.separated(
                       physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                      padding: EdgeInsets.fromLTRB(
+                        SizeConfig.screenWidth * 0.02,
+                        SizeConfig.screenHeight * 0.02,
+                        SizeConfig.screenWidth * 0.02,
+                        SizeConfig.screenHeight * 0.02,
+                      ),
                       itemCount: docs.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 20),
+                      separatorBuilder: (_, __) => SizedBox(height: SizeConfig.screenHeight * 0.025),
                       itemBuilder: (context, i) {
                         final data = docs[i].data();
 
@@ -164,9 +172,9 @@ class _Header extends StatelessWidget {
     final topInset = MediaQuery.of(context).padding.top;
 
     return Container(
-      height: 140 + topInset,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
+      height: SizeConfig.screenHeight * 0.1 + topInset,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
           colors: [
             Color(0xFF064E3B),
             Color(0xFF0B6B3A),
@@ -176,8 +184,8 @@ class _Header extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(40),
-          bottomRight: Radius.circular(40),
+          bottomLeft: Radius.circular(SizeConfig.screenWidth * 0.09),
+          bottomRight: Radius.circular(SizeConfig.screenWidth * 0.09),
         ),
       ),
       child: Stack(
@@ -185,9 +193,9 @@ class _Header extends StatelessWidget {
           // Header Pattern
           Positioned.fill(
             child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(SizeConfig.screenWidth * 0.1),
+                bottomRight: Radius.circular(SizeConfig.screenWidth * 0.1),
               ),
               child: CustomPaint(
                 painter: _HeaderPatternPainter(
@@ -199,7 +207,12 @@ class _Header extends StatelessWidget {
 
           // Header Content
           Padding(
-            padding: EdgeInsets.fromLTRB(20, topInset + 16, 20, 20),
+            padding: EdgeInsets.fromLTRB(
+              SizeConfig.screenWidth * 0.03,
+              topInset + SizeConfig.screenHeight * 0.02,
+              SizeConfig.screenWidth * 0.03,
+              SizeConfig.screenHeight * 0.02,
+            ),
             child: Column(
               children: [
                 Row(
@@ -208,7 +221,7 @@ class _Header extends StatelessWidget {
                     _AnimatedBackButton(
                       onTap: () => Navigator.pop(context),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: SizeConfig.screenWidth * 0.03),
 
                     // Title
                     Expanded(
@@ -228,17 +241,17 @@ class _Header extends StatelessWidget {
                                 ),
                               );
                             },
-                            child: const Text(
+                            child: Text(
                               'Executive Panel',
                               style: TextStyle(
-                                fontSize: 26,
+                                fontSize: SizeConfig.screenWidth * 0.06,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white,
                                 letterSpacing: 0.5,
                               ),
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          SizedBox(height: SizeConfig.screenHeight * 0.003),
                           TweenAnimationBuilder<double>(
                             tween: Tween(begin: 0, end: 1),
                             duration: const Duration(milliseconds: 900),
@@ -255,7 +268,7 @@ class _Header extends StatelessWidget {
                             child: Text(
                               semesterId,
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: SizeConfig.screenWidth * 0.03,
                                 color: Colors.white.withOpacity(0.9),
                                 fontWeight: FontWeight.w500,
                               ),
@@ -345,19 +358,19 @@ class _AnimatedBackButtonState extends State<_AnimatedBackButton> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         transform: Matrix4.identity()..scale(_isPressed ? 0.9 : 1.0),
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.016),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(_isPressed ? 0.3 : 0.2),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
           border: Border.all(
             color: Colors.white.withOpacity(0.3),
-            width: 2,
+            width: SizeConfig.screenWidth * 0.005,
           ),
         ),
-        child: const Icon(
+        child: Icon(
           Icons.arrow_back_ios_new_rounded,
           color: Colors.white,
-          size: 20,
+          size: SizeConfig.screenWidth * 0.045,
         ),
       ),
     );
@@ -378,26 +391,26 @@ class _HeaderBadge extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         return Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.15 + animation.value * 0.1),
             shape: BoxShape.circle,
             border: Border.all(
               color: Colors.white.withOpacity(0.3 + animation.value * 0.2),
-              width: 2,
+              width: SizeConfig.screenWidth * 0.005,
             ),
             boxShadow: [
               BoxShadow(
                 color: Colors.white.withOpacity(0.1 * animation.value),
-                blurRadius: 15 * animation.value,
-                spreadRadius: 3 * animation.value,
+                blurRadius: SizeConfig.screenWidth * 0.04 * animation.value,
+                spreadRadius: SizeConfig.screenWidth * 0.008 * animation.value,
               ),
             ],
           ),
-          child: const Icon(
+          child: Icon(
             Icons.groups_rounded,
             color: Colors.white,
-            size: 24,
+            size: SizeConfig.screenWidth * 0.06,
           ),
         );
       },
@@ -636,23 +649,23 @@ class _ProfileCardState extends State<_ProfileCard>
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
             border: Border.all(
               color: _ExecutivePanelPageState.brandStart.withOpacity(0.08),
-              width: 1.5,
+              width: SizeConfig.screenWidth * 0.004,
             ),
             boxShadow: [
               BoxShadow(
-                blurRadius: 20,
+                blurRadius: SizeConfig.screenWidth * 0.05,
                 spreadRadius: 0,
                 color: Colors.black.withOpacity(0.08),
-                offset: const Offset(0, 8),
+                offset: Offset(0, SizeConfig.screenHeight * 0.01),
               ),
               BoxShadow(
-                blurRadius: 8,
+                blurRadius: SizeConfig.screenWidth * 0.02,
                 spreadRadius: -4,
                 color: _ExecutivePanelPageState.brandStart.withOpacity(0.05),
-                offset: const Offset(0, 4),
+                offset: Offset(0, SizeConfig.screenHeight * 0.005),
               ),
             ],
           ),
@@ -673,7 +686,7 @@ class _ProfileCardState extends State<_ProfileCard>
                         child: CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
                               _ExecutivePanelPageState.brandStart),
-                          strokeWidth: 2.5,
+                          strokeWidth: SizeConfig.screenWidth * 0.003,
                         ),
                       ),
                       errorWidget: (context, url, error) => _ImageFallback(),
@@ -685,7 +698,7 @@ class _ProfileCardState extends State<_ProfileCard>
                     left: 0,
                     right: 0,
                     child: Container(
-                      height: 80,
+                      height: SizeConfig.screenHeight * 0.1,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
@@ -703,7 +716,7 @@ class _ProfileCardState extends State<_ProfileCard>
 
               // Content section
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -711,29 +724,30 @@ class _ProfileCardState extends State<_ProfileCard>
                     Text(
                       widget.name.isNotEmpty ? widget.name : '—',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: SizeConfig.screenWidth * 0.05,
                         fontWeight: FontWeight.w800,
                         color: Colors.grey.shade900,
                         letterSpacing: 0.3,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: SizeConfig.screenHeight * 0.01),
 
                     // Designation
                     if (widget.designation.trim().isNotEmpty)
                       Container(
-                        margin: const EdgeInsets.only(bottom: 6),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                        margin: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.008),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.screenWidth * 0.03,
+                            vertical: SizeConfig.screenHeight * 0.008),
                         decoration: BoxDecoration(
                           color: _ExecutivePanelPageState.brandStart
                               .withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
                         ),
                         child: Text(
                           widget.designation,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: SizeConfig.screenWidth * 0.03,
                             fontWeight: FontWeight.w600,
                             color: _ExecutivePanelPageState.brandStart,
                             letterSpacing: 0.2,
@@ -744,20 +758,23 @@ class _ProfileCardState extends State<_ProfileCard>
                     // Department
                     if (widget.department.trim().isNotEmpty)
                       Padding(
-                        padding: const EdgeInsets.only(top: 4, bottom: 8),
+                        padding: EdgeInsets.only(
+                          top: SizeConfig.screenHeight * 0.005,
+                          bottom: SizeConfig.screenHeight * 0.005,
+                        ),
                         child: Row(
                           children: [
                             Icon(
                               Icons.school_outlined,
-                              size: 16,
+                              size: SizeConfig.screenWidth * 0.04,
                               color: Colors.grey.shade600,
                             ),
-                            const SizedBox(width: 6),
+                            SizedBox(width: SizeConfig.screenWidth * 0.015),
                             Expanded(
                               child: Text(
                                 widget.department,
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: SizeConfig.screenWidth * 0.035,
                                   color: Colors.grey.shade700,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -767,31 +784,26 @@ class _ProfileCardState extends State<_ProfileCard>
                         ),
                       ),
 
-                    const SizedBox(height: 12),
+                    SizedBox(height: SizeConfig.screenHeight * 0.007),
                     Divider(color: Colors.grey.shade200, height: 1),
-                    const SizedBox(height: 16),
+                    SizedBox(height: SizeConfig.screenHeight * 0.02),
 
                     // Contact links
-                    Column(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _SocialButton(
-                          icon: Icons.email_outlined,
-                          label: widget.email.trim().isNotEmpty
-                              ? widget.email
-                              : 'Send Email',
-                          color: _ExecutivePanelPageState.brandStart,
+                        _SocialIconButton(
+                          imagePath: 'assets/images/mail.png',
                           onTap: () => _mailto(widget.email),
                         ),
-                        _SocialButton(
-                          icon: Icons.facebook_rounded,
-                          label: 'Facebook Profile',
-                          color: const Color(0xFF1877F2),
+                        SizedBox(width: SizeConfig.screenWidth * 0.06),
+                        _SocialIconButton(
+                          imagePath: 'assets/images/facebook.png',
                           onTap: () => _launch(widget.facebook, 'Facebook'),
                         ),
-                        _SocialButton(
-                          icon: Icons.work_outline_rounded,
-                          label: 'LinkedIn Profile',
-                          color: const Color(0xFF0A66C2),
+                        SizedBox(width: SizeConfig.screenWidth * 0.06),
+                        _SocialIconButton(
+                          imagePath: 'assets/images/linkedin.png',
                           onTap: () => _launch(widget.linkedIn, 'LinkedIn'),
                         ),
                       ],
@@ -807,85 +819,56 @@ class _ProfileCardState extends State<_ProfileCard>
   }
 }
 
-class _SocialButton extends StatefulWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
+class _SocialIconButton extends StatefulWidget {
+  final String imagePath;
   final VoidCallback onTap;
 
-  const _SocialButton({
-    required this.icon,
-    required this.label,
-    required this.color,
+  const _SocialIconButton({
+    required this.imagePath,
     required this.onTap,
   });
 
   @override
-  State<_SocialButton> createState() => _SocialButtonState();
+  State<_SocialIconButton> createState() => _SocialIconButtonState();
 }
 
-class _SocialButtonState extends State<_SocialButton> {
+class _SocialIconButtonState extends State<_SocialIconButton> {
   bool _isPressed = false;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: widget.onTap,
-          onTapDown: (_) => setState(() => _isPressed = true),
-          onTapUp: (_) => setState(() => _isPressed = false),
-          onTapCancel: () => setState(() => _isPressed = false),
-          borderRadius: BorderRadius.circular(12),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: _isPressed
-                  ? widget.color.withOpacity(0.12)
-                  : widget.color.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: widget.color.withOpacity(_isPressed ? 0.3 : 0.15),
-                width: 1.5,
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        transform: Matrix4.identity()..scale(_isPressed ? 0.9 : 1.0),
+        child: Container(
+          width: SizeConfig.screenWidth * 0.12,
+          height: SizeConfig.screenWidth * 0.12,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(_isPressed ? 0.15 : 0.1),
+                blurRadius: _isPressed ? 8 : 12,
+                spreadRadius: _isPressed ? 0 : 2,
+                offset: Offset(0, _isPressed ? 2 : 4),
               ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: widget.color.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    widget.icon,
-                    size: 20,
-                    color: widget.color,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    widget.label,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: widget.color,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: widget.color.withOpacity(0.7),
-                ),
-              ],
+            ],
+          ),
+          child: ClipOval(
+            child: Padding(
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
+              child: Image.asset(
+                widget.imagePath,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
         ),
@@ -910,14 +893,14 @@ class _ImageFallback extends StatelessWidget {
       ),
       child: Center(
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.05),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.5),
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.person_outline_rounded,
-            size: 64,
+            size: SizeConfig.screenWidth * 0.16,
             color: _ExecutivePanelPageState.brandStart.withOpacity(0.6),
           ),
         ),
@@ -933,12 +916,12 @@ class _ErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.08),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.06),
               decoration: BoxDecoration(
                 color: Colors.red.shade50,
                 shape: BoxShape.circle,
@@ -946,24 +929,24 @@ class _ErrorState extends StatelessWidget {
               child: Icon(
                 Icons.error_outline_rounded,
                 color: Colors.red.shade400,
-                size: 64,
+                size: SizeConfig.screenWidth * 0.16,
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: SizeConfig.screenHeight * 0.025),
+            Text(
               'Could not load the executive panel.',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: SizeConfig.screenWidth * 0.045,
                 fontWeight: FontWeight.w700,
                 color: Colors.black87,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.screenHeight * 0.01),
             Text(
               'Please check your connection and try again.',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: SizeConfig.screenWidth * 0.035,
                 color: Colors.grey.shade600,
               ),
               textAlign: TextAlign.center,
@@ -982,12 +965,12 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.08),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.06),
               decoration: BoxDecoration(
                 color: _ExecutivePanelPageState.brandStart.withOpacity(0.08),
                 shape: BoxShape.circle,
@@ -995,24 +978,24 @@ class _EmptyState extends StatelessWidget {
               child: Icon(
                 Icons.people_outline_rounded,
                 color: _ExecutivePanelPageState.brandStart,
-                size: 64,
+                size: SizeConfig.screenWidth * 0.16,
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: SizeConfig.screenHeight * 0.025),
+            Text(
               'No profiles found',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: SizeConfig.screenWidth * 0.045,
                 fontWeight: FontWeight.w700,
                 color: Colors.black87,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.screenHeight * 0.01),
             Text(
               'No executive panel members for this semester yet.',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: SizeConfig.screenWidth * 0.035,
                 color: Colors.grey.shade600,
               ),
               textAlign: TextAlign.center,
