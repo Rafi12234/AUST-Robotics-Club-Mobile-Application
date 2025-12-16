@@ -2526,6 +2526,11 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
   final Map<int, int> _sectionImageIndices = {};
   final Map<String, double> _imageAspect = {};
 
+  // Scroll controller for tracking scroll position
+  late ScrollController _scrollController;
+  double _scrollOffset = 0;
+  bool _showTitleInAppBar = false;
+
   @override
   void initState() {
     super.initState();
@@ -2533,11 +2538,24 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     )..forward();
+
+    _scrollController = ScrollController()
+      ..addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final offset = _scrollController.offset;
+    setState(() {
+      _scrollOffset = offset;
+      // Show title in app bar when scrolled past the expanded header
+      _showTitleInAppBar = offset > (SizeConfig.screenHeight * 0.15);
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -2633,6 +2651,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: CustomScrollView(
+        controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         slivers: [
           // Cover Photo Header
@@ -2651,6 +2670,24 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                       color: Colors.white, size: SizeConfig.screenWidth * 0.045),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+            title: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: _showTitleInAppBar ? 1.0 : 0.0,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 300),
+                offset: _showTitleInAppBar ? Offset.zero : const Offset(0, 0.5),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: SizeConfig.screenWidth * 0.045,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
@@ -2777,17 +2814,17 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                               ),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.people,
                               color: Colors.white,
-                              size: 20,
+                              size: SizeConfig.screenWidth * 0.04,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          const Text(
+                          SizedBox(width: SizeConfig.screenWidth * 0.03),
+                          Text(
                             'Project Team',
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: SizeConfig.screenWidth * 0.04,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF1B5E20),
                             ),
@@ -2795,7 +2832,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: SizeConfig.screenHeight * 0.01),
                     ...owners.asMap().entries.map((entry) {
                       final index = entry.key;
                       final owner = entry.value;
@@ -2812,14 +2849,14 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                           );
                         },
                         child: Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 8,
+                          margin: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.screenWidth * 0.04,
+                            vertical: SizeConfig.screenHeight * 0.005,
                           ),
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                             border: Border.all(
                               color: const Color(0xFF2E7D32).withOpacity(0.2),
                               width: 2,
@@ -2836,8 +2873,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                           child: Row(
                             children: [
                               Container(
-                                width: 50,
-                                height: 50,
+                                width: SizeConfig.screenWidth * 0.09,
+                                height: SizeConfig.screenWidth * 0.09,
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [
@@ -2847,31 +2884,31 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                   ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.person,
                                   color: Colors.white,
-                                  size: 24,
+                                  size: SizeConfig.screenWidth * 0.05,
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              SizedBox(width: SizeConfig.screenWidth * 0.03),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       owner['name'],
-                                      style: const TextStyle(
-                                        fontSize: 16,
+                                      style: TextStyle(
+                                        fontSize: SizeConfig.screenWidth * 0.038,
                                         fontWeight: FontWeight.bold,
                                         color: Color(0xFF1B5E20),
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
+                                    SizedBox(height: SizeConfig.screenHeight * 0.003),
                                     Text(
                                       owner['designation'],
                                       style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey[600],
+                                        fontSize: SizeConfig.screenWidth * 0.0299,
+                                        color: Colors.grey[800],
                                       ),
                                     ),
                                   ],
@@ -2882,7 +2919,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                         ),
                       );
                     }).toList(),
-                    const SizedBox(height: 24),
+                    SizedBox(height: SizeConfig.screenHeight * 0.005),
                   ],
 
                   // Sections
@@ -2907,16 +2944,16 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                         );
                       },
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.screenWidth * 0.04,
+                          vertical: SizeConfig.screenHeight * 0.02,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Section Header
                             Container(
-                              padding: const EdgeInsets.all(16),
+                              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
@@ -2924,7 +2961,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                     Color(0xFF2E7D32)
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                                 boxShadow: [
                                   BoxShadow(
                                     color: const Color(0xFF1B5E20)
@@ -2937,27 +2974,27 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                               child: Row(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.all(8),
+                                    padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                                     decoration: BoxDecoration(
                                       color: Colors.white.withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Text(
                                       '${sectionIndex + 1}',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 18,
+                                        fontSize: SizeConfig.screenWidth * 0.03,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  SizedBox(width: SizeConfig.screenWidth * 0.03),
                                   Expanded(
                                     child: Text(
                                       section['name'],
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 18,
+                                        fontSize: SizeConfig.screenWidth * 0.035,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -2968,7 +3005,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
 
                             // Section Images
                             if (images.isNotEmpty) ...[
-                              const SizedBox(height: 16),
+                              SizedBox(height: SizeConfig.screenHeight * 0.02),
                               Builder(
                                 builder: (context) {
                                   final currentIdx =
@@ -3004,8 +3041,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                         _resolveImageAspect(url);
 
                                         return Container(
-                                          margin: const EdgeInsets.symmetric(
-                                              horizontal: 8),
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: SizeConfig.screenWidth * 0.01),
                                           decoration: BoxDecoration(
                                             borderRadius:
                                             BorderRadius.circular(20),
@@ -3042,7 +3079,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                                         (context, url) =>
                                                         Container(
                                                           color: Colors.grey[200],
-                                                          child: const Center(
+                                                          child: Center(
                                                             child:
                                                             CircularProgressIndicator(
                                                               color:
@@ -3065,7 +3102,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
 
                                                 // Image Counter
                                                 Positioned(
-                                                  bottom: 12,
+                                                  bottom: SizeConfig.screenHeight * 0.015,
                                                   right: 12,
                                                   child: Container(
                                                     padding: const EdgeInsets
@@ -3082,9 +3119,9 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                                     ),
                                                     child: Text(
                                                       '${imageIndex + 1}/${images.length}',
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                         color: Colors.white,
-                                                        fontSize: 12,
+                                                        fontSize: SizeConfig.screenWidth * 0.025,
                                                         fontWeight:
                                                         FontWeight.bold,
                                                       ),
@@ -3101,7 +3138,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                 },
                               ),
 
-                              const SizedBox(height: 12),
+                              SizedBox(height: SizeConfig.screenHeight * 0.01),
                               // Image Indicators
                               if (images.length > 1)
                                 Row(
@@ -3142,12 +3179,12 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
 
                             // Section Description (with copy icon)
                             if (description.isNotEmpty) ...[
-                              const SizedBox(height: 16),
+                              SizedBox(height: SizeConfig.screenHeight * 0.02),
                               Stack(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        20, 20, 48, 20),
+                                    padding: EdgeInsets.fromLTRB(
+                                        SizeConfig.screenWidth*0.03, SizeConfig.screenWidth*0.03, SizeConfig.screenWidth*0.1, SizeConfig.screenWidth*0.03),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(16),
@@ -3160,8 +3197,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                     child: Text(
                                       description,
                                       style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.grey[800],
+                                        fontSize: SizeConfig.screenWidth * 0.033,
+                                        color: Colors.grey[1000],
                                         height: 1.7,
                                         letterSpacing: 0.3,
                                       ),
@@ -3177,7 +3214,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                       color: Colors.transparent,
                                       child: IconButton(
                                         tooltip: 'Copy description',
-                                        icon: const Icon(Icons.copy_rounded,
+                                        icon: Icon(Icons.copy_rounded,
                                             size: 20,
                                             color: Color(0xFF2E7D32)),
                                         onPressed: () async {
