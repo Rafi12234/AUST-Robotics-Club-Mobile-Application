@@ -466,31 +466,138 @@ class _ProfileCardState extends State<_ProfileCard>
     super.dispose();
   }
 
-  Future<void> _launch(String url) async {
+  Future<void> _launch(String url, String platform) async {
     final u = url.trim();
-    if (u.isEmpty) return;
 
-    // Ensure URL has a scheme
+    // Check if the field value is "N/A" or other invalid placeholder values
+    final lowerU = u.toLowerCase();
+    bool isNotAvailable = u.isEmpty ||
+        lowerU == 'n/a' ||
+        lowerU == 'na' ||
+        lowerU == 'n.a' ||
+        lowerU == 'n.a.' ||
+        u == '-' ||
+        u == '--' ||
+        lowerU == 'null' ||
+        lowerU == 'not available' ||
+        lowerU == 'none' ||
+        lowerU == 'no' ||
+        lowerU == 'nil';
+
+    if (isNotAvailable) {
+      _showNotAvailableMessage(platform);
+      return;
+    }
+
+    // Valid URL found - try to launch it
     String finalUrl = u;
     if (!u.startsWith('http://') && !u.startsWith('https://')) {
       finalUrl = 'https://$u';
     }
 
     final uri = Uri.tryParse(finalUrl);
-    if (uri == null) return;
+    if (uri == null) {
+      _showNotAvailableMessage(platform);
+      return;
+    }
 
     try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       debugPrint('Error launching URL: $e');
+      // Only show error if launch actually fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not open $platform'),
+          backgroundColor: Colors.red.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
+  }
+
+  void _showNotAvailableMessage(String platform) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              platform == 'Facebook' ? Icons.facebook_rounded : Icons.work_outline_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Currently $platform is not available',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: platform == 'Facebook'
+            ? const Color(0xFF1877F2)
+            : const Color(0xFF0A66C2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _mailto(String address) async {
     final a = address.trim();
-    if (a.isEmpty) return;
+
+    // Check if email is "N/A" or other invalid placeholder values
+    final lowerA = a.toLowerCase();
+    bool isNotAvailable = a.isEmpty ||
+        lowerA == 'n/a' ||
+        lowerA == 'na' ||
+        lowerA == 'n.a' ||
+        lowerA == 'n.a.' ||
+        a == '-' ||
+        a == '--' ||
+        lowerA == 'null' ||
+        lowerA == 'not available' ||
+        lowerA == 'none' ||
+        lowerA == 'no' ||
+        lowerA == 'nil';
+
+    if (isNotAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.email_outlined, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Text(
+                'Email is not available',
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+              ),
+            ],
+          ),
+          backgroundColor: _ExecutivePanelPageState.brandStart,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
 
     // Create Gmail compose URL that opens in browser
     final gmailUrl = Uri.parse('https://mail.google.com/mail/?view=cm&to=$a');
@@ -498,6 +605,12 @@ class _ProfileCardState extends State<_ProfileCard>
     try {
       if (await canLaunchUrl(gmailUrl)) {
         await launchUrl(gmailUrl, mode: LaunchMode.externalApplication);
+      } else {
+        // Fallback to mailto if Gmail URL fails
+        final mailtoUri = Uri(scheme: 'mailto', path: a);
+        if (await canLaunchUrl(mailtoUri)) {
+          await launchUrl(mailtoUri, mode: LaunchMode.externalApplication);
+        }
       }
     } catch (e) {
       // Fallback to mailto if Gmail URL fails
@@ -661,27 +774,26 @@ class _ProfileCardState extends State<_ProfileCard>
                     // Contact links
                     Column(
                       children: [
-                        if (widget.email.trim().isNotEmpty)
-                          _SocialButton(
-                            icon: Icons.email_outlined,
-                            label: widget.email,
-                            color: _ExecutivePanelPageState.brandStart,
-                            onTap: () => _mailto(widget.email),
-                          ),
-                        if (widget.facebook.trim().isNotEmpty)
-                          _SocialButton(
-                            icon: Icons.facebook_rounded,
-                            label: 'Facebook Profile',
-                            color: const Color(0xFF1877F2),
-                            onTap: () => _launch(widget.facebook),
-                          ),
-                        if (widget.linkedIn.trim().isNotEmpty)
-                          _SocialButton(
-                            icon: Icons.work_outline_rounded,
-                            label: 'LinkedIn Profile',
-                            color: const Color(0xFF0A66C2),
-                            onTap: () => _launch(widget.linkedIn),
-                          ),
+                        _SocialButton(
+                          icon: Icons.email_outlined,
+                          label: widget.email.trim().isNotEmpty
+                              ? widget.email
+                              : 'Send Email',
+                          color: _ExecutivePanelPageState.brandStart,
+                          onTap: () => _mailto(widget.email),
+                        ),
+                        _SocialButton(
+                          icon: Icons.facebook_rounded,
+                          label: 'Facebook Profile',
+                          color: const Color(0xFF1877F2),
+                          onTap: () => _launch(widget.facebook, 'Facebook'),
+                        ),
+                        _SocialButton(
+                          icon: Icons.work_outline_rounded,
+                          label: 'LinkedIn Profile',
+                          color: const Color(0xFF0A66C2),
+                          onTap: () => _launch(widget.linkedIn, 'LinkedIn'),
+                        ),
                       ],
                     ),
                   ],
