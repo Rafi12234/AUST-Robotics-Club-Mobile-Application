@@ -28,9 +28,15 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
   // Cache the stream to prevent rebuilding
   late final Stream<QuerySnapshot> _exclusiveProjectsStream;
 
+  // Scroll controller for tracking scroll position
+  late ScrollController _scrollController;
+  bool _showTitleInAppBar = false;
+
   @override
   void initState() {
     super.initState();
+
+    _scrollController = ScrollController()..addListener(_onScroll);
 
     // Initialize the stream once - only get Premium_Content = true
     _exclusiveProjectsStream = FirebaseFirestore.instance
@@ -61,12 +67,23 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
     )..forward();
   }
 
+  void _onScroll() {
+    final offset = _scrollController.offset;
+    final shouldShow = offset > (SizeConfig.screenHeight * 0.12);
+    if (_showTitleInAppBar != shouldShow) {
+      setState(() {
+        _showTitleInAppBar = shouldShow;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _headerController.dispose();
     _particleController.dispose();
     _pulseController.dispose();
     _welcomeController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -92,6 +109,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
 
           // Main Content
           CustomScrollView(
+            controller: _scrollController,
             physics: const BouncingScrollPhysics(),
             slivers: [
               // Animated Header
@@ -143,20 +161,30 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
             );
           },
           child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-                width: 1.5,
-              ),
-            ),
             child: IconButton(
               icon: Icon(Icons.arrow_back_ios_new,
                   color: Colors.white, size: SizeConfig.screenWidth * 0.05),
               onPressed: () => Navigator.pop(context),
               padding: EdgeInsets.zero,
             ),
+          ),
+        ),
+      ),
+      title: AnimatedOpacity(
+        duration: const Duration(milliseconds: 300),
+        opacity: _showTitleInAppBar ? 1.0 : 0.0,
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 300),
+          offset: _showTitleInAppBar ? Offset.zero : const Offset(0, 0.5),
+          child: Text(
+            'Exclusive Content',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: SizeConfig.screenWidth * 0.045,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),
@@ -176,7 +204,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
               );
             },
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.03, vertical: SizeConfig.screenHeight * 0.007),
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.03, vertical: SizeConfig.screenHeight * 0.005),
               decoration: BoxDecoration(
                 color: Colors.amber.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
@@ -1126,18 +1154,34 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
   final Map<int, int> _sectionImageIndices = {};
   final Map<String, double> _imageAspect = {};
 
+  // Scroll controller for tracking scroll position
+  late ScrollController _scrollController;
+  bool _showTitleInAppBar = false;
+
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController()..addListener(_onScroll);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     )..forward();
   }
 
+  void _onScroll() {
+    final offset = _scrollController.offset;
+    final shouldShow = offset > (SizeConfig.screenHeight * 0.15);
+    if (_showTitleInAppBar != shouldShow) {
+      setState(() {
+        _showTitleInAppBar = shouldShow;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -1233,11 +1277,12 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
     return Scaffold(
       backgroundColor: const Color(0xFFF8F7FC),
       body: CustomScrollView(
+        controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         slivers: [
           // Cover Photo Header
           SliverAppBar(
-            expandedHeight: SizeConfig.screenHeight * 0.35,
+            expandedHeight: SizeConfig.screenHeight * 0.3,
             floating: false,
             pinned: true,
             stretch: true,
@@ -1255,20 +1300,30 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                   );
                 },
                 child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 1.5,
-                    ),
-                  ),
                   child: IconButton(
                     icon: Icon(Icons.arrow_back_ios_new,
                         color: Colors.white, size: SizeConfig.screenWidth * 0.05),
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                   ),
+                ),
+              ),
+            ),
+            title: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: _showTitleInAppBar ? 1.0 : 0.0,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 300),
+                offset: _showTitleInAppBar ? Offset.zero : const Offset(0, 0.5),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: SizeConfig.screenWidth * 0.045,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
