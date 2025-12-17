@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:math' as math;
+import 'size_config.dart';
 
 // Main Educational Programs List Page
 class EducationalProgramsPage extends StatefulWidget {
@@ -40,6 +41,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
@@ -70,18 +72,18 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 80,
-                          height: 80,
+                          width: SizeConfig.screenWidth * 0.2,
+                          height: SizeConfig.screenWidth * 0.2,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
                               colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
                             ),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                           ),
-                          child: const Center(
+                          child: Center(
                             child: CircularProgressIndicator(
                               color: Colors.white,
-                              strokeWidth: 3,
+                              strokeWidth: SizeConfig.screenWidth * 0.008,
                             ),
                           ),
                         ),
@@ -98,22 +100,22 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(24),
+                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.06),
                           decoration: BoxDecoration(
                             color: Colors.red.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.error_outline,
-                            size: 60,
+                            size: SizeConfig.screenWidth * 0.15,
                             color: Colors.red,
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        const Text(
+                        SizedBox(height: SizeConfig.screenHeight * 0.025),
+                        Text(
                           'Oops! Something went wrong',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: SizeConfig.screenWidth * 0.045,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -130,7 +132,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(30),
+                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.075),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
@@ -142,24 +144,24 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                           ),
                           child: Icon(
                             Icons.school_outlined,
-                            size: 80,
+                            size: SizeConfig.screenWidth * 0.2,
                             color: Colors.grey[400],
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: SizeConfig.screenHeight * 0.03),
                         Text(
                           'No Programs Available',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: SizeConfig.screenWidth * 0.055,
                             fontWeight: FontWeight.bold,
                             color: Colors.grey[700],
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: SizeConfig.screenHeight * 0.01),
                         Text(
                           'Check back soon for exciting programs!',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: SizeConfig.screenWidth * 0.035,
                             color: Colors.grey[500],
                           ),
                         ),
@@ -199,7 +201,12 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
               });
 
               return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+                padding: EdgeInsets.fromLTRB(
+                  SizeConfig.screenWidth * 0.04,
+                  SizeConfig.screenHeight * 0.015,
+                  SizeConfig.screenWidth * 0.04,
+                  SizeConfig.screenHeight * 0.03,
+                ),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -232,7 +239,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                           );
                         },
                         child: Padding(
-                          padding: const EdgeInsets.only(bottom: 24),
+                          padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.018),
                           child: _buildProgramCard(
                             context,
                             name,
@@ -305,11 +312,11 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
       child: Container(
-        height: 140,
+        height: SizeConfig.screenHeight * 0.17,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -321,8 +328,8 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
           boxShadow: [
             BoxShadow(
               color: gradientColors[0].withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              blurRadius: SizeConfig.screenWidth * 0.05,
+              offset: Offset(0, SizeConfig.screenHeight * 0.012),
             ),
           ],
         ),
@@ -330,11 +337,11 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
           children: [
             // Decorative Circles
             Positioned(
-              right: -20,
-              top: -20,
+              right: -SizeConfig.screenWidth * 0.05,
+              top: -SizeConfig.screenWidth * 0.05,
               child: Container(
-                width: 100,
-                height: 100,
+                width: SizeConfig.screenWidth * 0.25,
+                height: SizeConfig.screenWidth * 0.25,
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.1),
                   shape: BoxShape.circle,
@@ -342,11 +349,11 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
               ),
             ),
             Positioned(
-              left: -30,
-              bottom: -30,
+              left: -SizeConfig.screenWidth * 0.075,
+              bottom: -SizeConfig.screenWidth * 0.075,
               child: Container(
-                width: 120,
-                height: 120,
+                width: SizeConfig.screenWidth * 0.3,
+                height: SizeConfig.screenWidth * 0.3,
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.08),
                   shape: BoxShape.circle,
@@ -356,26 +363,26 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
 
             // Content
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.045),
               child: Row(
                 children: [
                   // Left Side - Image/Icon
                   Container(
-                    width: 100,
-                    height: 100,
+                    width: SizeConfig.screenWidth * 0.22,
+                    height: SizeConfig.screenWidth * 0.22,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
+                          blurRadius: SizeConfig.screenWidth * 0.025,
+                          offset: Offset(0, SizeConfig.screenHeight * 0.006),
                         ),
                       ],
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                       child: imageUrl != null
                           ? CachedNetworkImage(
                         imageUrl: imageUrl,
@@ -384,7 +391,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                           color: Colors.grey[100],
                           child: Center(
                             child: CircularProgressIndicator(
-                              strokeWidth: 2,
+                              strokeWidth: SizeConfig.screenWidth * 0.005,
                               color: gradientColors[0],
                             ),
                           ),
@@ -393,7 +400,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                           color: Colors.grey[100],
                           child: Icon(
                             Icons.school,
-                            size: 40,
+                            size: SizeConfig.screenWidth * 0.1,
                             color: gradientColors[0],
                           ),
                         ),
@@ -402,13 +409,13 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                         color: Colors.grey[100],
                         child: Icon(
                           Icons.school,
-                          size: 40,
+                          size: SizeConfig.screenWidth * 0.1,
                           color: gradientColors[0],
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: SizeConfig.screenWidth * 0.04),
 
                   // Right Side - Text and Arrow
                   Expanded(
@@ -418,8 +425,8 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                       children: [
                         Text(
                           name,
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: SizeConfig.screenWidth * 0.042,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             height: 1.3,
@@ -427,21 +434,21 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: SizeConfig.screenHeight * 0.01),
                         Row(
                           children: [
                             Text(
                               'View Details',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: SizeConfig.screenWidth * 0.032,
                                 color: Colors.white.withOpacity(0.9),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: SizeConfig.screenWidth * 0.01),
                             Icon(
                               Icons.arrow_forward_rounded,
-                              size: 16,
+                              size: SizeConfig.screenWidth * 0.04,
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ],
@@ -514,15 +521,11 @@ class _ProgramHeaderDelegate extends SliverPersistentHeaderDelegate {
 
           // Back Button
           Positioned(
-            top: MediaQuery.of(context).padding.top + 4,
-            left: 8,
+            top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.005,
+            left: SizeConfig.screenWidth * 0.02,
             child: Container(
-              // decoration: BoxDecoration(
-              //   color: Colors.white.withOpacity(0.2),
-              //   borderRadius: BorderRadius.circular(12),
-              // ),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: SizeConfig.screenWidth * 0.055),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -530,9 +533,9 @@ class _ProgramHeaderDelegate extends SliverPersistentHeaderDelegate {
 
           // Title Content
           Positioned(
-            left: 20,
-            right: 24,
-            bottom: 24,
+            left: SizeConfig.screenWidth * 0.05,
+            right: SizeConfig.screenWidth * 0.06,
+            bottom: SizeConfig.screenHeight * 0.03,
             child: Opacity(
               opacity: 1 - progress,
               child: Column(
@@ -540,39 +543,39 @@ class _ProgramHeaderDelegate extends SliverPersistentHeaderDelegate {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.screenWidth * 0.03,
+                      vertical: SizeConfig.screenHeight * 0.008,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                     ),
-                    child: const Text(
+                    child: Text(
                       '📚 Learn & Grow',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 13,
+                        fontSize: SizeConfig.screenWidth * 0.032,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
+                  SizedBox(height: SizeConfig.screenHeight * 0.02),
+                  Text(
                     'Educational Programs',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 32,
+                      fontSize: SizeConfig.screenWidth * 0.075,
                       fontWeight: FontWeight.bold,
                       height: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: SizeConfig.screenHeight * 0.01),
                   Text(
                     'Mentorship & Training',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
-                      fontSize: 16,
+                      fontSize: SizeConfig.screenWidth * 0.04,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -584,15 +587,15 @@ class _ProgramHeaderDelegate extends SliverPersistentHeaderDelegate {
           // Collapsed Title
           if (isCollapsed)
             Positioned(
-              left: 70,
-              bottom: 16,
+              left: SizeConfig.screenWidth * 0.17,
+              bottom: SizeConfig.screenHeight * 0.02,
               child: Opacity(
                 opacity: (progress - 0.5) * 2,
-                child: const Text(
+                child: Text(
                   'Educational, Mentorship and Training Programs',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: SizeConfig.screenWidth * 0.04,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -620,12 +623,12 @@ class _WavePatternPainter extends CustomPainter {
     final paint = Paint()
       ..color = Colors.white.withOpacity(0.1)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+      ..strokeWidth = size.width * 0.005;
 
     for (int i = 0; i < 3; i++) {
       final path = Path();
-      final y = size.height * 0.3 + i * 40;
-      final amplitude = 20.0 * (1 - progress);
+      final y = size.height * 0.3 + i * (size.height * 0.08);
+      final amplitude = size.height * 0.04 * (1 - progress);
       final frequency = 0.02;
 
       path.moveTo(0, y);
@@ -655,9 +658,9 @@ class _DetailPatternPainter extends CustomPainter {
 
     // Draw decorative circles
     for (int i = 0; i < 8; i++) {
-      final x = (i * 60.0) % size.width;
-      final y = (i * 45.0) % size.height;
-      canvas.drawCircle(Offset(x, y), 30, paint);
+      final x = (i * size.width * 0.15) % size.width;
+      final y = (i * size.height * 0.15) % size.height;
+      canvas.drawCircle(Offset(x, y), size.width * 0.075, paint);
     }
   }
 
@@ -722,6 +725,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     final name = widget.programData['Name'] ?? 'Untitled Program';
     final description = widget.programData['Description'] ?? '';
     final images = _getAllImages();
@@ -733,22 +737,22 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
         slivers: [
           // Modern Curved App Bar
           SliverAppBar(
-            expandedHeight: 200,
+            expandedHeight: SizeConfig.screenHeight * 0.25,
             floating: false,
             pinned: true,
             stretch: true,
             elevation: 0,
             backgroundColor: const Color(0xFF1B5E20),
             leading: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                 ),
                 child: IconButton(
                   icon: Icon(Icons.arrow_back_ios_new,
-                      color: Colors.white, size: 20),
+                      color: Colors.white, size: SizeConfig.screenWidth * 0.05),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                 ),
@@ -756,7 +760,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
             ),
             flexibleSpace: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-                final expandedHeight = 200.0;
+                final expandedHeight = SizeConfig.screenHeight * 0.25;
                 final collapsedHeight =
                     kToolbarHeight + MediaQuery.of(context).padding.top;
                 final currentHeight = constraints.maxHeight;
@@ -766,7 +770,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
 
                 // Calculate left padding based on collapse ratio
                 final leftPadding =
-                    24.0 + (48.0 * collapseRatio); // Starts at 24, goes to 72
+                    SizeConfig.screenWidth * 0.06 + (SizeConfig.screenWidth * 0.12 * collapseRatio);
 
                 return Container(
                   decoration: const BoxDecoration(
@@ -784,18 +788,15 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                     centerTitle: false,
                     titlePadding: EdgeInsets.only(
                       left: leftPadding,
-                      bottom: 13,
+                      bottom: SizeConfig.screenHeight * 0.016,
                     ),
                     title: Text(
                       name,
                       style: TextStyle(
                           color: Colors.white,
-                          fontSize:
-                          23 - (4 * collapseRatio), // Shrinks from 20 to 16
+                          fontSize: SizeConfig.screenWidth * 0.055 - (SizeConfig.screenWidth * 0.01 * collapseRatio),
                           fontWeight: FontWeight.bold,
                           fontFamily: "font1"),
-                      // maxLines: 1,
-                      // overflow: TextOverflow.ellipsis,
                     ),
                     background: Stack(
                       fit: StackFit.expand,
@@ -835,9 +836,9 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                 children: [
                   // Images Gallery with 3D Effect
                   if (images.isNotEmpty) ...[
-                    const SizedBox(height: 24),
+                    SizedBox(height: SizeConfig.screenHeight * 0.03),
                     SizedBox(
-                      height: 400,
+                      height: SizeConfig.screenHeight * 0.5,
                       child: PageView.builder(
                         controller: _pageController,
                         onPageChanged: (index) {
@@ -857,26 +858,26 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                               return Center(
                                 child: SizedBox(
                                   height:
-                                  Curves.easeInOut.transform(value) * 400,
+                                  Curves.easeInOut.transform(value) * SizeConfig.screenHeight * 0.5,
                                   child: child,
                                 ),
                               );
                             },
                             child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                              margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.02),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
+                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.075),
                                 boxShadow: [
                                   BoxShadow(
                                     color: const Color(0xFF1B5E20)
                                         .withOpacity(0.2),
-                                    blurRadius: 30,
-                                    offset: const Offset(0, 15),
+                                    blurRadius: SizeConfig.screenWidth * 0.075,
+                                    offset: Offset(0, SizeConfig.screenHeight * 0.02),
                                   ),
                                 ],
                               ),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(30),
+                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.075),
                                 child: Stack(
                                   fit: StackFit.expand,
                                   children: [
@@ -901,9 +902,9 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                                       errorWidget: (context, url, error) =>
                                           Container(
                                             color: Colors.grey[200],
-                                            child: const Icon(
+                                            child: Icon(
                                               Icons.broken_image,
-                                              size: 60,
+                                              size: SizeConfig.screenWidth * 0.15,
                                               color: Colors.grey,
                                             ),
                                           ),
@@ -914,7 +915,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                                       left: 0,
                                       right: 0,
                                       child: Container(
-                                        height: 100,
+                                        height: SizeConfig.screenHeight * 0.12,
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
                                             begin: Alignment.bottomCenter,
@@ -929,29 +930,29 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                                     ),
                                     // Image Counter
                                     Positioned(
-                                      bottom: 16,
-                                      right: 16,
+                                      bottom: SizeConfig.screenHeight * 0.02,
+                                      right: SizeConfig.screenWidth * 0.04,
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 8,
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: SizeConfig.screenWidth * 0.035,
+                                          vertical: SizeConfig.screenHeight * 0.01,
                                         ),
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                           borderRadius:
-                                          BorderRadius.circular(20),
+                                          BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                                           boxShadow: [
                                             BoxShadow(
                                               color: Colors.black
                                                   .withOpacity(0.2),
-                                              blurRadius: 10,
+                                              blurRadius: SizeConfig.screenWidth * 0.025,
                                             ),
                                           ],
                                         ),
                                         child: Text(
                                           '${index + 1} / ${images.length}',
-                                          style: const TextStyle(
-                                            fontSize: 10,
+                                          style: TextStyle(
+                                            fontSize: SizeConfig.screenWidth * 0.025,
                                             fontWeight: FontWeight.bold,
                                             color: Color(0xFF1B5E20),
                                           ),
@@ -966,7 +967,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                         },
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: SizeConfig.screenHeight * 0.025),
 
                     // Modern Dot Indicators
                     Row(
@@ -975,11 +976,11 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                         images.length,
                             (index) => AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: _currentPage == index ? 30 : 8,
-                          height: 8,
+                          margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.01),
+                          width: _currentPage == index ? SizeConfig.screenWidth * 0.075 : SizeConfig.screenWidth * 0.02,
+                          height: SizeConfig.screenWidth * 0.02,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.01),
                             gradient: _currentPage == index
                                 ? const LinearGradient(
                               colors: [
@@ -999,9 +1000,9 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
 
                   // Description Section
                   if (description.isNotEmpty) ...[
-                    const SizedBox(height: 40),
+                    SizedBox(height: SizeConfig.screenHeight * 0.05),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.06),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1009,8 +1010,8 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                           Row(
                             children: [
                               Container(
-                                width: 6,
-                                height: 30,
+                                width: SizeConfig.screenWidth * 0.015,
+                                height: SizeConfig.screenHeight * 0.04,
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [
@@ -1020,29 +1021,29 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                   ),
-                                  borderRadius: BorderRadius.circular(3),
+                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.0075),
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              const Text(
+                              SizedBox(width: SizeConfig.screenWidth * 0.03),
+                              Text(
                                 'Program Overview',
                                 style: TextStyle(
-                                  fontSize: 24,
+                                  fontSize: SizeConfig.screenWidth * 0.06,
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF1B5E20),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: SizeConfig.screenHeight * 0.025),
 
                           // Description Card
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(24),
+                            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.06),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
                               border: Border.all(
                                 color:
                                 const Color(0xFF1B5E20).withOpacity(0.1),
@@ -1052,15 +1053,15 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                                 BoxShadow(
                                   color: const Color(0xFF1B5E20)
                                       .withOpacity(0.05),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
+                                  blurRadius: SizeConfig.screenWidth * 0.05,
+                                  offset: Offset(0, SizeConfig.screenHeight * 0.012),
                                 ),
                               ],
                             ),
                             child: Text(
                               description,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: SizeConfig.screenWidth * 0.04,
                                 height: 1.8,
                                 color: Colors.grey[800],
                                 letterSpacing: 0.3,
@@ -1071,30 +1072,30 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                         ],
                       ),
                     ),
-                    const SizedBox(height: 50),
+                    SizedBox(height: SizeConfig.screenHeight * 0.06),
                   ] else ...[
-                    const SizedBox(height: 40),
+                    SizedBox(height: SizeConfig.screenHeight * 0.05),
                     Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.screenWidth * 0.05,
+                          vertical: SizeConfig.screenHeight * 0.015,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                         ),
                         child: Text(
                           'No description available',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: SizeConfig.screenWidth * 0.035,
                             color: Colors.grey[600],
                             fontStyle: FontStyle.italic,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 50),
+                    SizedBox(height: SizeConfig.screenHeight * 0.06),
                   ],
                 ],
               ),
