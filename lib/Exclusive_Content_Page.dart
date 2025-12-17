@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
+import 'size_config.dart';
 
 // ===================== Exclusive Content Page =====================
 class ExclusiveContentPage extends StatefulWidget {
@@ -124,14 +125,14 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
 
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 240,
+      expandedHeight: SizeConfig.screenHeight * 0.21,
       floating: false,
       pinned: true,
       stretch: true,
       elevation: 0,
       backgroundColor: const Color(0xFF4A148C),
       leading: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.023),
         child: TweenAnimationBuilder<double>(
           duration: const Duration(milliseconds: 600),
           tween: Tween(begin: 0.0, end: 1.0),
@@ -144,15 +145,15 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
               border: Border.all(
                 color: Colors.white.withOpacity(0.3),
                 width: 1.5,
               ),
             ),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new,
-                  color: Colors.white, size: 20),
+              icon: Icon(Icons.arrow_back_ios_new,
+                  color: Colors.white, size: SizeConfig.screenWidth * 0.05),
               onPressed: () => Navigator.pop(context),
               padding: EdgeInsets.zero,
             ),
@@ -161,7 +162,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.023),
           child: TweenAnimationBuilder<double>(
             duration: const Duration(milliseconds: 600),
             tween: Tween(begin: 0.0, end: 1.0),
@@ -175,10 +176,10 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
               );
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.03, vertical: SizeConfig.screenHeight * 0.007),
               decoration: BoxDecoration(
                 color: Colors.amber.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                 border: Border.all(
                   color: Colors.amber.withOpacity(0.4),
                   width: 1.5,
@@ -190,14 +191,14 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                   Icon(
                     Icons.workspace_premium,
                     color: Colors.amber[300],
-                    size: 18,
+                    size: SizeConfig.screenWidth * 0.04,
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: SizeConfig.screenWidth * 0.015),
                   Text(
                     'PREMIUM',
                     style: TextStyle(
                       color: Colors.amber[300],
-                      fontSize: 12,
+                      fontSize: SizeConfig.screenWidth * 0.028,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1,
                     ),
@@ -207,11 +208,11 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: SizeConfig.screenWidth * 0.02),
       ],
       flexibleSpace: LayoutBuilder(
         builder: (context, constraints) {
-          final expandedHeight = 240.0;
+          final expandedHeight = SizeConfig.screenHeight * 0.25;
           final collapsedHeight =
               kToolbarHeight + MediaQuery.of(context).padding.top;
           final currentHeight = constraints.maxHeight;
@@ -265,9 +266,9 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
 
                 // Content
                 Positioned(
-                  left: 24 + (48 * collapseRatio),
-                  right: 24,
-                  bottom: 20,
+                  left: SizeConfig.screenWidth * 0.05 + (48 * collapseRatio),
+                  right: SizeConfig.screenWidth * 0.05,
+                  bottom: SizeConfig.screenHeight * 0.015,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -286,13 +287,13 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                             );
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 7,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: SizeConfig.screenWidth * 0.03,
+                              vertical: SizeConfig.screenHeight * 0.007,
                             ),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                               border: Border.all(
                                 color: Colors.white.withOpacity(0.3),
                                 width: 1.5,
@@ -304,14 +305,14 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                                 Icon(
                                   Icons.lock_open_rounded,
                                   color: Colors.amber[300],
-                                  size: 16,
+                                  size: SizeConfig.screenWidth * 0.035,
                                 ),
-                                const SizedBox(width: 6),
-                                const Text(
+                                SizedBox(width: SizeConfig.screenWidth * 0.015),
+                                Text(
                                   'Members Exclusive',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 12,
+                                    fontSize: SizeConfig.screenWidth * 0.028,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -319,7 +320,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: SizeConfig.screenHeight * 0.012),
                       ],
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 1000),
@@ -337,7 +338,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                           'Exclusive Content',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 32 - (12 * collapseRatio),
+                            fontSize: SizeConfig.screenWidth * 0.06 - (SizeConfig.screenWidth * 0.02 * collapseRatio),
                             fontWeight: FontWeight.bold,
                             height: 1.1,
                             shadows: [
@@ -351,7 +352,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                         ),
                       ),
                       if (collapseRatio < 0.5) ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: SizeConfig.screenHeight * 0.008),
                         TweenAnimationBuilder<double>(
                           duration: const Duration(milliseconds: 1200),
                           tween: Tween(begin: 0.0, end: 1.0),
@@ -368,7 +369,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                             'Premium research & educational materials',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.9),
-                              fontSize: 14,
+                              fontSize: SizeConfig.screenWidth * 0.032,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -447,7 +448,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
         final projects = snapshot.data!.docs;
 
         return SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.045),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -469,7 +470,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                     );
                   },
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
+                    padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.02),
                     child: _ExclusiveProjectCard(
                       projectName: projectName,
                       data: data,
@@ -504,31 +505,31 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.06),
               decoration: BoxDecoration(
                 color: Colors.red.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.error_outline_rounded,
-                size: 60,
+                size: SizeConfig.screenWidth * 0.14,
                 color: Colors.red[400],
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: SizeConfig.screenHeight * 0.02),
+            Text(
               'Oops! Something went wrong',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: SizeConfig.screenWidth * 0.045,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1A237E),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.screenHeight * 0.01),
             Text(
               'Please try again later',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: SizeConfig.screenWidth * 0.032,
                 color: Colors.grey[600],
               ),
             ),
@@ -556,7 +557,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(30),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.07),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -568,26 +569,26 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
               ),
               child: Icon(
                 Icons.workspace_premium_outlined,
-                size: 80,
+                size: SizeConfig.screenWidth * 0.18,
                 color: Colors.grey[400],
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: SizeConfig.screenHeight * 0.025),
+            Text(
               'No Exclusive Content Yet',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: SizeConfig.screenWidth * 0.05,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1A237E),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.screenHeight * 0.01),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.1),
               child: Text(
                 'Premium research and projects will appear here soon!',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: SizeConfig.screenWidth * 0.032,
                   color: Colors.grey[600],
                   height: 1.5,
                 ),
@@ -632,8 +633,8 @@ class _WelcomeBanner extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(20),
+        margin: EdgeInsets.all(SizeConfig.screenWidth * 0.045),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.045),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [
@@ -643,7 +644,7 @@ class _WelcomeBanner extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF4A148C).withOpacity(0.3),
@@ -657,7 +658,7 @@ class _WelcomeBanner extends StatelessWidget {
             // Pattern
             Positioned.fill(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
                 child: CustomPaint(
                   painter: _WelcomePatternPainter(),
                 ),
@@ -671,8 +672,8 @@ class _WelcomeBanner extends StatelessWidget {
                   animation: pulseController,
                   builder: (context, child) {
                     return Container(
-                      width: 70,
-                      height: 70,
+                      width: SizeConfig.screenWidth * 0.16,
+                      height: SizeConfig.screenWidth * 0.16,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -680,7 +681,7 @@ class _WelcomeBanner extends StatelessWidget {
                             Colors.orange.withOpacity(0.2),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.045),
                         border: Border.all(
                           color: Colors.amber.withOpacity(0.5),
                           width: 2,
@@ -700,21 +701,21 @@ class _WelcomeBanner extends StatelessWidget {
                           Icon(
                             Icons.person_rounded,
                             color: Colors.amber[300],
-                            size: 36,
+                            size: SizeConfig.screenWidth * 0.08,
                           ),
                           Positioned(
-                            bottom: 4,
-                            right: 4,
+                            bottom: SizeConfig.screenWidth * 0.01,
+                            right: SizeConfig.screenWidth * 0.01,
                             child: Container(
-                              padding: const EdgeInsets.all(2),
+                              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.005),
                               decoration: const BoxDecoration(
                                 color: Color(0xFF43A047),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.verified,
                                 color: Colors.white,
-                                size: 14,
+                                size: SizeConfig.screenWidth * 0.032,
                               ),
                             ),
                           ),
@@ -723,30 +724,30 @@ class _WelcomeBanner extends StatelessWidget {
                     );
                   },
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: SizeConfig.screenWidth * 0.04),
 
                 // Text Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Welcome Back!',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: SizeConfig.screenWidth * 0.045,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: SizeConfig.screenHeight * 0.008),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.screenWidth * 0.03,
+                          vertical: SizeConfig.screenHeight * 0.007,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                           border: Border.all(
                             color: Colors.white.withOpacity(0.2),
                           ),
@@ -757,26 +758,26 @@ class _WelcomeBanner extends StatelessWidget {
                             Icon(
                               Icons.badge_outlined,
                               color: Colors.amber[300],
-                              size: 16,
+                              size: SizeConfig.screenWidth * 0.035,
                             ),
-                            const SizedBox(width: 6),
+                            SizedBox(width: SizeConfig.screenWidth * 0.015),
                             Text(
                               verifiedId,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 14,
+                                fontSize: SizeConfig.screenWidth * 0.032,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: SizeConfig.screenHeight * 0.01),
                       Text(
                         'Enjoy your premium access',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.7),
-                          fontSize: 13,
+                          fontSize: SizeConfig.screenWidth * 0.03,
                         ),
                       ),
                     ],
@@ -892,14 +893,14 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
           );
         },
         child: Container(
-          height: 180,
+          height: SizeConfig.screenHeight * 0.16,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: gradient,
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
             boxShadow: [
               BoxShadow(
                 color: gradient[1].withOpacity(_isPressed ? 0.6 : 0.4),
@@ -913,7 +914,7 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
               // Background Pattern
               Positioned.fill(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
                   child: CustomPaint(
                     painter: _CardPatternPainter(),
                   ),
@@ -922,16 +923,16 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
 
               // Premium Badge
               Positioned(
-                top: 16,
-                right: 16,
+                top: SizeConfig.screenHeight * 0.015,
+                right: SizeConfig.screenWidth * 0.04,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.screenWidth * 0.025,
+                    vertical: SizeConfig.screenHeight * 0.006,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.amber.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                     border: Border.all(
                       color: Colors.amber.withOpacity(0.4),
                     ),
@@ -942,14 +943,14 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                       Icon(
                         Icons.workspace_premium,
                         color: Colors.amber[300],
-                        size: 14,
+                        size: SizeConfig.screenWidth * 0.032,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: SizeConfig.screenWidth * 0.01),
                       Text(
                         'PREMIUM',
                         style: TextStyle(
                           color: Colors.amber[300],
-                          fontSize: 10,
+                          fontSize: SizeConfig.screenWidth * 0.023,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
                         ),
@@ -961,16 +962,16 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
 
               // Content
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.045),
                 child: Row(
                   children: [
                     // Cover Image
                     Container(
-                      width: 100,
-                      height: 140,
+                      width: SizeConfig.screenWidth * 0.22,
+                      height: SizeConfig.screenHeight * 0.13,
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.3),
                           width: 2,
@@ -984,18 +985,18 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
                         child: coverUrl.isNotEmpty
                             ? CachedNetworkImage(
                           imageUrl: coverUrl,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
                             color: Colors.white.withOpacity(0.1),
-                            child: const Center(
+                            child: Center(
                               child: SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
+                                width: SizeConfig.screenWidth * 0.055,
+                                height: SizeConfig.screenWidth * 0.055,
+                                child: const CircularProgressIndicator(
                                   strokeWidth: 2,
                                   color: Colors.white,
                                 ),
@@ -1003,20 +1004,20 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                             ),
                           ),
                           errorWidget: (context, url, error) =>
-                          const Icon(
+                          Icon(
                             Icons.broken_image_outlined,
                             color: Colors.white,
-                            size: 32,
+                            size: SizeConfig.screenWidth * 0.07,
                           ),
                         )
-                            : const Icon(
+                            : Icon(
                           Icons.science_outlined,
                           color: Colors.white,
-                          size: 40,
+                          size: SizeConfig.screenWidth * 0.09,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: SizeConfig.screenWidth * 0.04),
 
                     // Text Content
                     Expanded(
@@ -1024,11 +1025,11 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 20),
+                          SizedBox(height: SizeConfig.screenHeight * 0.02),
                           Text(
                             widget.projectName,
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontSize: SizeConfig.screenWidth * 0.04,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                               height: 1.3,
@@ -1037,11 +1038,11 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                             overflow: TextOverflow.ellipsis,
                           ),
                           if (subtitle.isNotEmpty) ...[
-                            const SizedBox(height: 8),
+                            SizedBox(height: SizeConfig.screenHeight * 0.008),
                             Text(
                               subtitle,
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: SizeConfig.screenWidth * 0.03,
                                 color: Colors.white.withOpacity(0.8),
                                 height: 1.4,
                               ),
@@ -1052,13 +1053,13 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                           const Spacer(),
                           // View Button
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 8,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: SizeConfig.screenWidth * 0.032,
+                              vertical: SizeConfig.screenHeight * 0.008,
                             ),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                               border: Border.all(
                                 color: Colors.white.withOpacity(0.3),
                               ),
@@ -1066,25 +1067,25 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.play_circle_outline,
                                   color: Colors.white,
-                                  size: 16,
+                                  size: SizeConfig.screenWidth * 0.035,
                                 ),
-                                const SizedBox(width: 6),
-                                const Text(
+                                SizedBox(width: SizeConfig.screenWidth * 0.015),
+                                Text(
                                   'View Content',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 12,
+                                    fontSize: SizeConfig.screenWidth * 0.028,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
+                                SizedBox(width: SizeConfig.screenWidth * 0.01),
                                 Icon(
                                   Icons.arrow_forward_rounded,
                                   color: Colors.white.withOpacity(0.8),
-                                  size: 14,
+                                  size: SizeConfig.screenWidth * 0.032,
                                 ),
                               ],
                             ),
@@ -1236,14 +1237,14 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
         slivers: [
           // Cover Photo Header
           SliverAppBar(
-            expandedHeight: 320,
+            expandedHeight: SizeConfig.screenHeight * 0.35,
             floating: false,
             pinned: true,
             stretch: true,
             elevation: 0,
             backgroundColor: const Color(0xFF4A148C),
             leading: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.023),
               child: TweenAnimationBuilder<double>(
                 duration: const Duration(milliseconds: 500),
                 tween: Tween(begin: 0.0, end: 1.0),
@@ -1256,15 +1257,15 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                     border: Border.all(
                       color: Colors.white.withOpacity(0.3),
                       width: 1.5,
                     ),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new,
-                        color: Colors.white, size: 20),
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        color: Colors.white, size: SizeConfig.screenWidth * 0.05),
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                   ),
@@ -1273,13 +1274,13 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
             ),
             actions: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.023),
                 child: Container(
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.03, vertical: SizeConfig.screenHeight * 0.007),
                   decoration: BoxDecoration(
                     color: Colors.amber.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                     border: Border.all(
                       color: Colors.amber.withOpacity(0.4),
                     ),
@@ -1290,14 +1291,14 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                       Icon(
                         Icons.workspace_premium,
                         color: Colors.amber[300],
-                        size: 16,
+                        size: SizeConfig.screenWidth * 0.035,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: SizeConfig.screenWidth * 0.01),
                       Text(
                         'PREMIUM',
                         style: TextStyle(
                           color: Colors.amber[300],
-                          fontSize: 11,
+                          fontSize: SizeConfig.screenWidth * 0.025,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1305,7 +1306,7 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: SizeConfig.screenWidth * 0.02),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
@@ -1392,11 +1393,11 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                       );
                     },
                     child: Container(
-                      margin: const EdgeInsets.all(20),
-                      padding: const EdgeInsets.all(24),
+                      margin: EdgeInsets.all(SizeConfig.screenWidth * 0.045),
+                      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.055),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFF4A148C).withOpacity(0.1),
@@ -1410,15 +1411,15 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                         children: [
                           // Premium Badge
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: SizeConfig.screenWidth * 0.03,
+                              vertical: SizeConfig.screenHeight * 0.007,
                             ),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [Color(0xFF4A148C), Color(0xFF880E4F)],
                               ),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1426,36 +1427,36 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                                 Icon(
                                   Icons.workspace_premium,
                                   color: Colors.amber[300],
-                                  size: 16,
+                                  size: SizeConfig.screenWidth * 0.035,
                                 ),
-                                const SizedBox(width: 6),
-                                const Text(
+                                SizedBox(width: SizeConfig.screenWidth * 0.015),
+                                Text(
                                   'Exclusive Content',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 12,
+                                    fontSize: SizeConfig.screenWidth * 0.028,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: SizeConfig.screenHeight * 0.018),
                           Text(
                             title,
-                            style: const TextStyle(
-                              fontSize: 26,
+                            style: TextStyle(
+                              fontSize: SizeConfig.screenWidth * 0.058,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF1A237E),
                               height: 1.3,
                             ),
                           ),
                           if (subtitle.isNotEmpty) ...[
-                            const SizedBox(height: 12),
+                            SizedBox(height: SizeConfig.screenHeight * 0.012),
                             Text(
                               subtitle,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: SizeConfig.screenWidth * 0.036,
                                 color: Colors.grey[700],
                                 height: 1.5,
                               ),
@@ -1553,28 +1554,28 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.045),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF4A148C), Color(0xFF880E4F)],
                 ),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
               ),
               child: Icon(
                 icon,
                 color: Colors.white,
-                size: 20,
+                size: SizeConfig.screenWidth * 0.045,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: SizeConfig.screenWidth * 0.03),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 20,
+              style: TextStyle(
+                fontSize: SizeConfig.screenWidth * 0.045,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1A237E),
               ),
@@ -1587,14 +1588,14 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
 
   Widget _buildOwnerCard(Map<String, dynamic> owner) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 8,
+      margin: EdgeInsets.symmetric(
+        horizontal: SizeConfig.screenWidth * 0.045,
+        vertical: SizeConfig.screenHeight * 0.008,
       ),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
         border: Border.all(
           color: const Color(0xFF4A148C).withOpacity(0.2),
           width: 2,
@@ -1610,38 +1611,38 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
       child: Row(
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: SizeConfig.screenWidth * 0.115,
+            height: SizeConfig.screenWidth * 0.115,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF4A148C), Color(0xFF880E4F)],
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.person,
               color: Colors.white,
-              size: 24,
+              size: SizeConfig.screenWidth * 0.055,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: SizeConfig.screenWidth * 0.04),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   owner['name'],
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: SizeConfig.screenWidth * 0.038,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1A237E),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: SizeConfig.screenHeight * 0.005),
                 Text(
                   owner['designation'],
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: SizeConfig.screenWidth * 0.03,
                     color: Colors.grey[600],
                   ),
                 ),
@@ -1660,21 +1661,21 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
     required String description,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 12,
+      padding: EdgeInsets.symmetric(
+        horizontal: SizeConfig.screenWidth * 0.045,
+        vertical: SizeConfig.screenHeight * 0.012,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Section Header
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF4A148C), Color(0xFF880E4F)],
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF4A148C).withOpacity(0.3),
@@ -1686,27 +1687,27 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                   ),
                   child: Text(
                     '${sectionIndex + 1}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: SizeConfig.screenWidth * 0.04,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: SizeConfig.screenWidth * 0.03),
                 Expanded(
                   child: Text(
                     section['name'],
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: SizeConfig.screenWidth * 0.04,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1717,7 +1718,7 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
 
           // Section Images
           if (images.isNotEmpty) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: SizeConfig.screenHeight * 0.018),
             Builder(
               builder: (context) {
                 final currentIdx = _sectionImageIndices[sectionIndex] ?? 0;
@@ -1727,12 +1728,12 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                 final screenWidth = MediaQuery.of(context).size.width;
                 final aspect = _imageAspect[currentUrl];
                 final targetHeight =
-                aspect != null ? (screenWidth / aspect) : 260.0;
+                aspect != null ? (screenWidth / aspect) : SizeConfig.screenHeight * 0.3;
 
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeInOut,
-                  height: targetHeight.clamp(200.0, 400.0),
+                  height: targetHeight.clamp(SizeConfig.screenHeight * 0.22, SizeConfig.screenHeight * 0.45),
                   child: PageView.builder(
                     controller: PageController(viewportFraction: 1),
                     onPageChanged: (idx) {
@@ -1746,9 +1747,9 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                       _resolveImageAspect(url);
 
                       return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.02),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.045),
                           boxShadow: [
                             BoxShadow(
                               color: const Color(0xFF4A148C).withOpacity(0.2),
@@ -1758,7 +1759,7 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.045),
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
@@ -1786,9 +1787,9 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                                   errorWidget: (context, url, error) =>
                                       Container(
                                         color: const Color(0xFFF3E5F5),
-                                        child: const Icon(
+                                        child: Icon(
                                           Icons.broken_image,
-                                          size: 60,
+                                          size: SizeConfig.screenWidth * 0.14,
                                           color: Colors.grey,
                                         ),
                                       ),
@@ -1797,12 +1798,12 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
 
                               // Image Counter
                               Positioned(
-                                bottom: 12,
-                                right: 12,
+                                bottom: SizeConfig.screenHeight * 0.012,
+                                right: SizeConfig.screenWidth * 0.03,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: SizeConfig.screenWidth * 0.03,
+                                    vertical: SizeConfig.screenHeight * 0.007,
                                   ),
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
@@ -1811,13 +1812,13 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                                         Color(0xFF880E4F)
                                       ],
                                     ),
-                                    borderRadius: BorderRadius.circular(20),
+                                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                                   ),
                                   child: Text(
                                     '${imageIndex + 1}/${images.length}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 12,
+                                      fontSize: SizeConfig.screenWidth * 0.028,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -1833,7 +1834,7 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
               },
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: SizeConfig.screenHeight * 0.012),
             // Image Indicators
             if (images.length > 1)
               Row(
@@ -1846,11 +1847,11 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                     final active = currentIndex == idx;
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      width: active ? 30 : 8,
-                      height: 8,
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: active ? SizeConfig.screenWidth * 0.07 : SizeConfig.screenWidth * 0.02,
+                      height: SizeConfig.screenWidth * 0.02,
+                      margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.01),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.01),
                         gradient: active
                             ? const LinearGradient(
                           colors: [
@@ -1869,14 +1870,19 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
 
           // Section Description (with copy icon)
           if (description.isNotEmpty) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: SizeConfig.screenHeight * 0.018),
             Stack(
               children: [
                 Container(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 48, 20),
+                  padding: EdgeInsets.fromLTRB(
+                    SizeConfig.screenWidth * 0.045,
+                    SizeConfig.screenWidth * 0.045,
+                    SizeConfig.screenWidth * 0.11,
+                    SizeConfig.screenWidth * 0.045,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                     border: Border.all(
                       color: const Color(0xFF4A148C).withOpacity(0.2),
                       width: 2,
@@ -1885,7 +1891,7 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                   child: Text(
                     description,
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: SizeConfig.screenWidth * 0.035,
                       color: Colors.grey[800],
                       height: 1.7,
                       letterSpacing: 0.3,
@@ -1896,14 +1902,14 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
 
                 // Copy button at top-right
                 Positioned(
-                  top: 4,
-                  right: 4,
+                  top: SizeConfig.screenWidth * 0.01,
+                  right: SizeConfig.screenWidth * 0.01,
                   child: Material(
                     color: Colors.transparent,
                     child: IconButton(
                       tooltip: 'Copy description',
-                      icon: const Icon(Icons.copy_rounded,
-                          size: 20, color: Color(0xFF4A148C)),
+                      icon: Icon(Icons.copy_rounded,
+                          size: SizeConfig.screenWidth * 0.045, color: Color(0xFF4A148C)),
                       onPressed: () async {
                         await Clipboard.setData(
                           ClipboardData(text: description),
@@ -1911,21 +1917,21 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                         if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Row(
+                            content: Row(
                               children: [
                                 Icon(Icons.check_circle,
-                                    color: Colors.white, size: 20),
-                                SizedBox(width: 10),
-                                Text('Description copied!'),
+                                    color: Colors.white, size: SizeConfig.screenWidth * 0.045),
+                                SizedBox(width: SizeConfig.screenWidth * 0.025),
+                                const Text('Description copied!'),
                               ],
                             ),
                             backgroundColor: const Color(0xFF4A148C),
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                             ),
                             duration: const Duration(seconds: 2),
-                            margin: const EdgeInsets.all(16),
+                            margin: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                           ),
                         );
                       },
@@ -1936,7 +1942,7 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
             ),
           ],
 
-          const SizedBox(height: 20),
+          SizedBox(height: SizeConfig.screenHeight * 0.02),
         ],
       ),
     );
@@ -2016,11 +2022,11 @@ class _ExclusiveFullScreenImagePageState
                         imageUrl: widget.imageUrl,
                         fit: BoxFit.contain,
                         placeholder: (context, url) => Container(
-                          width: 80,
-                          height: 80,
+                          width: SizeConfig.screenWidth * 0.2,
+                          height: SizeConfig.screenWidth * 0.2,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                           ),
                           child: const Center(
                             child: CircularProgressIndicator(
@@ -2030,25 +2036,25 @@ class _ExclusiveFullScreenImagePageState
                           ),
                         ),
                         errorWidget: (context, url, error) => Container(
-                          padding: const EdgeInsets.all(30),
+                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.07),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.broken_image,
                                 color: Colors.white,
-                                size: 60,
+                                size: SizeConfig.screenWidth * 0.14,
                               ),
-                              const SizedBox(height: 12),
+                              SizedBox(height: SizeConfig.screenHeight * 0.012),
                               Text(
                                 'Failed to load image',
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.7),
-                                  fontSize: 14,
+                                  fontSize: SizeConfig.screenWidth * 0.032,
                                 ),
                               ),
                             ],
@@ -2062,14 +2068,14 @@ class _ExclusiveFullScreenImagePageState
 
               // Close Button
               Positioned(
-                top: MediaQuery.of(context).padding.top + 10,
-                left: 16,
+                top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.01,
+                left: SizeConfig.screenWidth * 0.04,
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   child: GestureDetector(
                     onTap: _closeImage,
                     child: Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -2077,16 +2083,16 @@ class _ExclusiveFullScreenImagePageState
                             const Color(0xFF880E4F).withOpacity(0.8),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.3),
                           width: 1.5,
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.close,
                         color: Colors.white,
-                        size: 24,
+                        size: SizeConfig.screenWidth * 0.055,
                       ),
                     ),
                   ),
@@ -2095,8 +2101,8 @@ class _ExclusiveFullScreenImagePageState
 
               // Copy Link Button
               Positioned(
-                top: MediaQuery.of(context).padding.top + 10,
-                right: 16,
+                top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.01,
+                right: SizeConfig.screenWidth * 0.04,
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   child: GestureDetector(
@@ -2104,24 +2110,24 @@ class _ExclusiveFullScreenImagePageState
                       Clipboard.setData(ClipboardData(text: widget.imageUrl));
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: const Row(
+                          content: Row(
                             children: [
-                              Icon(Icons.link, color: Colors.white),
-                              SizedBox(width: 10),
-                              Text('Image URL copied!'),
+                              Icon(Icons.link, color: Colors.white, size: SizeConfig.screenWidth * 0.045),
+                              SizedBox(width: SizeConfig.screenWidth * 0.025),
+                              const Text('Image URL copied!'),
                             ],
                           ),
                           backgroundColor: const Color(0xFF4A148C),
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                           ),
-                          margin: const EdgeInsets.all(16),
+                          margin: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                         ),
                       );
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -2129,16 +2135,16 @@ class _ExclusiveFullScreenImagePageState
                             const Color(0xFF880E4F).withOpacity(0.8),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.3),
                           width: 1.5,
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.link,
                         color: Colors.white,
-                        size: 24,
+                        size: SizeConfig.screenWidth * 0.055,
                       ),
                     ),
                   ),
@@ -2147,16 +2153,16 @@ class _ExclusiveFullScreenImagePageState
 
               // Zoom Hint
               Positioned(
-                bottom: MediaQuery.of(context).padding.bottom + 30,
+                bottom: MediaQuery.of(context).padding.bottom + SizeConfig.screenHeight * 0.035,
                 left: 0,
                 right: 0,
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   child: Center(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.screenWidth * 0.045,
+                        vertical: SizeConfig.screenHeight * 0.012,
                       ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -2165,7 +2171,7 @@ class _ExclusiveFullScreenImagePageState
                             const Color(0xFF880E4F).withOpacity(0.6),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(25),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.2),
                         ),
@@ -2176,14 +2182,14 @@ class _ExclusiveFullScreenImagePageState
                           Icon(
                             Icons.pinch,
                             color: Colors.white.withOpacity(0.9),
-                            size: 18,
+                            size: SizeConfig.screenWidth * 0.04,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: SizeConfig.screenWidth * 0.02),
                           Text(
                             'Pinch to zoom',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.9),
-                              fontSize: 13,
+                              fontSize: SizeConfig.screenWidth * 0.03,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -2440,11 +2446,11 @@ class _StatisticsSection extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        padding: const EdgeInsets.all(20),
+        margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.045),
+        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.045),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.045),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF4A148C).withOpacity(0.1),
@@ -2491,31 +2497,31 @@ class _StatisticsSection extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
           ),
           child: Icon(
             icon,
             color: color,
-            size: 24,
+            size: SizeConfig.screenWidth * 0.055,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: SizeConfig.screenHeight * 0.008),
         Text(
           value,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: SizeConfig.screenWidth * 0.045,
             fontWeight: FontWeight.bold,
             color: color,
           ),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: SizeConfig.screenHeight * 0.002),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: SizeConfig.screenWidth * 0.028,
             color: Colors.grey[600],
           ),
         ),
@@ -2525,7 +2531,7 @@ class _StatisticsSection extends StatelessWidget {
 
   Widget _buildDivider() {
     return Container(
-      height: 50,
+      height: SizeConfig.screenHeight * 0.055,
       width: 1,
       color: Colors.grey[200],
     );
@@ -2597,10 +2603,10 @@ class _FeaturedContentCardState extends State<_FeaturedContentCard>
           scale: _isPressed ? 0.95 : 1.0,
           duration: const Duration(milliseconds: 150),
           child: Container(
-            width: 280,
-            margin: const EdgeInsets.only(right: 16),
+            width: SizeConfig.screenWidth * 0.65,
+            margin: EdgeInsets.only(right: SizeConfig.screenWidth * 0.04),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF4A148C).withOpacity(0.2),
@@ -2610,7 +2616,7 @@ class _FeaturedContentCardState extends State<_FeaturedContentCard>
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
               child: Stack(
                 children: [
                   // Background Image
@@ -2638,10 +2644,10 @@ class _FeaturedContentCardState extends State<_FeaturedContentCard>
                             ],
                           ),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.science,
                           color: Colors.white,
-                          size: 50,
+                          size: SizeConfig.screenWidth * 0.12,
                         ),
                       ),
                     )
@@ -2686,31 +2692,31 @@ class _FeaturedContentCardState extends State<_FeaturedContentCard>
 
                   // Premium Badge
                   Positioned(
-                    top: 16,
-                    left: 16,
+                    top: SizeConfig.screenHeight * 0.018,
+                    left: SizeConfig.screenWidth * 0.04,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.screenWidth * 0.025,
+                        vertical: SizeConfig.screenHeight * 0.006,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.amber.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.workspace_premium,
                             color: Colors.white,
-                            size: 14,
+                            size: SizeConfig.screenWidth * 0.032,
                           ),
-                          SizedBox(width: 4),
+                          SizedBox(width: SizeConfig.screenWidth * 0.01),
                           Text(
                             'FEATURED',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 10,
+                              fontSize: SizeConfig.screenWidth * 0.023,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -2721,57 +2727,57 @@ class _FeaturedContentCardState extends State<_FeaturedContentCard>
 
                   // Content
                   Positioned(
-                    left: 16,
-                    right: 16,
-                    bottom: 16,
+                    left: SizeConfig.screenWidth * 0.04,
+                    right: SizeConfig.screenWidth * 0.04,
+                    bottom: SizeConfig.screenHeight * 0.018,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: SizeConfig.screenWidth * 0.04,
                             fontWeight: FontWeight.bold,
                             height: 1.3,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: SizeConfig.screenHeight * 0.007),
                         Text(
                           widget.subtitle,
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.8),
-                            fontSize: 13,
+                            fontSize: SizeConfig.screenWidth * 0.03,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: SizeConfig.screenHeight * 0.012),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.screenWidth * 0.03,
+                            vertical: SizeConfig.screenHeight * 0.007,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Icons.play_circle_outline,
                                 color: Colors.white,
-                                size: 14,
+                                size: SizeConfig.screenWidth * 0.032,
                               ),
-                              SizedBox(width: 4),
+                              SizedBox(width: SizeConfig.screenWidth * 0.01),
                               Text(
                                 'View Now',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 11,
+                                  fontSize: SizeConfig.screenWidth * 0.025,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -2830,14 +2836,14 @@ class _LockedContentOverlay extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.045),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.1),
                 shape: BoxShape.circle,
@@ -2849,49 +2855,50 @@ class _LockedContentOverlay extends StatelessWidget {
               child: Icon(
                 Icons.lock_rounded,
                 color: Colors.amber[300],
-                size: 40,
+                size: SizeConfig.screenWidth * 0.09,
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: SizeConfig.screenHeight * 0.018),
+            Text(
               'Premium Content',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: SizeConfig.screenWidth * 0.04,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.screenHeight * 0.008),
             Text(
               'Verify your membership to access',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.7),
-                fontSize: 13,
+                fontSize: SizeConfig.screenWidth * 0.03,
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: SizeConfig.screenHeight * 0.02),
             ElevatedButton(
               onPressed: onUnlock,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.amber,
                 foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.screenWidth * 0.055,
+                  vertical: SizeConfig.screenHeight * 0.012,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.045),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.lock_open, size: 18),
-                  SizedBox(width: 8),
+                  Icon(Icons.lock_open, size: SizeConfig.screenWidth * 0.04),
+                  SizedBox(width: SizeConfig.screenWidth * 0.02),
                   Text(
                     'Unlock Now',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      fontSize: SizeConfig.screenWidth * 0.032,
                     ),
                   ),
                 ],
@@ -2925,7 +2932,7 @@ class _ContentProgressIndicator extends StatelessWidget {
             Text(
               'Progress',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: SizeConfig.screenWidth * 0.028,
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w500,
               ),
@@ -2933,19 +2940,19 @@ class _ContentProgressIndicator extends StatelessWidget {
             Text(
               '${(progress * 100).toInt()}%',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: SizeConfig.screenWidth * 0.028,
                 color: color,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: SizeConfig.screenHeight * 0.007),
         Container(
-          height: 6,
+          height: SizeConfig.screenHeight * 0.007,
           decoration: BoxDecoration(
             color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.008),
           ),
           child: FractionallySizedBox(
             alignment: Alignment.centerLeft,
@@ -2955,7 +2962,7 @@ class _ContentProgressIndicator extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [color, color.withOpacity(0.7)],
                 ),
-                borderRadius: BorderRadius.circular(3),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.008),
               ),
             ),
           ),
@@ -3026,12 +3033,12 @@ class _BookmarkButtonState extends State<_BookmarkButton>
           return Transform.scale(
             scale: 1.0 + (_controller.value * 0.2) - (_controller.value * 0.2),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
               decoration: BoxDecoration(
                 color: widget.isBookmarked
                     ? Colors.amber.withOpacity(0.2)
                     : Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                 border: Border.all(
                   color: widget.isBookmarked
                       ? Colors.amber.withOpacity(0.5)
@@ -3043,7 +3050,7 @@ class _BookmarkButtonState extends State<_BookmarkButton>
                     ? Icons.bookmark_rounded
                     : Icons.bookmark_border_rounded,
                 color: widget.isBookmarked ? Colors.amber : Colors.grey,
-                size: 20,
+                size: SizeConfig.screenWidth * 0.045,
               ),
             ),
           );
@@ -3083,22 +3090,22 @@ class _RatingWidget extends StatelessWidget {
             color = Colors.grey[300]!;
           }
 
-          return Icon(icon, color: color, size: 16);
+          return Icon(icon, color: color, size: SizeConfig.screenWidth * 0.038);
         }),
-        const SizedBox(width: 6),
+        SizedBox(width: SizeConfig.screenWidth * 0.015),
         Text(
           rating.toStringAsFixed(1),
-          style: const TextStyle(
-            fontSize: 13,
+          style: TextStyle(
+            fontSize: SizeConfig.screenWidth * 0.03,
             fontWeight: FontWeight.bold,
             color: Color(0xFF1A237E),
           ),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: SizeConfig.screenWidth * 0.01),
         Text(
           '($reviewCount)',
           style: TextStyle(
-            fontSize: 12,
+            fontSize: SizeConfig.screenWidth * 0.028,
             color: Colors.grey[500],
           ),
         ),
@@ -3122,10 +3129,10 @@ class _ContentTypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.025, vertical: SizeConfig.screenHeight * 0.006),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
         border: Border.all(
           color: color.withOpacity(0.3),
         ),
@@ -3133,13 +3140,13 @@ class _ContentTypeBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 14),
-          const SizedBox(width: 4),
+          Icon(icon, color: color, size: SizeConfig.screenWidth * 0.032),
+          SizedBox(width: SizeConfig.screenWidth * 0.01),
           Text(
             type,
             style: TextStyle(
               color: color,
-              fontSize: 11,
+              fontSize: SizeConfig.screenWidth * 0.025,
               fontWeight: FontWeight.bold,
             ),
           ),
