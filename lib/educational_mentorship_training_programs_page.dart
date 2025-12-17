@@ -51,8 +51,8 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
           SliverPersistentHeader(
             pinned: true,
             delegate: _ProgramHeaderDelegate(
-              minHeight: 100,
-              maxHeight: 280,
+              minHeight: SizeConfig.screenHeight* 0.1,
+              maxHeight: SizeConfig.screenWidth * 0.55,
               animation: _headerController,
             ),
           ),
@@ -100,7 +100,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.06),
+                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                           decoration: BoxDecoration(
                             color: Colors.red.withOpacity(0.1),
                             shape: BoxShape.circle,
@@ -202,10 +202,10 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
 
               return SliverPadding(
                 padding: EdgeInsets.fromLTRB(
-                  SizeConfig.screenWidth * 0.04,
+                  SizeConfig.screenWidth * 0.03,
                   SizeConfig.screenHeight * 0.015,
-                  SizeConfig.screenWidth * 0.04,
-                  SizeConfig.screenHeight * 0.03,
+                  SizeConfig.screenWidth * 0.03,
+                  SizeConfig.screenHeight * 0.015,
                 ),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
@@ -239,7 +239,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                           );
                         },
                         child: Padding(
-                          padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.018),
+                          padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.015),
                           child: _buildProgramCard(
                             context,
                             name,
@@ -314,9 +314,9 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
       onTap: onTap,
       borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
       child: Container(
-        height: SizeConfig.screenHeight * 0.17,
+        height: SizeConfig.screenHeight * 0.14,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -363,7 +363,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
 
             // Content
             Padding(
-              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.045),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
               child: Row(
                 children: [
                   // Left Side - Image/Icon
@@ -382,7 +382,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                       ],
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
+                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                       child: imageUrl != null
                           ? CachedNetworkImage(
                         imageUrl: imageUrl,
@@ -426,7 +426,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                         Text(
                           name,
                           style: TextStyle(
-                            fontSize: SizeConfig.screenWidth * 0.042,
+                            fontSize: SizeConfig.screenWidth * 0.043,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             height: 1.3,
@@ -440,7 +440,7 @@ class _EducationalProgramsPageState extends State<EducationalProgramsPage>
                             Text(
                               'View Details',
                               style: TextStyle(
-                                fontSize: SizeConfig.screenWidth * 0.032,
+                                fontSize: SizeConfig.screenWidth * 0.028,
                                 color: Colors.white.withOpacity(0.9),
                                 fontWeight: FontWeight.w500,
                               ),
@@ -487,8 +487,8 @@ class _ProgramHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final progress = (shrinkOffset / maxExtent).clamp(0.0, 1.0);
-    final isCollapsed = progress > 0.5;
+    final progress = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
+    final isCollapsed = progress > 0.7;
 
     return Container(
       decoration: const BoxDecoration(
@@ -504,100 +504,116 @@ class _ProgramHeaderDelegate extends SliverPersistentHeaderDelegate {
       ),
       child: Stack(
         children: [
-          // Animated Background Pattern
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: animation,
-              builder: (context, child) {
-                return CustomPaint(
-                  painter: _WavePatternPainter(
-                    animation: animation.value,
-                    progress: progress,
-                  ),
-                );
-              },
+          // Animated Background Pattern (only when expanded)
+          if (!isCollapsed)
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: _WavePatternPainter(
+                      animation: animation.value,
+                      progress: progress,
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
 
-          // Back Button
+          // Back Button - Always properly positioned
           Positioned(
-            top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.005,
-            left: SizeConfig.screenWidth * 0.02,
+            top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.008,
+            left: SizeConfig.screenWidth * 0.03,
             child: Container(
+              width: SizeConfig.screenWidth * 0.1,
+              height: SizeConfig.screenWidth * 0.1,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
+              ),
               child: IconButton(
-                icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: SizeConfig.screenWidth * 0.055),
+                icon: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.white,
+                  size: SizeConfig.screenWidth * 0.045,
+                ),
                 onPressed: () => Navigator.pop(context),
+                padding: EdgeInsets.zero,
               ),
             ),
           ),
 
-          // Title Content
-          Positioned(
-            left: SizeConfig.screenWidth * 0.05,
-            right: SizeConfig.screenWidth * 0.06,
-            bottom: SizeConfig.screenHeight * 0.03,
-            child: Opacity(
-              opacity: 1 - progress,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.screenWidth * 0.03,
-                      vertical: SizeConfig.screenHeight * 0.008,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
-                    ),
-                    child: Text(
-                      '📚 Learn & Grow',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: SizeConfig.screenWidth * 0.032,
-                        fontWeight: FontWeight.bold,
+          // Expanded Title Content (fades out when scrolling)
+          if (!isCollapsed)
+            Positioned(
+              left: SizeConfig.screenWidth * 0.05,
+              right: SizeConfig.screenWidth * 0.06,
+              bottom: SizeConfig.screenHeight * 0.025,
+              child: Opacity(
+                opacity: (1 - progress * 1.5).clamp(0.0, 1.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.screenWidth * 0.03,
+                        vertical: SizeConfig.screenHeight * 0.006,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                      ),
+                      child: Text(
+                        '📚 Learn & Grow',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: SizeConfig.screenWidth * 0.03,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: SizeConfig.screenHeight * 0.02),
-                  Text(
-                    'Educational Programs',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: SizeConfig.screenWidth * 0.075,
-                      fontWeight: FontWeight.bold,
-                      height: 1.2,
+                    SizedBox(height: SizeConfig.screenHeight * 0.015),
+                    Text(
+                      'Educational Programs',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: SizeConfig.screenWidth * 0.065,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: SizeConfig.screenHeight * 0.01),
-                  Text(
-                    'Mentorship & Training',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: SizeConfig.screenWidth * 0.04,
-                      fontWeight: FontWeight.w500,
+                    SizedBox(height: SizeConfig.screenHeight * 0.006),
+                    Text(
+                      'Mentorship & Training',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: SizeConfig.screenWidth * 0.035,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // Collapsed Title
+          // Collapsed Title - Centered in AppBar
           if (isCollapsed)
             Positioned(
-              left: SizeConfig.screenWidth * 0.17,
-              bottom: SizeConfig.screenHeight * 0.02,
+              top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.02,
+              left: SizeConfig.screenWidth * 0.15,
+              right: SizeConfig.screenWidth * 0.05,
               child: Opacity(
-                opacity: (progress - 0.5) * 2,
+                opacity: ((progress - 0.7) * 3.3).clamp(0.0, 1.0),
                 child: Text(
-                  'Educational, Mentorship and Training Programs',
+                  'Educational & Training Programs',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: SizeConfig.screenWidth * 0.04,
                     fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
@@ -737,7 +753,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
         slivers: [
           // Modern Curved App Bar
           SliverAppBar(
-            expandedHeight: SizeConfig.screenHeight * 0.25,
+            expandedHeight: SizeConfig.screenHeight * 0.2,
             floating: false,
             pinned: true,
             stretch: true,
@@ -748,11 +764,11 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                 ),
                 child: IconButton(
                   icon: Icon(Icons.arrow_back_ios_new,
-                      color: Colors.white, size: SizeConfig.screenWidth * 0.05),
+                      color: Colors.white, size: SizeConfig.screenWidth * 0.045),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                 ),
@@ -760,7 +776,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
             ),
             flexibleSpace: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-                final expandedHeight = SizeConfig.screenHeight * 0.25;
+                final expandedHeight = SizeConfig.screenHeight * 0.2;
                 final collapsedHeight =
                     kToolbarHeight + MediaQuery.of(context).padding.top;
                 final currentHeight = constraints.maxHeight;
@@ -768,9 +784,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                     (expandedHeight - collapsedHeight))
                     .clamp(0.0, 1.0);
 
-                // Calculate left padding based on collapse ratio
-                final leftPadding =
-                    SizeConfig.screenWidth * 0.06 + (SizeConfig.screenWidth * 0.12 * collapseRatio);
+                final isCollapsed = collapseRatio > 0.7;
 
                 return Container(
                   decoration: const BoxDecoration(
@@ -784,44 +798,60 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                       ],
                     ),
                   ),
-                  child: FlexibleSpaceBar(
-                    centerTitle: false,
-                    titlePadding: EdgeInsets.only(
-                      left: leftPadding,
-                      bottom: SizeConfig.screenHeight * 0.016,
-                    ),
-                    title: Text(
-                      name,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: SizeConfig.screenWidth * 0.055 - (SizeConfig.screenWidth * 0.01 * collapseRatio),
-                          fontWeight: FontWeight.bold,
-                          fontFamily: "font1"),
-                    ),
-                    background: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF1B5E20),
-                                Color(0xFF2E7D32),
-                                Color(0xFF43A047),
-                              ],
-                            ),
-                          ),
-                        ),
-                        // Decorative Pattern
+                  child: Stack(
+                    children: [
+                      // Decorative Pattern (only when expanded)
+                      if (!isCollapsed)
                         Positioned.fill(
                           child: CustomPaint(
                             painter: _DetailPatternPainter(),
                           ),
                         ),
-                      ],
-                    ),
+
+                      // Expanded Title (fades out when scrolling)
+                      if (!isCollapsed)
+                        Positioned(
+                          left: SizeConfig.screenWidth * 0.05,
+                          right: SizeConfig.screenWidth * 0.05,
+                          bottom: SizeConfig.screenHeight * 0.02,
+                          child: Opacity(
+                            opacity: (1 - collapseRatio * 1.5).clamp(0.0, 1.0),
+                            child: Text(
+                              name,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: SizeConfig.screenWidth * 0.065,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: "font1",
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+
+                      // Collapsed Title - Centered next to back button
+                      if (isCollapsed)
+                        Positioned(
+                          top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.018,
+                          left: SizeConfig.screenWidth * 0.15,
+                          right: SizeConfig.screenWidth * 0.05,
+                          child: Opacity(
+                            opacity: ((collapseRatio - 0.7) * 3.3).clamp(0.0, 1.0),
+                            child: Text(
+                              name,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: SizeConfig.screenWidth * 0.04,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: "font1",
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 );
               },
@@ -836,9 +866,9 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                 children: [
                   // Images Gallery with 3D Effect
                   if (images.isNotEmpty) ...[
-                    SizedBox(height: SizeConfig.screenHeight * 0.03),
+                    SizedBox(height: SizeConfig.screenHeight * 0.02),
                     SizedBox(
-                      height: SizeConfig.screenHeight * 0.5,
+                      height: SizeConfig.screenHeight * 0.4,
                       child: PageView.builder(
                         controller: _pageController,
                         onPageChanged: (index) {
@@ -858,26 +888,26 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                               return Center(
                                 child: SizedBox(
                                   height:
-                                  Curves.easeInOut.transform(value) * SizeConfig.screenHeight * 0.5,
+                                  Curves.easeInOut.transform(value) * SizeConfig.screenHeight * 0.4,
                                   child: child,
                                 ),
                               );
                             },
                             child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.02),
+                              margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.015),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.075),
+                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                                 boxShadow: [
                                   BoxShadow(
                                     color: const Color(0xFF1B5E20)
                                         .withOpacity(0.2),
-                                    blurRadius: SizeConfig.screenWidth * 0.075,
-                                    offset: Offset(0, SizeConfig.screenHeight * 0.02),
+                                    blurRadius: SizeConfig.screenWidth * 0.05,
+                                    offset: Offset(0, SizeConfig.screenHeight * 0.015),
                                   ),
                                 ],
                               ),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.075),
+                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                                 child: Stack(
                                   fit: StackFit.expand,
                                   children: [
@@ -904,7 +934,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                                             color: Colors.grey[200],
                                             child: Icon(
                                               Icons.broken_image,
-                                              size: SizeConfig.screenWidth * 0.15,
+                                              size: SizeConfig.screenWidth * 0.12,
                                               color: Colors.grey,
                                             ),
                                           ),
@@ -915,7 +945,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                                       left: 0,
                                       right: 0,
                                       child: Container(
-                                        height: SizeConfig.screenHeight * 0.12,
+                                        height: SizeConfig.screenHeight * 0.08,
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
                                             begin: Alignment.bottomCenter,
@@ -930,29 +960,29 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                                     ),
                                     // Image Counter
                                     Positioned(
-                                      bottom: SizeConfig.screenHeight * 0.02,
-                                      right: SizeConfig.screenWidth * 0.04,
+                                      bottom: SizeConfig.screenHeight * 0.015,
+                                      right: SizeConfig.screenWidth * 0.03,
                                       child: Container(
                                         padding: EdgeInsets.symmetric(
-                                          horizontal: SizeConfig.screenWidth * 0.035,
-                                          vertical: SizeConfig.screenHeight * 0.01,
+                                          horizontal: SizeConfig.screenWidth * 0.025,
+                                          vertical: SizeConfig.screenHeight * 0.006,
                                         ),
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                           borderRadius:
-                                          BorderRadius.circular(SizeConfig.screenWidth * 0.05),
+                                          BorderRadius.circular(SizeConfig.screenWidth * 0.035),
                                           boxShadow: [
                                             BoxShadow(
                                               color: Colors.black
                                                   .withOpacity(0.2),
-                                              blurRadius: SizeConfig.screenWidth * 0.025,
+                                              blurRadius: SizeConfig.screenWidth * 0.02,
                                             ),
                                           ],
                                         ),
                                         child: Text(
                                           '${index + 1} / ${images.length}',
                                           style: TextStyle(
-                                            fontSize: SizeConfig.screenWidth * 0.025,
+                                            fontSize: SizeConfig.screenWidth * 0.022,
                                             fontWeight: FontWeight.bold,
                                             color: Color(0xFF1B5E20),
                                           ),
@@ -967,7 +997,7 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                         },
                       ),
                     ),
-                    SizedBox(height: SizeConfig.screenHeight * 0.025),
+                    SizedBox(height: SizeConfig.screenHeight * 0.018),
 
                     // Modern Dot Indicators
                     Row(
@@ -976,11 +1006,11 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                         images.length,
                             (index) => AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
-                          margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.01),
-                          width: _currentPage == index ? SizeConfig.screenWidth * 0.075 : SizeConfig.screenWidth * 0.02,
-                          height: SizeConfig.screenWidth * 0.02,
+                          margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.008),
+                          width: _currentPage == index ? SizeConfig.screenWidth * 0.06 : SizeConfig.screenWidth * 0.018,
+                          height: SizeConfig.screenWidth * 0.018,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.01),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.009),
                             gradient: _currentPage == index
                                 ? const LinearGradient(
                               colors: [
@@ -1000,9 +1030,9 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
 
                   // Description Section
                   if (description.isNotEmpty) ...[
-                    SizedBox(height: SizeConfig.screenHeight * 0.05),
+                    SizedBox(height: SizeConfig.screenHeight * 0.03),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.06),
+                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.045),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1010,8 +1040,8 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                           Row(
                             children: [
                               Container(
-                                width: SizeConfig.screenWidth * 0.015,
-                                height: SizeConfig.screenHeight * 0.04,
+                                width: SizeConfig.screenWidth * 0.012,
+                                height: SizeConfig.screenHeight * 0.028,
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [
@@ -1021,50 +1051,50 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                   ),
-                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.0075),
+                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.006),
                                 ),
                               ),
-                              SizedBox(width: SizeConfig.screenWidth * 0.03),
+                              SizedBox(width: SizeConfig.screenWidth * 0.025),
                               Text(
                                 'Program Overview',
                                 style: TextStyle(
-                                  fontSize: SizeConfig.screenWidth * 0.06,
+                                  fontSize: SizeConfig.screenWidth * 0.048,
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF1B5E20),
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: SizeConfig.screenHeight * 0.025),
+                          SizedBox(height: SizeConfig.screenHeight * 0.018),
 
                           // Description Card
                           Container(
                             width: double.infinity,
-                            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.06),
+                            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.045),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
+                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.045),
                               border: Border.all(
                                 color:
                                 const Color(0xFF1B5E20).withOpacity(0.1),
-                                width: 2,
+                                width: 1.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
                                   color: const Color(0xFF1B5E20)
                                       .withOpacity(0.05),
-                                  blurRadius: SizeConfig.screenWidth * 0.05,
-                                  offset: Offset(0, SizeConfig.screenHeight * 0.012),
+                                  blurRadius: SizeConfig.screenWidth * 0.04,
+                                  offset: Offset(0, SizeConfig.screenHeight * 0.008),
                                 ),
                               ],
                             ),
                             child: Text(
                               description,
                               style: TextStyle(
-                                fontSize: SizeConfig.screenWidth * 0.04,
-                                height: 1.8,
+                                fontSize: SizeConfig.screenWidth * 0.036,
+                                height: 1.7,
                                 color: Colors.grey[800],
-                                letterSpacing: 0.3,
+                                letterSpacing: 0.2,
                               ),
                               textAlign: TextAlign.justify,
                             ),
@@ -1072,30 +1102,30 @@ class _ProgramDetailPageState extends State<ProgramDetailPage>
                         ],
                       ),
                     ),
-                    SizedBox(height: SizeConfig.screenHeight * 0.06),
+                    SizedBox(height: SizeConfig.screenHeight * 0.04),
                   ] else ...[
-                    SizedBox(height: SizeConfig.screenHeight * 0.05),
+                    SizedBox(height: SizeConfig.screenHeight * 0.03),
                     Center(
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: SizeConfig.screenWidth * 0.05,
-                          vertical: SizeConfig.screenHeight * 0.015,
+                          horizontal: SizeConfig.screenWidth * 0.04,
+                          vertical: SizeConfig.screenHeight * 0.012,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
+                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                         ),
                         child: Text(
                           'No description available',
                           style: TextStyle(
-                            fontSize: SizeConfig.screenWidth * 0.035,
+                            fontSize: SizeConfig.screenWidth * 0.032,
                             color: Colors.grey[600],
                             fontStyle: FontStyle.italic,
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(height: SizeConfig.screenHeight * 0.06),
+                    SizedBox(height: SizeConfig.screenHeight * 0.04),
                   ],
                 ],
               ),
