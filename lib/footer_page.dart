@@ -91,29 +91,6 @@ class FooterPage extends StatelessWidget {
     }
   }
 
-  void _showComingSoon(BuildContext context, String feature) {
-    HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.construction_rounded,
-                color: Colors.white, size: 18),
-            const SizedBox(width: 10),
-            Text('$feature - Coming Soon!'),
-          ],
-        ),
-        backgroundColor: kGreenAccent,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   void _navigateToCreditsPage(BuildContext context) {
     HapticFeedback.mediumImpact();
     Navigator.push(
@@ -168,7 +145,6 @@ class FooterPage extends StatelessWidget {
               );
             },
             onFaqTap: () => _navigateToFAQPage(context),
-            onPolicyTap: () => _showComingSoon(context, 'Policies & Privacy'),
           ),
 
           SizedBox(height: SizeConfig.screenHeight * 0.02),
@@ -283,12 +259,10 @@ class _CompactHeader extends StatelessWidget {
 class _QuickLinksRow extends StatelessWidget {
   final VoidCallback onContactTap;
   final VoidCallback onFaqTap;
-  final VoidCallback onPolicyTap;
 
   const _QuickLinksRow({
     required this.onContactTap,
     required this.onFaqTap,
-    required this.onPolicyTap,
   });
 
   @override
@@ -308,12 +282,6 @@ class _QuickLinksRow extends StatelessWidget {
             icon: Icons.help_outline_rounded,
             label: 'FAQ',
             onTap: onFaqTap,
-          ),
-          _VerticalDivider(),
-          _FooterLinkButton(
-            icon: Icons.privacy_tip_outlined,
-            label: 'Policies & Privacy',
-            onTap: onPolicyTap,
           ),
         ],
       ),
