@@ -626,113 +626,177 @@ class _FormControlSection extends StatefulWidget {
 }
 
 class _FormControlSectionState extends State<_FormControlSection> {
-  final DocumentReference _formSettingsDoc = FirebaseFirestore.instance
+    final DocumentReference _formSettingsDoc = FirebaseFirestore.instance
       .collection('New_Member_Recruitment')
       .doc('Form ON_OFF and Payment Number');
 
-  @override
-  Widget build(BuildContext context) {
+    // Updated: use the single settings doc where Sub Executive form access & message live
+    final DocumentReference _subExecSettingsDoc = FirebaseFirestore.instance
+      .collection('New_Member_Recruitment')
+      .doc('Form ON_OFF and Payment Number');
+
+    @override
+    Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot>(
       stream: _formSettingsDoc.snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(40),
-              child: CircularProgressIndicator(color: kGreenMain),
-            ),
-          );
-        }
+      builder: (context, memberSnapshot) {
+        return StreamBuilder<DocumentSnapshot>(
+          stream: _subExecSettingsDoc.snapshots(),
+          builder: (context, subExecSnapshot) {
+            if (memberSnapshot.connectionState == ConnectionState.waiting ||
+                subExecSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(40),
+                  child: CircularProgressIndicator(color: kGreenMain),
+                ),
+              );
+            }
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  Text('Error: ${snapshot.error}'),
-                ],
-              ),
-            ),
-          );
-        }
-
-        final data = snapshot.data?.data() as Map<String, dynamic>? ?? {};
-        final isFormEnabled = data['Access'] == true;
-        final bkashNumber = data['Bkash'] ?? '';
-        final nagadNumber = data['Nagad'] ?? '';
-        final message = data['Message'] ?? '';
-
-        return FadeTransition(
-          opacity: widget.contentController,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.2),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: widget.contentController,
-              curve: Curves.easeOutCubic,
-            )),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            if (memberSnapshot.hasError || subExecSnapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
                     children: [
-                      Container(
-                        width: 4,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [kGreenMain, kGreenLight],
+                      Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text('Error: ${memberSnapshot.error ?? subExecSnapshot.error}'),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final memberData = memberSnapshot.data?.data() as Map<String, dynamic>? ?? {};
+            final isFormEnabled = memberData['Access'] == true;
+            final bkashNumber = memberData['Bkash'] ?? '';
+            final nagadNumber = memberData['Nagad'] ?? '';
+            final message = memberData['Message'] ?? '';
+
+            // Read Sub Executive flags from the centralized settings doc
+            final subExecData = subExecSnapshot.data?.data() as Map<String, dynamic>? ?? {};
+            // Field names as provided by user:
+            // - Sub_Executive_Form_Access : boolean
+            // - Message for Sub Executive : String
+            final isSubExecFormEnabled = subExecData['Sub_Executive_Form_Access'] == true;
+            final subExecMessage = subExecData['Message for Sub Executive'] ?? '';
+
+            return FadeTransition(
+              opacity: widget.contentController,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.2),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: widget.contentController,
+                  curve: Curves.easeOutCubic,
+                )),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // General Member Recruitment Section
+                      Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [kGreenMain, kGreenLight],
+                              ),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'General Member Recruitment',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: kGreenDark,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Recruitment Controls',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: kGreenDark,
-                          letterSpacing: 0.3,
-                        ),
+                      const SizedBox(height: 20),
+                      _FormStatusCard(
+                        isEnabled: isFormEnabled,
+                        onToggle: (value) => _updateFormAccess(value),
+                        title: 'General Member Form',
+                      ),
+                      const SizedBox(height: 16),
+                      _PaymentNumbersCard(
+                        bkashNumber: bkashNumber,
+                        nagadNumber: nagadNumber,
+                        onBkashUpdate: (value) => _updateField('Bkash', value),
+                        onNagadUpdate: (value) => _updateField('Nagad', value),
+                      ),
+                      const SizedBox(height: 16),
+                      _OfflineMessageCard(
+                        message: message,
+                        onUpdate: (value) => _updateField('Message', value),
+                        title: 'General Member Offline Message',
+                      ),
+
+                      // Sub Executive Recruitment Section
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [kAccentPurple, kAccentBlue],
+                              ),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Sub Executive Recruitment',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: kGreenDark,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      // Use the toggle bound to the centralized settings doc field
+                      _SubExecFormStatusCard(
+                        isEnabled: isSubExecFormEnabled,
+                        onToggle: (value) => _updateSubExecFormAccess(value),
+                      ),
+                      const SizedBox(height: 16),
+                      // Message for Sub Executive (reads/writes 'Message for Sub Executive')
+                      _SubExecOfflineMessageCard(
+                        message: subExecMessage,
+                        onUpdate: (value) => _updateSubExecField('Message for Sub Executive', value),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  _FormStatusCard(
-                    isEnabled: isFormEnabled,
-                    onToggle: (value) => _updateFormAccess(value),
-                  ),
-                  const SizedBox(height: 16),
-                  _PaymentNumbersCard(
-                    bkashNumber: bkashNumber,
-                    nagadNumber: nagadNumber,
-                    onBkashUpdate: (value) => _updateField('Bkash', value),
-                    onNagadUpdate: (value) => _updateField('Nagad', value),
-                  ),
-                  const SizedBox(height: 16),
-                  _OfflineMessageCard(
-                    message: message,
-                    onUpdate: (value) => _updateField('Message', value),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
-  }
+    }
 
-  Future<void> _updateFormAccess(bool value) async {
+    // Update general member settings (unchanged)
+    Future<void> _updateFormAccess(bool value) async {
     try {
       await _formSettingsDoc.update({'Access': value});
       if (mounted) {
@@ -747,8 +811,8 @@ class _FormControlSectionState extends State<_FormControlSection> {
                 const SizedBox(width: 12),
                 Text(
                   value
-                      ? 'Recruitment Form Enabled!'
-                      : 'Recruitment Form Disabled!',
+                      ? 'General Member Form Enabled!'
+                      : 'General Member Form Disabled!',
                 ),
               ],
             ),
@@ -770,9 +834,50 @@ class _FormControlSectionState extends State<_FormControlSection> {
         );
       }
     }
-  }
+    }
 
-  Future<void> _updateField(String field, String value) async {
+    // Update sub-exec form access -> writes to 'Sub_Executive_Form_Access' field
+    Future<void> _updateSubExecFormAccess(bool value) async {
+    try {
+      await _subExecSettingsDoc.update({'Sub_Executive_Form_Access': value});
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  value ? Icons.check_circle : Icons.cancel,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  value
+                      ? 'Sub Executive Form Enabled!'
+                      : 'Sub Executive Form Disabled!',
+                ),
+              ],
+            ),
+            backgroundColor: value ? kAccentPurple : kAccentRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+    }
+
+    Future<void> _updateField(String field, String value) async {
     try {
       await _formSettingsDoc.update({field: value});
       if (mounted) {
@@ -803,7 +908,40 @@ class _FormControlSectionState extends State<_FormControlSection> {
         );
       }
     }
-  }
+    }
+
+    Future<void> _updateSubExecField(String field, String value) async {
+    try {
+      await _subExecSettingsDoc.update({field: value});
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Text('Sub Executive $field updated successfully!'),
+              ],
+            ),
+            backgroundColor: kAccentPurple,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+    }
 }
 
 // ============================================
@@ -961,6 +1099,119 @@ class _ViewApplicantsButtonState extends State<_ViewApplicantsButton> {
                   ),
                 ),
               ),
+              // Sub Executive Applicants Button
+              const SizedBox(height: 16),
+              _SubExecApplicantsButton(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXECUTIVE APPLICANTS BUTTON
+// ============================================
+class _SubExecApplicantsButton extends StatefulWidget {
+  @override
+  State<_SubExecApplicantsButton> createState() => _SubExecApplicantsButtonState();
+}
+
+class _SubExecApplicantsButtonState extends State<_SubExecApplicantsButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SubExecutiveApplicantsPage(),
+            ),
+          );
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          transform: Matrix4.identity()..scale(_isHovered ? 1.02 : 1.0),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF4C1D95),
+                Color(0xFF6D28D9),
+                Color(0xFF8B5CF6),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6D28D9).withOpacity(0.4),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.admin_panel_settings_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Sub Executive Applicants',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.95),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'View Sub Executive applications by semester',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
             ],
           ),
         ),
@@ -975,10 +1226,12 @@ class _ViewApplicantsButtonState extends State<_ViewApplicantsButton> {
 class _FormStatusCard extends StatefulWidget {
   final bool isEnabled;
   final Function(bool) onToggle;
+  final String? title;
 
   const _FormStatusCard({
     required this.isEnabled,
     required this.onToggle,
+    this.title,
   });
 
   @override
@@ -1605,10 +1858,12 @@ class _PaymentNumberFieldState extends State<_PaymentNumberField> {
 class _OfflineMessageCard extends StatefulWidget {
   final String message;
   final Function(String) onUpdate;
+  final String? title;
 
   const _OfflineMessageCard({
     required this.message,
     required this.onUpdate,
+    this.title,
   });
 
   @override
@@ -1672,19 +1927,19 @@ class _OfflineMessageCardState extends State<_OfflineMessageCard> {
                 ),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Offline Message',
-                      style: TextStyle(
+                      widget.title ?? 'Offline Message',
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         color: kGreenDark,
                       ),
                     ),
-                    Text(
+                    const Text(
                       'Shown when recruitment is disabled',
                       style: TextStyle(
                         fontSize: 12,
@@ -1750,6 +2005,579 @@ class _OfflineMessageCardState extends State<_OfflineMessageCard> {
                 border: InputBorder.none,
                 isDense: true,
                 hintText: 'Enter message to show when form is disabled...',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXECUTIVE FORM STATUS CARD
+// ============================================
+class _SubExecFormStatusCard extends StatefulWidget {
+  final bool isEnabled;
+  final Function(bool) onToggle;
+
+  const _SubExecFormStatusCard({
+    required this.isEnabled,
+    required this.onToggle,
+  });
+
+  @override
+  State<_SubExecFormStatusCard> createState() => _SubExecFormStatusCardState();
+}
+
+class _SubExecFormStatusCardState extends State<_SubExecFormStatusCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: widget.isEnabled
+              ? [kAccentPurple, const Color(0xFF8B5CF6)]
+              : [const Color(0xFF374151), const Color(0xFF4B5563)],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color:
+            (widget.isEnabled ? kAccentPurple : Colors.grey).withOpacity(0.4),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: widget.isEnabled
+                          ? [
+                        BoxShadow(
+                          color: kAccentGold
+                              .withOpacity(0.5 * _pulseController.value),
+                          blurRadius: 20 * _pulseController.value,
+                          spreadRadius: 5 * _pulseController.value,
+                        ),
+                      ]
+                          : null,
+                    ),
+                    child: Icon(
+                      widget.isEnabled
+                          ? Icons.admin_panel_settings_rounded
+                          : Icons.admin_panel_settings_outlined,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sub Executive Form',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: widget.isEnabled ? kAccentGold : kAccentRed,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: (widget.isEnabled
+                                    ? kAccentGold
+                                    : kAccentRed)
+                                    .withOpacity(0.5),
+                                blurRadius: 8,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.isEnabled ? 'FORM ACTIVE' : 'FORM INACTIVE',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          _SubExecAnimatedToggleSwitch(
+            isEnabled: widget.isEnabled,
+            onToggle: widget.onToggle,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXEC ANIMATED TOGGLE SWITCH
+// ============================================
+class _SubExecAnimatedToggleSwitch extends StatefulWidget {
+  final bool isEnabled;
+  final Function(bool) onToggle;
+
+  const _SubExecAnimatedToggleSwitch({
+    required this.isEnabled,
+    required this.onToggle,
+  });
+
+  @override
+  State<_SubExecAnimatedToggleSwitch> createState() => _SubExecAnimatedToggleSwitchState();
+}
+
+class _SubExecAnimatedToggleSwitchState extends State<_SubExecAnimatedToggleSwitch>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  bool _isToggling = false;
+  double _dragPosition = 0.0;
+  bool _isDragging = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+      value: widget.isEnabled ? 1.0 : 0.0,
+    );
+  }
+
+  @override
+  void didUpdateWidget(_SubExecAnimatedToggleSwitch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isEnabled != oldWidget.isEnabled && !_isDragging) {
+      if (widget.isEnabled) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTap() {
+    if (_isToggling) return;
+    _toggleState(!widget.isEnabled);
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    setState(() {
+      _isDragging = true;
+      _dragPosition = _controller.value;
+    });
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details, double containerWidth) {
+    if (_isToggling) return;
+    setState(() {
+      _dragPosition += details.primaryDelta! / containerWidth;
+      _dragPosition = _dragPosition.clamp(0.0, 1.0);
+      _controller.value = _dragPosition;
+    });
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    setState(() {
+      _isDragging = false;
+    });
+    final velocity = details.primaryVelocity ?? 0;
+    final shouldEnable =
+    velocity > 0 ? _dragPosition > 0.3 : _dragPosition > 0.7;
+    _toggleState(shouldEnable);
+  }
+
+  Future<void> _toggleState(bool newState) async {
+    if (_isToggling || newState == widget.isEnabled) {
+      if (widget.isEnabled) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+      return;
+    }
+
+    setState(() => _isToggling = true);
+
+    if (newState) {
+      await _controller.forward();
+    } else {
+      await _controller.reverse();
+    }
+
+    widget.onToggle(newState);
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (mounted) {
+      setState(() => _isToggling = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final containerWidth = constraints.maxWidth;
+        final thumbWidth = containerWidth / 2 - 16;
+
+        return GestureDetector(
+          onTap: _handleTap,
+          onHorizontalDragStart: _handleDragStart,
+          onHorizontalDragUpdate: (details) =>
+              _handleDragUpdate(details, containerWidth),
+          onHorizontalDragEnd: _handleDragEnd,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              final isEnabled = _controller.value > 0.5;
+
+              return Container(
+                width: double.infinity,
+                height: 70,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.white.withOpacity(0.1),
+                      Colors.white.withOpacity(0.15),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(35),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: AnimatedOpacity(
+                                opacity: isEnabled ? 0.4 : 0.9,
+                                duration: const Duration(milliseconds: 200),
+                                child: const Text(
+                                  'DISABLE',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: AnimatedOpacity(
+                                opacity: isEnabled ? 0.9 : 0.4,
+                                duration: const Duration(milliseconds: 200),
+                                child: const Text(
+                                  'ENABLE',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      left: 8 +
+                          (_controller.value *
+                              (containerWidth - thumbWidth - 16)),
+                      top: 8,
+                      bottom: 8,
+                      child: AnimatedContainer(
+                        duration: _isDragging
+                            ? Duration.zero
+                            : const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
+                        width: thumbWidth,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: isEnabled
+                                ? [kAccentGold, const Color(0xFFFF9500)]
+                                : [
+                              const Color(0xFF9CA3AF),
+                              const Color(0xFF6B7280)
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(27),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (isEnabled ? kAccentGold : Colors.grey)
+                                  .withOpacity(0.5),
+                              blurRadius: 15,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: _isToggling
+                              ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          )
+                              : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                isEnabled
+                                    ? Icons.power_settings_new_rounded
+                                    : Icons.power_off_rounded,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                isEnabled ? 'ON' : 'OFF',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ============================================
+// SUB EXEC OFFLINE MESSAGE CARD
+// ============================================
+class _SubExecOfflineMessageCard extends StatefulWidget {
+  final String message;
+  final Function(String) onUpdate;
+
+  const _SubExecOfflineMessageCard({
+    required this.message,
+    required this.onUpdate,
+  });
+
+  @override
+  State<_SubExecOfflineMessageCard> createState() => _SubExecOfflineMessageCardState();
+}
+
+class _SubExecOfflineMessageCardState extends State<_SubExecOfflineMessageCard> {
+  late TextEditingController _controller;
+  bool _isEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.message);
+  }
+
+  @override
+  void didUpdateWidget(_SubExecOfflineMessageCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.message != oldWidget.message && !_isEditing) {
+      _controller.text = widget.message;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: kAccentPurple.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: kAccentPurple.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.message_rounded,
+                  color: kAccentPurple,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sub Executive Offline Message',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: kGreenDark,
+                      ),
+                    ),
+                    Text(
+                      'Shown when Sub Executive form is disabled',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: _isEditing
+                    ? Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.check_circle,
+                          color: kAccentPurple),
+                      onPressed: () {
+                        widget.onUpdate(_controller.text.trim());
+                        setState(() => _isEditing = false);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.cancel, color: kAccentRed),
+                      onPressed: () {
+                        _controller.text = widget.message;
+                        setState(() => _isEditing = false);
+                      },
+                    ),
+                  ],
+                )
+                    : IconButton(
+                  icon:
+                  const Icon(Icons.edit_rounded, color: kAccentPurple),
+                  onPressed: () => setState(() => _isEditing = true),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color:
+              _isEditing ? Colors.grey[50] : kAccentPurple.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _isEditing ? kAccentPurple : kAccentPurple.withOpacity(0.2),
+                width: _isEditing ? 2 : 1,
+              ),
+            ),
+            child: TextField(
+              controller: _controller,
+              enabled: _isEditing,
+              maxLines: 3,
+              style: TextStyle(
+                fontSize: 14,
+                color: _isEditing ? kGreenDark : Colors.grey[700],
+                height: 1.5,
+              ),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isDense: true,
+                hintText: 'Enter message to show when Sub Executive form is disabled...',
               ),
             ),
           ),
@@ -3934,6 +4762,1703 @@ class _IconBtn extends StatelessWidget {
             border: Border.all(color: color.withOpacity(0.3)),
           ),
           child: Icon(icon, color: color, size: 14),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXECUTIVE APPLICANTS PAGE
+// ============================================
+class SubExecutiveApplicantsPage extends StatefulWidget {
+  const SubExecutiveApplicantsPage({Key? key}) : super(key: key);
+
+  @override
+  State<SubExecutiveApplicantsPage> createState() =>
+      _SubExecutiveApplicantsPageState();
+}
+
+class _SubExecutiveApplicantsPageState extends State<SubExecutiveApplicantsPage>
+    with TickerProviderStateMixin {
+  late AnimationController _headerController;
+  late AnimationController _fabController;
+  String? _selectedSemester;
+  List<String> _availableSemesters = [];
+  bool _isLoadingSemesters = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+    ));
+
+    _headerController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..forward();
+
+    _fabController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _loadAvailableSemesters();
+  }
+
+  Future<void> _loadAvailableSemesters() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .get();
+
+      setState(() {
+        _availableSemesters = snapshot.docs
+            .map((doc) => doc.id)
+            .where((id) => id != 'Settings')
+            .toList();
+        _isLoadingSemesters = false;
+      });
+
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) _fabController.forward();
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingSemesters = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading semesters: $e'),
+            backgroundColor: kAccentRed,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _headerController.dispose();
+    _fabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: _selectedSemester == null
+                  ? _buildSemesterSelection()
+                  : _buildApplicantsList(),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: _selectedSemester != null
+          ? _SubExecBackToSemestersFAB(
+        controller: _fabController,
+        onTap: () {
+          setState(() => _selectedSemester = null);
+        },
+      )
+          : null,
+    );
+  }
+
+  Widget _buildHeader() {
+    final double topPadding = MediaQuery.of(context).padding.top;
+
+    return Container(
+      padding: EdgeInsets.only(top: topPadding),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF4C1D95), Color(0xFF6D28D9), Color(0xFF8B5CF6)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6D28D9).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new,
+                      color: Colors.white, size: 20),
+                  onPressed: () {
+                    if (_selectedSemester != null) {
+                      setState(() => _selectedSemester = null);
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                Expanded(
+                  child: FadeTransition(
+                    opacity: _headerController,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Sub Executive Applicants',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        Text(
+                          _selectedSemester == null
+                              ? 'Select a semester to view applicants'
+                              : _selectedSemester!,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.85),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (_selectedSemester != null)
+                  _SubExecExportButton(semesterName: _selectedSemester!),
+              ],
+            ),
+          ),
+          if (_selectedSemester != null)
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withOpacity(0.2)),
+              ),
+                child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('Sub-Executive_Recruitment')
+                    .doc(_selectedSemester!)
+                    .collection('Members')
+                    .snapshots(),
+                 builder: (context, snapshot) {
+                   final count = snapshot.data?.docs.length ?? 0;
+                   return Row(
+                     mainAxisAlignment: MainAxisAlignment.center,
+                     children: [
+                       const Icon(Icons.people_alt_rounded,
+                           color: Colors.white, size: 20),
+                       const SizedBox(width: 8),
+                      Text(
+                        '$count Applicant${count != 1 ? 's' : ''}',
+                         style: const TextStyle(
+                           color: Colors.white,
+                           fontSize: 16,
+                           fontWeight: FontWeight.w700,
+                         ),
+                       ),
+                     ],
+                   );
+                 },
+               ),
+             ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSemesterSelection() {
+    if (_isLoadingSemesters) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: kAccentPurple, strokeWidth: 3),
+            SizedBox(height: 16),
+            Text(
+              'Loading semesters...',
+              style: TextStyle(color: Colors.grey, fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_availableSemesters.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(scale: value, child: child);
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: kAccentPurple.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.calendar_today_rounded,
+                      size: 80, color: Colors.grey[400]),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'No Semesters Yet',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: kGreenDark,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'No Sub Executive recruitment semesters found',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Text(
+              'Select Semester',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: kGreenDark,
+              ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: kAccentPurple.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${_availableSemesters.length} Total',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: kAccentPurple,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ..._availableSemesters.asMap().entries.map((entry) {
+          final index = entry.key;
+          final semester = entry.value;
+          return _SubExecSemesterTile(
+            semester: semester,
+            index: index,
+            onTap: () => setState(() => _selectedSemester = semester),
+            onExport: () => _exportSemesterData(semester),
+          );
+        }),
+        const SizedBox(height: 100),
+      ],
+    );
+  }
+
+  Future<void> _exportSemesterData(String semester) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(semester)
+          .collection('Members')
+          .get();
+
+       final members = snapshot.docs
+           .map((doc) => doc.data())
+           .toList();
+
+      if (members.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('No applicants to export'),
+              backgroundColor: kAccentRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      final result = await SubExecCSVExportService.exportApplicantsToCSV(
+        semesterName: semester,
+        applicants: members,
+        context: context,
+      );
+
+      if (result.success && mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => SubExecExportSuccessDialog(
+            filePath: result.filePath!,
+            fileName: result.fileName!,
+            applicantCount: result.applicantCount!,
+            semesterName: semester,
+          ),
+        );
+      } else if (!result.success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: ${result.error}'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: kAccentRed,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildApplicantsList() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(_selectedSemester!)
+          .collection('Members')
+          .snapshots(),
+       builder: (context, snapshot) {
+         if (snapshot.connectionState == ConnectionState.waiting) {
+           return const Center(
+             child: CircularProgressIndicator(color: kAccentPurple),
+           );
+         }
+
+         if (snapshot.hasError) {
+           return Center(
+             child: Text('Error: ${snapshot.error}'),
+           );
+         }
+
+         final docs = snapshot.data?.docs ?? [];
+
+         if (docs.isEmpty) {
+           return Center(
+             child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: [
+                 Icon(Icons.people_outline, size: 80, color: Colors.grey[400]),
+                 const SizedBox(height: 16),
+                 const Text(
+                   'No Applicants Yet',
+                   style: TextStyle(
+                     fontSize: 20,
+                     fontWeight: FontWeight.w700,
+                     color: kGreenDark,
+                   ),
+                 ),
+                 const SizedBox(height: 8),
+                 Text(
+                   'No applications for this semester',
+                   style: TextStyle(color: Colors.grey[600]),
+                 ),
+               ],
+             ),
+           );
+         }
+
+         return ListView.builder(
+           padding: const EdgeInsets.all(16),
+           itemCount: docs.length,
+           itemBuilder: (context, index) {
+             final data = docs[index].data() as Map<String, dynamic>;
+             return _SubExecApplicantCard(
+               data: data,
+               index: index,
+               docId: docs[index].id,
+               semesterName: _selectedSemester!,
+             );
+           },
+         );
+       },
+     );
+   }
+ }
+
+// ============================================
+// SUB EXEC CSV EXPORT SERVICE
+// ============================================
+class SubExecCSVExportService {
+  static Future<SubExecExportResult> exportApplicantsToCSV({
+    required String semesterName,
+    required List<Map<String, dynamic>> applicants,
+    required BuildContext context,
+  }) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const _SubExecExportLoadingDialog(),
+      );
+
+      List<List<dynamic>> csvData = [];
+
+      csvData.add([
+        'S/N',
+        'Name',
+        'Phone',
+        'Edu Mail',
+        'Student ID',
+        'Department',
+        'Semester',
+        'AUSTRC ID',
+        'Is AUSTRC Member',
+        'Selected Departments',
+        'Why Join Panel',
+        'Previous Club Experience',
+        'Event Experience',
+        'Robotics Projects',
+        'Image Link',
+      ]);
+
+      int serialNumber = 1;
+      for (var applicant in applicants) {
+        final departments = applicant['Selected_Departments'];
+        String deptString = '';
+        if (departments is List) {
+          deptString = departments.join(', ');
+        } else if (departments is String) {
+          deptString = departments;
+        }
+
+        // support multiple possible field names (keep compatible with submit form)
+        final phone = applicant['Phone_Number'] ?? applicant['Phone'] ?? '';
+        final eduMail = applicant['Edu_Mail'] ?? applicant['EduMail'] ?? '';
+        final studentId = applicant['Student_ID'] ?? applicant['StudentID'] ?? '';
+        final dept = applicant['Department'] ?? '';
+        final semesterField = applicant['Semester'] ?? applicant['Recruitment_Semester'] ?? '';
+        final austId = applicant['AUST_RC_ID'] ?? applicant['AUSTRC_ID'] ?? applicant['AUSTRC_ID'] ?? '';
+        final isMember = (applicant['Is_AUST_RC_Member'] == true) || (applicant['Is_AUSTRC_Member'] == true) || (applicant['Is_AUSTRC_Member'] == 'true');
+        final imageLink = applicant['Image_Drive_Link'] ?? applicant['Image_Link'] ?? '';
+
+        csvData.add([
+          serialNumber++,
+          applicant['Name'] ?? '',
+          phone,
+          eduMail,
+          studentId,
+          dept,
+          semesterField,
+          austId,
+          isMember ? 'Yes' : 'No',
+          deptString,
+          applicant['Why_Join_Panel'] ?? '',
+          applicant['Previous_Club_Experience'] ?? '',
+          applicant['Event_Management_Experience'] ?? applicant['Event_Experience'] ?? '',
+          applicant['Robotics_Projects'] ?? '',
+          imageLink,
+        ]);
+      }
+
+      String csv = const ListToCsvConverter().convert(csvData);
+
+      final directory = await getApplicationDocumentsDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final sanitizedSemester =
+      semesterName.replaceAll(RegExp(r'[^\w\s]'), '_').replaceAll(' ', '_');
+      final fileName = 'SubExec_${sanitizedSemester}_$timestamp.csv';
+      final filePath = '${directory.path}/$fileName';
+
+      final file = File(filePath);
+      await file.writeAsString(csv);
+
+      if (!await file.exists()) {
+        throw Exception('Failed to create file');
+      }
+
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      return SubExecExportResult(
+        success: true,
+        filePath: filePath,
+        fileName: fileName,
+        applicantCount: applicants.length,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      return SubExecExportResult(
+        success: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  static Future<ShareResult?> shareFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) {
+        return null;
+      }
+
+      final result = await Share.shareXFiles(
+        [XFile(filePath)],
+        subject: 'Sub Executive Applicants Export',
+        text: 'Sub Executive applicants data in CSV format',
+      );
+
+      return result;
+    } catch (e) {
+      return null;
+    }
+  }
+}
+
+class SubExecExportResult {
+  final bool success;
+  final String? filePath;
+  final String? fileName;
+  final int? applicantCount;
+  final String? error;
+
+  SubExecExportResult({
+    required this.success,
+    this.filePath,
+    this.fileName,
+    this.applicantCount,
+    this.error,
+  });
+}
+
+// ============================================
+// SUB EXEC EXPORT LOADING DIALOG
+// ============================================
+class _SubExecExportLoadingDialog extends StatelessWidget {
+  const _SubExecExportLoadingDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: kAccentPurple.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: CircularProgressIndicator(
+                    color: kAccentPurple,
+                    strokeWidth: 4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Exporting Data...',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: kGreenDark,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Generating CSV file',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXEC EXPORT SUCCESS DIALOG
+// ============================================
+class SubExecExportSuccessDialog extends StatefulWidget {
+  final String filePath;
+  final String fileName;
+  final int applicantCount;
+  final String semesterName;
+
+  const SubExecExportSuccessDialog({
+    super.key,
+    required this.filePath,
+    required this.fileName,
+    required this.applicantCount,
+    required this.semesterName,
+  });
+
+  @override
+  State<SubExecExportSuccessDialog> createState() =>
+      _SubExecExportSuccessDialogState();
+}
+
+class _SubExecExportSuccessDialogState
+    extends State<SubExecExportSuccessDialog> {
+  bool _isSharing = false;
+
+  Future<void> _handleShare() async {
+    if (_isSharing) return;
+
+    setState(() => _isSharing = true);
+
+    try {
+      final result = await SubExecCSVExportService.shareFile(widget.filePath);
+
+      if (mounted) {
+        setState(() => _isSharing = false);
+
+        if (result != null) {
+          await Future.delayed(const Duration(milliseconds: 300));
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSharing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error sharing: $e'),
+            backgroundColor: kAccentRed,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 30,
+              offset: const Offset(0, 15),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            kAccentPurple.withOpacity(0.15),
+                            const Color(0xFF8B5CF6).withOpacity(0.15),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [kAccentPurple, Color(0xFF8B5CF6)],
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Export Successful!',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: kGreenDark,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${widget.applicantCount} applicants exported from ${widget.semesterName}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: kAccentPurple.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: kAccentPurple.withOpacity(0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: kAccentPurple.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.description_rounded,
+                        color: kAccentPurple,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.fileName,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: kGreenDark,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'CSV File Ready',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed:
+                      _isSharing ? null : () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        'Close',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _isSharing ? null : _handleShare,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kAccentPurple,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: kAccentPurple.withOpacity(0.6),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 4,
+                        shadowColor: kAccentPurple.withOpacity(0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: _isSharing
+                          ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                          : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.share_rounded, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Share / Save',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXEC SEMESTER TILE
+// ============================================
+class _SubExecSemesterTile extends StatelessWidget {
+  final String semester;
+  final int index;
+  final VoidCallback onTap;
+  final VoidCallback onExport;
+
+  const _SubExecSemesterTile({
+    required this.semester,
+    required this.index,
+    required this.onTap,
+    required this.onExport,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 400 + (index * 100)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: kAccentPurple.withOpacity(0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          kAccentPurple.withOpacity(0.15),
+                          const Color(0xFF8B5CF6).withOpacity(0.15),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.calendar_month_rounded,
+                      color: kAccentPurple,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          semester,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: kGreenDark,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('Sub-Executive_Recruitment')
+                              .doc(semester)
+                              .collection('Applicants')
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            final count = snapshot.data?.docs.length ?? 0;
+                            return Text(
+                              '$count applicant${count != 1 ? 's' : ''}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: onExport,
+                        icon: const Icon(Icons.download_rounded),
+                        color: kAccentPurple,
+                        tooltip: 'Export CSV',
+                      ),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: kAccentPurple,
+                        size: 18,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXEC APPLICANT CARD
+// ============================================
+class _SubExecApplicantCard extends StatelessWidget {
+  final Map<String, dynamic> data;
+  final int index;
+  final String docId;
+  final String semesterName;
+
+  const _SubExecApplicantCard({
+    required this.data,
+    required this.index,
+    required this.docId,
+    required this.semesterName,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final departments = data['Selected_Departments'];
+    String deptString = '';
+    if (departments is List) {
+      deptString = departments.join(', ');
+    } else if (departments is String) {
+      deptString = departments;
+    }
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 300 + (index * 50)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: kAccentPurple.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () => _showApplicantDetails(context),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [kAccentPurple, Color(0xFF8B5CF6)],
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              data['Name'] ?? 'Unknown',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: kGreenDark,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              data['Edu_Mail'] ?? '',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: data['Is_AUSTRC_Member'] == true
+                              ? kGreenLight.withOpacity(0.15)
+                              : Colors.grey.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          data['Is_AUSTRC_Member'] == true
+                              ? 'AUSTRC Member'
+                              : 'Non-Member',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: data['Is_AUSTRC_Member'] == true
+                                ? kGreenMain
+                                : Colors.grey[600],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 24),
+                  _buildInfoRow(Icons.school, 'Department', data['Department'] ?? ''),
+                  _buildInfoRow(Icons.calendar_today, 'Semester', data['Semester'] ?? ''),
+                  _buildInfoRow(Icons.badge, 'Student ID', data['Student_ID'] ?? ''),
+                  _buildInfoRow(Icons.work, 'Applied For', deptString),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: kAccentPurple),
+          const SizedBox(width: 8),
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[600],
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: kGreenDark,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showApplicantDetails(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _SubExecApplicantDetailsSheet(data: data),
+    );
+  }
+}
+
+// ============================================
+// SUB EXEC APPLICANT DETAILS SHEET
+// ============================================
+class _SubExecApplicantDetailsSheet extends StatelessWidget {
+  final Map<String, dynamic> data;
+
+  const _SubExecApplicantDetailsSheet({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    final departments = data['Selected_Departments'];
+    String deptString = '';
+    if (departments is List) {
+      deptString = departments.join(', ');
+    } else if (departments is String) {
+      deptString = departments;
+    }
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(24),
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [kAccentPurple, Color(0xFF8B5CF6)],
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: kAccentPurple.withOpacity(0.4),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: Text(
+                        data['Name'] ?? 'Unknown',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: kGreenDark,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: data['Is_AUSTRC_Member'] == true
+                              ? kGreenLight.withOpacity(0.15)
+                              : Colors.grey.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          data['Is_AUSTRC_Member'] == true
+                              ? 'AUSTRC Member'
+                              : 'Non-Member',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: data['Is_AUSTRC_Member'] == true
+                                ? kGreenMain
+                                : Colors.grey[600],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('Personal Information'),
+                    Builder(builder: (context) {
+                      final austId = data['AUST_RC_ID'] ?? data['AUSTRC_ID'] ?? '';
+                      final List<Widget> personalDetails = [
+                        _buildDetailRow('Phone', data['Phone'] ?? ''),
+                        _buildDetailRow('Edu Mail', data['Edu_Mail'] ?? data['EduMail'] ?? ''),
+                        _buildDetailRow('Student ID', data['Student_ID'] ?? data['StudentID'] ?? ''),
+                        _buildDetailRow('Department', data['Department'] ?? ''),
+                        _buildDetailRow('Semester', data['Semester'] ?? data['Recruitment_Semester'] ?? ''),
+                      ];
+                      if (austId.toString().isNotEmpty) {
+                        personalDetails.add(_buildDetailRow('AUSTRC ID', austId));
+                      }
+                      return _buildDetailCard(personalDetails);
+                    }),
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Applied Departments'),
+                    _buildDetailCard([
+                      _buildDetailRow('Departments', deptString),
+                    ]),
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Why Join Panel'),
+                    _buildTextCard(data['Why_Join_Panel'] ?? 'Not provided'),
+                    if (data['Previous_Club_Experience'] != null &&
+                        data['Previous_Club_Experience'].toString().isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('Previous Club Experience'),
+                      _buildTextCard(data['Previous_Club_Experience']),
+                    ],
+                    if (data['Event_Experience'] != null &&
+                        data['Event_Experience'].toString().isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('Event Experience'),
+                      _buildTextCard(data['Event_Experience']),
+                    ],
+                    if (data['Robotics_Projects'] != null &&
+                        data['Robotics_Projects'].toString().isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('Robotics Projects'),
+                      _buildTextCard(data['Robotics_Projects']),
+                    ],
+                    Builder(builder: (context) {
+                      final imageLink = data['Image_Drive_Link'] ?? data['Image_Link'] ?? '';
+                      if (imageLink.toString().isNotEmpty) {
+                        return Column(
+                          children: [
+                            const SizedBox(height: 24),
+                            _buildSectionTitle('Image Link'),
+                            _buildLinkCard(context, imageLink),
+                          ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 20,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [kAccentPurple, Color(0xFF8B5CF6)],
+              ),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: kGreenDark,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailCard(List<Widget> children) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: kGreenDark,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextCard(String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 14,
+          color: Colors.grey[700],
+          height: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLinkCard(BuildContext context, String link) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: kAccentBlue.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: kAccentBlue.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.link, color: kAccentBlue),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              link,
+              style: const TextStyle(
+                fontSize: 13,
+                color: kAccentBlue,
+                decoration: TextDecoration.underline,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.open_in_new, color: kAccentBlue),
+            onPressed: () async {
+              final uri = Uri.parse(link);
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXEC EXPORT BUTTON
+// ============================================
+class _SubExecExportButton extends StatelessWidget {
+  final String semesterName;
+
+  const _SubExecExportButton({required this.semesterName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _exportData(context),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.3)),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.download_rounded, color: Colors.white, size: 18),
+                SizedBox(width: 6),
+                Text(
+                  'Export',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _exportData(BuildContext context) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(semesterName)
+          .collection('Applicants')
+          .get();
+
+      final applicants = snapshot.docs.map((doc) => doc.data()).toList();
+
+      if (applicants.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('No applicants to export'),
+              backgroundColor: kAccentRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      final result = await SubExecCSVExportService.exportApplicantsToCSV(
+        semesterName: semesterName,
+        applicants: applicants,
+        context: context,
+      );
+
+      if (result.success && context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => SubExecExportSuccessDialog(
+            filePath: result.filePath!,
+            fileName: result.fileName!,
+            applicantCount: result.applicantCount!,
+            semesterName: semesterName,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: kAccentRed,
+          ),
+        );
+      }
+    }
+  }
+}
+
+// ============================================
+// SUB EXEC BACK TO SEMESTERS FAB
+// ============================================
+class _SubExecBackToSemestersFAB extends StatelessWidget {
+  final AnimationController controller;
+  final VoidCallback onTap;
+
+  const _SubExecBackToSemestersFAB({
+    required this.controller,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: CurvedAnimation(
+        parent: controller,
+        curve: Curves.elasticOut,
+      ),
+      child: FloatingActionButton.extended(
+        onPressed: onTap,
+        backgroundColor: kAccentPurple,
+        icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+        label: const Text(
+          'All Semesters',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );

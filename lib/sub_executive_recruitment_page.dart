@@ -105,15 +105,20 @@ class _SubExecutiveRecruitmentPageState
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      // Load access status from Sub-Executive_Recruitment settings
+      // Load access status from centralized settings doc
+      // New location: Collection: New_Member_Recruitment -> Document: 'Form ON_OFF and Payment Number'
+      // Field for sub-exec access: 'Sub_Executive_Form_Access'
+      // Message field: 'Message for Sub Executive'
       final settingsDoc = await FirebaseFirestore.instance
-          .collection('Sub-Executive_Recruitment')
-          .doc('Settings')
+          .collection('New_Member_Recruitment')
+          .doc('Form ON_OFF and Payment Number')
           .get();
 
       if (settingsDoc.exists) {
         final data = settingsDoc.data();
-        final accessValue = data?['Access'];
+
+        // Allow a couple of fallback names for compatibility
+        final accessValue = data?['Sub_Executive_Form_Access'] ?? data?['Sub Executive Form Access'] ?? data?['Access'];
 
         bool isAccessible = false;
         if (accessValue is bool) {
@@ -124,7 +129,7 @@ class _SubExecutiveRecruitmentPageState
 
         setState(() {
           _isFormAccessible = isAccessible;
-          _accessMessage = data?['Message'] ?? 'Form is currently closed';
+          _accessMessage = data?['Message for Sub Executive'] ?? data?['Message'] ?? 'Form is currently closed';
         });
 
         if (!_isFormAccessible) {
