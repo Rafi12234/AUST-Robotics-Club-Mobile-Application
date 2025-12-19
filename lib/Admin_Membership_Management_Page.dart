@@ -626,17 +626,17 @@ class _FormControlSection extends StatefulWidget {
 }
 
 class _FormControlSectionState extends State<_FormControlSection> {
-    final DocumentReference _formSettingsDoc = FirebaseFirestore.instance
+  final DocumentReference _formSettingsDoc = FirebaseFirestore.instance
       .collection('New_Member_Recruitment')
       .doc('Form ON_OFF and Payment Number');
 
-    // Updated: use the single settings doc where Sub Executive form access & message live
-    final DocumentReference _subExecSettingsDoc = FirebaseFirestore.instance
+  // Updated: use the single settings doc where Sub Executive form access & message live
+  final DocumentReference _subExecSettingsDoc = FirebaseFirestore.instance
       .collection('New_Member_Recruitment')
       .doc('Form ON_OFF and Payment Number');
 
-    @override
-    Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot>(
       stream: _formSettingsDoc.snapshots(),
       builder: (context, memberSnapshot) {
@@ -793,10 +793,10 @@ class _FormControlSectionState extends State<_FormControlSection> {
         );
       },
     );
-    }
+  }
 
-    // Update general member settings (unchanged)
-    Future<void> _updateFormAccess(bool value) async {
+  // Update general member settings (unchanged)
+  Future<void> _updateFormAccess(bool value) async {
     try {
       await _formSettingsDoc.update({'Access': value});
       if (mounted) {
@@ -834,10 +834,10 @@ class _FormControlSectionState extends State<_FormControlSection> {
         );
       }
     }
-    }
+  }
 
-    // Update sub-exec form access -> writes to 'Sub_Executive_Form_Access' field
-    Future<void> _updateSubExecFormAccess(bool value) async {
+  // Update sub-exec form access -> writes to 'Sub_Executive_Form_Access' field
+  Future<void> _updateSubExecFormAccess(bool value) async {
     try {
       await _subExecSettingsDoc.update({'Sub_Executive_Form_Access': value});
       if (mounted) {
@@ -875,9 +875,9 @@ class _FormControlSectionState extends State<_FormControlSection> {
         );
       }
     }
-    }
+  }
 
-    Future<void> _updateField(String field, String value) async {
+  Future<void> _updateField(String field, String value) async {
     try {
       await _formSettingsDoc.update({field: value});
       if (mounted) {
@@ -908,9 +908,9 @@ class _FormControlSectionState extends State<_FormControlSection> {
         );
       }
     }
-    }
+  }
 
-    Future<void> _updateSubExecField(String field, String value) async {
+  Future<void> _updateSubExecField(String field, String value) async {
     try {
       await _subExecSettingsDoc.update({field: value});
       if (mounted) {
@@ -941,7 +941,7 @@ class _FormControlSectionState extends State<_FormControlSection> {
         );
       }
     }
-    }
+  }
 }
 
 // ============================================
@@ -4956,33 +4956,33 @@ class _SubExecutiveApplicantsPageState extends State<SubExecutiveApplicantsPage>
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.white.withOpacity(0.2)),
               ),
-                child: StreamBuilder<QuerySnapshot>(
+              child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('Sub-Executive_Recruitment')
                     .doc(_selectedSemester!)
                     .collection('Members')
                     .snapshots(),
-                 builder: (context, snapshot) {
-                   final count = snapshot.data?.docs.length ?? 0;
-                   return Row(
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     children: [
-                       const Icon(Icons.people_alt_rounded,
-                           color: Colors.white, size: 20),
-                       const SizedBox(width: 8),
+                builder: (context, snapshot) {
+                  final count = snapshot.data?.docs.length ?? 0;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.people_alt_rounded,
+                          color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
                       Text(
                         '$count Applicant${count != 1 ? 's' : ''}',
-                         style: const TextStyle(
-                           color: Colors.white,
-                           fontSize: 16,
-                           fontWeight: FontWeight.w700,
-                         ),
-                       ),
-                     ],
-                   );
-                 },
-               ),
-             ),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           const SizedBox(height: 8),
         ],
       ),
@@ -5107,9 +5107,9 @@ class _SubExecutiveApplicantsPageState extends State<SubExecutiveApplicantsPage>
           .collection('Members')
           .get();
 
-       final members = snapshot.docs
-           .map((doc) => doc.data())
-           .toList();
+      final members = snapshot.docs
+          .map((doc) => doc.data())
+          .toList();
 
       if (members.isEmpty) {
         if (mounted) {
@@ -5174,63 +5174,63 @@ class _SubExecutiveApplicantsPageState extends State<SubExecutiveApplicantsPage>
           .doc(_selectedSemester!)
           .collection('Members')
           .snapshots(),
-       builder: (context, snapshot) {
-         if (snapshot.connectionState == ConnectionState.waiting) {
-           return const Center(
-             child: CircularProgressIndicator(color: kAccentPurple),
-           );
-         }
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: kAccentPurple),
+          );
+        }
 
-         if (snapshot.hasError) {
-           return Center(
-             child: Text('Error: ${snapshot.error}'),
-           );
-         }
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error: ${snapshot.error}'),
+          );
+        }
 
-         final docs = snapshot.data?.docs ?? [];
+        final docs = snapshot.data?.docs ?? [];
 
-         if (docs.isEmpty) {
-           return Center(
-             child: Column(
-               mainAxisAlignment: MainAxisAlignment.center,
-               children: [
-                 Icon(Icons.people_outline, size: 80, color: Colors.grey[400]),
-                 const SizedBox(height: 16),
-                 const Text(
-                   'No Applicants Yet',
-                   style: TextStyle(
-                     fontSize: 20,
-                     fontWeight: FontWeight.w700,
-                     color: kGreenDark,
-                   ),
-                 ),
-                 const SizedBox(height: 8),
-                 Text(
-                   'No applications for this semester',
-                   style: TextStyle(color: Colors.grey[600]),
-                 ),
-               ],
-             ),
-           );
-         }
+        if (docs.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.people_outline, size: 80, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                const Text(
+                  'No Applicants Yet',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: kGreenDark,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'No applications for this semester',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          );
+        }
 
-         return ListView.builder(
-           padding: const EdgeInsets.all(16),
-           itemCount: docs.length,
-           itemBuilder: (context, index) {
-             final data = docs[index].data() as Map<String, dynamic>;
-             return _SubExecApplicantCard(
-               data: data,
-               index: index,
-               docId: docs[index].id,
-               semesterName: _selectedSemester!,
-             );
-           },
-         );
-       },
-     );
-   }
- }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            final data = docs[index].data() as Map<String, dynamic>;
+            return _SubExecApplicantCard(
+              data: data,
+              index: index,
+              docId: docs[index].id,
+              semesterName: _selectedSemester!,
+            );
+          },
+        );
+      },
+    );
+  }
+}
 
 // ============================================
 // SUB EXEC CSV EXPORT SERVICE
@@ -5798,7 +5798,7 @@ class _SubExecSemesterTile extends StatelessWidget {
                           stream: FirebaseFirestore.instance
                               .collection('Sub-Executive_Recruitment')
                               .doc(semester)
-                              .collection('Applicants')
+                              .collection('Members')
                               .snapshots(),
                           builder: (context, snapshot) {
                             final count = snapshot.data?.docs.length ?? 0;
