@@ -14,6 +14,7 @@ import 'FancyFloatingButton.dart';
 import 'size_config.dart';
 import 'footer_page.dart'; // Footer import
 import 'dart:math' as math;
+import 'member_recruitment_selection_page.dart';
 
 /// AUST RC brand greens + white
 const kGreenDark = Color(0xFF0B6B3A);
@@ -2983,7 +2984,7 @@ class _QuickActionsRow extends StatelessWidget {
                 delay: 200,
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => MemberRecruitmentPage()),
+                    MaterialPageRoute(builder: (_) => MemberRecruitmentSelectionPage()),
                   );
                 },
               ),
