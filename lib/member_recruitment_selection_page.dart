@@ -193,34 +193,36 @@ class _MemberRecruitmentSelectionPageState
                             width: 1.5,
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.waving_hand_rounded,
-                              size: SizeConfig.screenWidth * 0.1,
-                              color: const Color(0xFF2E7D32),
-                            ),
-                            SizedBox(height: SizeConfig.screenHeight * 0.015),
-                            Text(
-                              'Welcome to AUST Robotics Club!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: SizeConfig.screenWidth * 0.045,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1B5E20),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.waving_hand_rounded,
+                                size: SizeConfig.screenWidth * 0.1,
+                                color: const Color(0xFF2E7D32),
                               ),
-                            ),
-                            SizedBox(height: SizeConfig.screenHeight * 0.01),
-                            Text(
-                              'Select the type of membership you want to apply for',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: SizeConfig.screenWidth * 0.035,
-                                color: Colors.grey[600],
-                                height: 1.4,
+                              SizedBox(height: SizeConfig.screenHeight * 0.015),
+                              Text(
+                                'Welcome to AUST Robotics Club!',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: SizeConfig.screenWidth * 0.045,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF1B5E20),
+                                ),
                               ),
-                            ),
-                          ],
+                              SizedBox(height: SizeConfig.screenHeight * 0.01),
+                              Text(
+                                'Select the type of membership you want to apply for',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: SizeConfig.screenWidth * 0.035,
+                                  color: Colors.grey[600],
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

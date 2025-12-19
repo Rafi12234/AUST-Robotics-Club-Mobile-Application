@@ -1517,45 +1517,66 @@ class _SubExecutiveRecruitmentPageState
             ),
           ],
         ),
-        child: TextFormField(
-          controller: controller,
-          maxLines: maxLines,
-          validator: validator,
-          style: TextStyle(fontSize: SizeConfig.screenWidth * 0.036),
-          decoration: InputDecoration(
-            labelText: label,
-            hintText: hintText,
-            alignLabelWithHint: true,
-            labelStyle: TextStyle(
-              fontSize: SizeConfig.screenWidth * 0.032,
-              height: 1.2,
-            ),
-            prefixIcon: Padding(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Question Label - Full visibility
+            Padding(
               padding: EdgeInsets.only(
                 top: SizeConfig.screenHeight * 0.015,
-                left: SizeConfig.screenWidth * 0.03,
-                right: SizeConfig.screenWidth * 0.02,
+                left: SizeConfig.screenWidth * 0.04,
+                right: SizeConfig.screenWidth * 0.04,
+                bottom: SizeConfig.screenHeight * 0.008,
               ),
-              child: Icon(
-                icon,
-                color: _primaryColor,
-                size: SizeConfig.screenWidth * 0.05,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    icon,
+                    color: _primaryColor,
+                    size: SizeConfig.screenWidth * 0.05,
+                  ),
+                  SizedBox(width: SizeConfig.screenWidth * 0.025),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: SizeConfig.screenWidth * 0.034,
+                        fontWeight: FontWeight.w600,
+                        color: _primaryColor,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            prefixIconConstraints: BoxConstraints(
-              minWidth: SizeConfig.screenWidth * 0.1,
+            // Text Field
+            TextFormField(
+              controller: controller,
+              maxLines: maxLines,
+              validator: validator,
+              style: TextStyle(fontSize: SizeConfig.screenWidth * 0.036),
+              decoration: InputDecoration(
+                hintText: hintText ?? 'Enter your answer here...',
+                hintStyle: TextStyle(
+                  fontSize: SizeConfig.screenWidth * 0.032,
+                  color: Colors.grey[400],
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.grey[50],
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.screenWidth * 0.04,
+                  vertical: SizeConfig.screenHeight * 0.015,
+                ),
+              ),
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
-              borderSide: BorderSide.none,
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: SizeConfig.screenWidth * 0.04,
-              vertical: SizeConfig.screenHeight * 0.018,
-            ),
-          ),
+            SizedBox(height: SizeConfig.screenHeight * 0.01),
+          ],
         ),
       ),
     );
