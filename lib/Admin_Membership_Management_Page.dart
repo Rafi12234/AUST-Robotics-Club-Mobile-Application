@@ -78,7 +78,7 @@ class CSVExportService {
       // Create filename with timestamp
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final sanitizedSemester =
-      semesterName.replaceAll(RegExp(r'[^\w\s]'), '_').replaceAll(' ', '_');
+          semesterName.replaceAll(RegExp(r'[^\w\s]'), '_').replaceAll(' ', '_');
       final fileName = '${sanitizedSemester}_Members_$timestamp.csv';
       final filePath = '${directory.path}/$fileName';
 
@@ -430,7 +430,8 @@ class _ExportSuccessDialogState extends State<ExportSuccessDialog> {
                 children: [
                   Expanded(
                     child: TextButton(
-                      onPressed: _isSharing ? null : () => Navigator.pop(context),
+                      onPressed:
+                          _isSharing ? null : () => Navigator.pop(context),
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -465,27 +466,27 @@ class _ExportSuccessDialogState extends State<ExportSuccessDialog> {
                       ),
                       child: _isSharing
                           ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
                           : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.share_rounded, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'Share / Save',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.share_rounded, size: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Share / Save',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ],
@@ -659,28 +660,34 @@ class _FormControlSectionState extends State<_FormControlSection> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
+                      Icon(Icons.error_outline,
+                          size: 60, color: Colors.grey[400]),
                       const SizedBox(height: 16),
-                      Text('Error: ${memberSnapshot.error ?? subExecSnapshot.error}'),
+                      Text(
+                          'Error: ${memberSnapshot.error ?? subExecSnapshot.error}'),
                     ],
                   ),
                 ),
               );
             }
 
-            final memberData = memberSnapshot.data?.data() as Map<String, dynamic>? ?? {};
+            final memberData =
+                memberSnapshot.data?.data() as Map<String, dynamic>? ?? {};
             final isFormEnabled = memberData['Access'] == true;
             final bkashNumber = memberData['Bkash'] ?? '';
             final nagadNumber = memberData['Nagad'] ?? '';
             final message = memberData['Message'] ?? '';
 
             // Read Sub Executive flags from the centralized settings doc
-            final subExecData = subExecSnapshot.data?.data() as Map<String, dynamic>? ?? {};
+            final subExecData =
+                subExecSnapshot.data?.data() as Map<String, dynamic>? ?? {};
             // Field names as provided by user:
             // - Sub_Executive_Form_Access : boolean
             // - Message for Sub Executive : String
-            final isSubExecFormEnabled = subExecData['Sub_Executive_Form_Access'] == true;
-            final subExecMessage = subExecData['Message for Sub Executive'] ?? '';
+            final isSubExecFormEnabled =
+                subExecData['Sub_Executive_Form_Access'] == true;
+            final subExecMessage =
+                subExecData['Message for Sub Executive'] ?? '';
 
             return FadeTransition(
               opacity: widget.contentController,
@@ -782,7 +789,8 @@ class _FormControlSectionState extends State<_FormControlSection> {
                       // Message for Sub Executive (reads/writes 'Message for Sub Executive')
                       _SubExecOfflineMessageCard(
                         message: subExecMessage,
-                        onUpdate: (value) => _updateSubExecField('Message for Sub Executive', value),
+                        onUpdate: (value) => _updateSubExecField(
+                            'Message for Sub Executive', value),
                       ),
                     ],
                   ),
@@ -1012,7 +1020,7 @@ class _ViewApplicantsButtonState extends State<_ViewApplicantsButton> {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                        const AdminMembershipApplicantsPage(),
+                            const AdminMembershipApplicantsPage(),
                       ),
                     );
                   },
@@ -1115,7 +1123,8 @@ class _ViewApplicantsButtonState extends State<_ViewApplicantsButton> {
 // ============================================
 class _SubExecApplicantsButton extends StatefulWidget {
   @override
-  State<_SubExecApplicantsButton> createState() => _SubExecApplicantsButtonState();
+  State<_SubExecApplicantsButton> createState() =>
+      _SubExecApplicantsButtonState();
 }
 
 class _SubExecApplicantsButtonState extends State<_SubExecApplicantsButton> {
@@ -1273,7 +1282,7 @@ class _FormStatusCardState extends State<_FormStatusCard>
         boxShadow: [
           BoxShadow(
             color:
-            (widget.isEnabled ? kGreenMain : Colors.grey).withOpacity(0.4),
+                (widget.isEnabled ? kGreenMain : Colors.grey).withOpacity(0.4),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -1293,13 +1302,13 @@ class _FormStatusCardState extends State<_FormStatusCard>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: widget.isEnabled
                           ? [
-                        BoxShadow(
-                          color: kAccentGold
-                              .withOpacity(0.5 * _pulseController.value),
-                          blurRadius: 20 * _pulseController.value,
-                          spreadRadius: 5 * _pulseController.value,
-                        ),
-                      ]
+                              BoxShadow(
+                                color: kAccentGold
+                                    .withOpacity(0.5 * _pulseController.value),
+                                blurRadius: 20 * _pulseController.value,
+                                spreadRadius: 5 * _pulseController.value,
+                              ),
+                            ]
                           : null,
                     ),
                     child: Icon(
@@ -1337,8 +1346,8 @@ class _FormStatusCardState extends State<_FormStatusCard>
                             boxShadow: [
                               BoxShadow(
                                 color: (widget.isEnabled
-                                    ? kAccentGold
-                                    : kAccentRed)
+                                        ? kAccentGold
+                                        : kAccentRed)
                                     .withOpacity(0.5),
                                 blurRadius: 8,
                                 spreadRadius: 2,
@@ -1452,7 +1461,7 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
     });
     final velocity = details.primaryVelocity ?? 0;
     final shouldEnable =
-    velocity > 0 ? _dragPosition > 0.3 : _dragPosition > 0.7;
+        velocity > 0 ? _dragPosition > 0.3 : _dragPosition > 0.7;
     _toggleState(shouldEnable);
   }
 
@@ -1576,9 +1585,9 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
                             colors: isEnabled
                                 ? [kAccentGold, const Color(0xFFFF9500)]
                                 : [
-                              const Color(0xFF9CA3AF),
-                              const Color(0xFF6B7280)
-                            ],
+                                    const Color(0xFF9CA3AF),
+                                    const Color(0xFF6B7280)
+                                  ],
                           ),
                           borderRadius: BorderRadius.circular(27),
                           boxShadow: [
@@ -1593,34 +1602,34 @@ class _AnimatedToggleSwitchState extends State<_AnimatedToggleSwitch>
                         child: Center(
                           child: _isToggling
                               ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 3,
-                            ),
-                          )
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 3,
+                                  ),
+                                )
                               : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                isEnabled
-                                    ? Icons.power_settings_new_rounded
-                                    : Icons.power_off_rounded,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                isEnabled ? 'ON' : 'OFF',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w900,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      isEnabled
+                                          ? Icons.power_settings_new_rounded
+                                          : Icons.power_off_rounded,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      isEnabled ? 'ON' : 'OFF',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ),
@@ -1953,29 +1962,28 @@ class _OfflineMessageCardState extends State<_OfflineMessageCard> {
                 duration: const Duration(milliseconds: 200),
                 child: _isEditing
                     ? Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.check_circle,
-                          color: kGreenMain),
-                      onPressed: () {
-                        widget.onUpdate(_controller.text.trim());
-                        setState(() => _isEditing = false);
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.cancel, color: kAccentRed),
-                      onPressed: () {
-                        _controller.text = widget.message;
-                        setState(() => _isEditing = false);
-                      },
-                    ),
-                  ],
-                )
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.check_circle,
+                                color: kGreenMain),
+                            onPressed: () {
+                              widget.onUpdate(_controller.text.trim());
+                              setState(() => _isEditing = false);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.cancel, color: kAccentRed),
+                            onPressed: () {
+                              _controller.text = widget.message;
+                              setState(() => _isEditing = false);
+                            },
+                          ),
+                        ],
+                      )
                     : IconButton(
-                  icon:
-                  const Icon(Icons.edit_rounded, color: kGreenMain),
-                  onPressed: () => setState(() => _isEditing = true),
-                ),
+                        icon: const Icon(Icons.edit_rounded, color: kGreenMain),
+                        onPressed: () => setState(() => _isEditing = true),
+                      ),
               ),
             ],
           ),
@@ -1985,7 +1993,7 @@ class _OfflineMessageCardState extends State<_OfflineMessageCard> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color:
-              _isEditing ? Colors.grey[50] : kAccentRed.withOpacity(0.05),
+                  _isEditing ? Colors.grey[50] : kAccentRed.withOpacity(0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: _isEditing ? kGreenMain : kAccentRed.withOpacity(0.2),
@@ -2064,8 +2072,8 @@ class _SubExecFormStatusCardState extends State<_SubExecFormStatusCard>
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color:
-            (widget.isEnabled ? kAccentPurple : Colors.grey).withOpacity(0.4),
+            color: (widget.isEnabled ? kAccentPurple : Colors.grey)
+                .withOpacity(0.4),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -2085,13 +2093,13 @@ class _SubExecFormStatusCardState extends State<_SubExecFormStatusCard>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: widget.isEnabled
                           ? [
-                        BoxShadow(
-                          color: kAccentGold
-                              .withOpacity(0.5 * _pulseController.value),
-                          blurRadius: 20 * _pulseController.value,
-                          spreadRadius: 5 * _pulseController.value,
-                        ),
-                      ]
+                              BoxShadow(
+                                color: kAccentGold
+                                    .withOpacity(0.5 * _pulseController.value),
+                                blurRadius: 20 * _pulseController.value,
+                                spreadRadius: 5 * _pulseController.value,
+                              ),
+                            ]
                           : null,
                     ),
                     child: Icon(
@@ -2129,8 +2137,8 @@ class _SubExecFormStatusCardState extends State<_SubExecFormStatusCard>
                             boxShadow: [
                               BoxShadow(
                                 color: (widget.isEnabled
-                                    ? kAccentGold
-                                    : kAccentRed)
+                                        ? kAccentGold
+                                        : kAccentRed)
                                     .withOpacity(0.5),
                                 blurRadius: 8,
                                 spreadRadius: 2,
@@ -2179,10 +2187,12 @@ class _SubExecAnimatedToggleSwitch extends StatefulWidget {
   });
 
   @override
-  State<_SubExecAnimatedToggleSwitch> createState() => _SubExecAnimatedToggleSwitchState();
+  State<_SubExecAnimatedToggleSwitch> createState() =>
+      _SubExecAnimatedToggleSwitchState();
 }
 
-class _SubExecAnimatedToggleSwitchState extends State<_SubExecAnimatedToggleSwitch>
+class _SubExecAnimatedToggleSwitchState
+    extends State<_SubExecAnimatedToggleSwitch>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   bool _isToggling = false;
@@ -2244,7 +2254,7 @@ class _SubExecAnimatedToggleSwitchState extends State<_SubExecAnimatedToggleSwit
     });
     final velocity = details.primaryVelocity ?? 0;
     final shouldEnable =
-    velocity > 0 ? _dragPosition > 0.3 : _dragPosition > 0.7;
+        velocity > 0 ? _dragPosition > 0.3 : _dragPosition > 0.7;
     _toggleState(shouldEnable);
   }
 
@@ -2368,9 +2378,9 @@ class _SubExecAnimatedToggleSwitchState extends State<_SubExecAnimatedToggleSwit
                             colors: isEnabled
                                 ? [kAccentGold, const Color(0xFFFF9500)]
                                 : [
-                              const Color(0xFF9CA3AF),
-                              const Color(0xFF6B7280)
-                            ],
+                                    const Color(0xFF9CA3AF),
+                                    const Color(0xFF6B7280)
+                                  ],
                           ),
                           borderRadius: BorderRadius.circular(27),
                           boxShadow: [
@@ -2385,34 +2395,34 @@ class _SubExecAnimatedToggleSwitchState extends State<_SubExecAnimatedToggleSwit
                         child: Center(
                           child: _isToggling
                               ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 3,
-                            ),
-                          )
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 3,
+                                  ),
+                                )
                               : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                isEnabled
-                                    ? Icons.power_settings_new_rounded
-                                    : Icons.power_off_rounded,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                isEnabled ? 'ON' : 'OFF',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w900,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      isEnabled
+                                          ? Icons.power_settings_new_rounded
+                                          : Icons.power_off_rounded,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      isEnabled ? 'ON' : 'OFF',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ),
@@ -2440,10 +2450,12 @@ class _SubExecOfflineMessageCard extends StatefulWidget {
   });
 
   @override
-  State<_SubExecOfflineMessageCard> createState() => _SubExecOfflineMessageCardState();
+  State<_SubExecOfflineMessageCard> createState() =>
+      _SubExecOfflineMessageCardState();
 }
 
-class _SubExecOfflineMessageCardState extends State<_SubExecOfflineMessageCard> {
+class _SubExecOfflineMessageCardState
+    extends State<_SubExecOfflineMessageCard> {
   late TextEditingController _controller;
   bool _isEditing = false;
 
@@ -2526,29 +2538,29 @@ class _SubExecOfflineMessageCardState extends State<_SubExecOfflineMessageCard> 
                 duration: const Duration(milliseconds: 200),
                 child: _isEditing
                     ? Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.check_circle,
-                          color: kAccentPurple),
-                      onPressed: () {
-                        widget.onUpdate(_controller.text.trim());
-                        setState(() => _isEditing = false);
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.cancel, color: kAccentRed),
-                      onPressed: () {
-                        _controller.text = widget.message;
-                        setState(() => _isEditing = false);
-                      },
-                    ),
-                  ],
-                )
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.check_circle,
+                                color: kAccentPurple),
+                            onPressed: () {
+                              widget.onUpdate(_controller.text.trim());
+                              setState(() => _isEditing = false);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.cancel, color: kAccentRed),
+                            onPressed: () {
+                              _controller.text = widget.message;
+                              setState(() => _isEditing = false);
+                            },
+                          ),
+                        ],
+                      )
                     : IconButton(
-                  icon:
-                  const Icon(Icons.edit_rounded, color: kAccentPurple),
-                  onPressed: () => setState(() => _isEditing = true),
-                ),
+                        icon: const Icon(Icons.edit_rounded,
+                            color: kAccentPurple),
+                        onPressed: () => setState(() => _isEditing = true),
+                      ),
               ),
             ],
           ),
@@ -2557,11 +2569,13 @@ class _SubExecOfflineMessageCardState extends State<_SubExecOfflineMessageCard> 
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color:
-              _isEditing ? Colors.grey[50] : kAccentPurple.withOpacity(0.05),
+              color: _isEditing
+                  ? Colors.grey[50]
+                  : kAccentPurple.withOpacity(0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _isEditing ? kAccentPurple : kAccentPurple.withOpacity(0.2),
+                color:
+                    _isEditing ? kAccentPurple : kAccentPurple.withOpacity(0.2),
                 width: _isEditing ? 2 : 1,
               ),
             ),
@@ -2577,7 +2591,8 @@ class _SubExecOfflineMessageCardState extends State<_SubExecOfflineMessageCard> 
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 isDense: true,
-                hintText: 'Enter message to show when Sub Executive form is disabled...',
+                hintText:
+                    'Enter message to show when Sub Executive form is disabled...',
               ),
             ),
           ),
@@ -2684,17 +2699,17 @@ class _AdminMembershipApplicantsPageState
       ),
       floatingActionButton: _selectedSemester == null
           ? _AddSemesterFAB(
-        controller: _fabController,
-        onSemesterCreated: () {
-          _loadAvailableSemesters();
-        },
-      )
+              controller: _fabController,
+              onSemesterCreated: () {
+                _loadAvailableSemesters();
+              },
+            )
           : _BackToSemestersFAB(
-        controller: _fabController,
-        onTap: () {
-          setState(() => _selectedSemester = null);
-        },
-      ),
+              controller: _fabController,
+              onTap: () {
+                setState(() => _selectedSemester = null);
+              },
+            ),
     );
   }
 
@@ -3723,9 +3738,9 @@ class _AddSemesterDialogState extends State<_AddSemesterDialog> {
                   ),
                   suffixIcon: _isValid
                       ? const Icon(
-                    Icons.check_circle_rounded,
-                    color: kGreenMain,
-                  )
+                          Icons.check_circle_rounded,
+                          color: kGreenMain,
+                        )
                       : null,
                   filled: true,
                   fillColor: Colors.grey[50],
@@ -3778,7 +3793,7 @@ class _AddSemesterDialogState extends State<_AddSemesterDialog> {
                     child: ElevatedButton(
                       onPressed: _isValid
                           ? () =>
-                          Navigator.pop(context, _controller.text.trim())
+                              Navigator.pop(context, _controller.text.trim())
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kGreenMain,
@@ -4592,7 +4607,7 @@ class _InfoItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight:
-                    isHighlighted ? FontWeight.w700 : FontWeight.w600,
+                        isHighlighted ? FontWeight.w700 : FontWeight.w600,
                     color: isHighlighted ? color : kGreenDark,
                   ),
                   maxLines: 2,
@@ -4868,11 +4883,11 @@ class _SubExecutiveApplicantsPageState extends State<SubExecutiveApplicantsPage>
       ),
       floatingActionButton: _selectedSemester != null
           ? _SubExecBackToSemestersFAB(
-        controller: _fabController,
-        onTap: () {
-          setState(() => _selectedSemester = null);
-        },
-      )
+              controller: _fabController,
+              onTap: () {
+                setState(() => _selectedSemester = null);
+              },
+            )
           : null,
     );
   }
@@ -5107,9 +5122,7 @@ class _SubExecutiveApplicantsPageState extends State<SubExecutiveApplicantsPage>
           .collection('Members')
           .get();
 
-      final members = snapshot.docs
-          .map((doc) => doc.data())
-          .toList();
+      final members = snapshot.docs.map((doc) => doc.data()).toList();
 
       if (members.isEmpty) {
         if (mounted) {
@@ -5281,12 +5294,20 @@ class SubExecCSVExportService {
         // support multiple possible field names (keep compatible with submit form)
         final phone = applicant['Phone_Number'] ?? applicant['Phone'] ?? '';
         final eduMail = applicant['Edu_Mail'] ?? applicant['EduMail'] ?? '';
-        final studentId = applicant['Student_ID'] ?? applicant['StudentID'] ?? '';
+        final studentId =
+            applicant['Student_ID'] ?? applicant['StudentID'] ?? '';
         final dept = applicant['Department'] ?? '';
-        final semesterField = applicant['Semester'] ?? applicant['Recruitment_Semester'] ?? '';
-        final austId = applicant['AUST_RC_ID'] ?? applicant['AUSTRC_ID'] ?? applicant['AUSTRC_ID'] ?? '';
-        final isMember = (applicant['Is_AUST_RC_Member'] == true) || (applicant['Is_AUSTRC_Member'] == true) || (applicant['Is_AUSTRC_Member'] == 'true');
-        final imageLink = applicant['Image_Drive_Link'] ?? applicant['Image_Link'] ?? '';
+        final semesterField =
+            applicant['Semester'] ?? applicant['Recruitment_Semester'] ?? '';
+        final austId = applicant['AUST_RC_ID'] ??
+            applicant['AUSTRC_ID'] ??
+            applicant['AUSTRC_ID'] ??
+            '';
+        final isMember = (applicant['Is_AUST_RC_Member'] == true) ||
+            (applicant['Is_AUSTRC_Member'] == true) ||
+            (applicant['Is_AUSTRC_Member'] == 'true');
+        final imageLink =
+            applicant['Image_Drive_Link'] ?? applicant['Image_Link'] ?? '';
 
         csvData.add([
           serialNumber++,
@@ -5301,7 +5322,9 @@ class SubExecCSVExportService {
           deptString,
           applicant['Why_Join_Panel'] ?? '',
           applicant['Previous_Club_Experience'] ?? '',
-          applicant['Event_Management_Experience'] ?? applicant['Event_Experience'] ?? '',
+          applicant['Event_Management_Experience'] ??
+              applicant['Event_Experience'] ??
+              '',
           applicant['Robotics_Projects'] ?? '',
           imageLink,
         ]);
@@ -5312,7 +5335,7 @@ class SubExecCSVExportService {
       final directory = await getApplicationDocumentsDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final sanitizedSemester =
-      semesterName.replaceAll(RegExp(r'[^\w\s]'), '_').replaceAll(' ', '_');
+          semesterName.replaceAll(RegExp(r'[^\w\s]'), '_').replaceAll(' ', '_');
       final fileName = 'SubExec_${sanitizedSemester}_$timestamp.csv';
       final filePath = '${directory.path}/$fileName';
 
@@ -5642,7 +5665,7 @@ class _SubExecExportSuccessDialogState
                   Expanded(
                     child: TextButton(
                       onPressed:
-                      _isSharing ? null : () => Navigator.pop(context),
+                          _isSharing ? null : () => Navigator.pop(context),
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -5677,27 +5700,27 @@ class _SubExecExportSuccessDialogState
                       ),
                       child: _isSharing
                           ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
                           : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.share_rounded, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'Share / Save',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.share_rounded, size: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Share / Save',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ],
@@ -5973,9 +5996,12 @@ class _SubExecApplicantCard extends StatelessWidget {
                     ],
                   ),
                   const Divider(height: 24),
-                  _buildInfoRow(Icons.school, 'Department', data['Department'] ?? ''),
-                  _buildInfoRow(Icons.calendar_today, 'Semester', data['Semester'] ?? ''),
-                  _buildInfoRow(Icons.badge, 'Student ID', data['Student_ID'] ?? ''),
+                  _buildInfoRow(
+                      Icons.school, 'Department', data['Department'] ?? ''),
+                  _buildInfoRow(
+                      Icons.calendar_today, 'Semester', data['Semester'] ?? ''),
+                  _buildInfoRow(
+                      Icons.badge, 'Student ID', data['Student_ID'] ?? ''),
                   _buildInfoRow(Icons.work, 'Applied For', deptString),
                 ],
               ),
@@ -6134,16 +6160,24 @@ class _SubExecApplicantDetailsSheet extends StatelessWidget {
                     const SizedBox(height: 32),
                     _buildSectionTitle('Personal Information'),
                     Builder(builder: (context) {
-                      final austId = data['AUST_RC_ID'] ?? data['AUSTRC_ID'] ?? '';
+                      final austId =
+                          data['AUST_RC_ID'] ?? data['AUSTRC_ID'] ?? '';
                       final List<Widget> personalDetails = [
                         _buildDetailRow('Phone', data['Phone'] ?? ''),
-                        _buildDetailRow('Edu Mail', data['Edu_Mail'] ?? data['EduMail'] ?? ''),
-                        _buildDetailRow('Student ID', data['Student_ID'] ?? data['StudentID'] ?? ''),
+                        _buildDetailRow('Edu Mail',
+                            data['Edu_Mail'] ?? data['EduMail'] ?? ''),
+                        _buildDetailRow('Student ID',
+                            data['Student_ID'] ?? data['StudentID'] ?? ''),
                         _buildDetailRow('Department', data['Department'] ?? ''),
-                        _buildDetailRow('Semester', data['Semester'] ?? data['Recruitment_Semester'] ?? ''),
+                        _buildDetailRow(
+                            'Semester',
+                            data['Semester'] ??
+                                data['Recruitment_Semester'] ??
+                                ''),
                       ];
                       if (austId.toString().isNotEmpty) {
-                        personalDetails.add(_buildDetailRow('AUSTRC ID', austId));
+                        personalDetails
+                            .add(_buildDetailRow('AUSTRC ID', austId));
                       }
                       return _buildDetailCard(personalDetails);
                     }),
@@ -6156,7 +6190,9 @@ class _SubExecApplicantDetailsSheet extends StatelessWidget {
                     _buildSectionTitle('Why Join Panel'),
                     _buildTextCard(data['Why_Join_Panel'] ?? 'Not provided'),
                     if (data['Previous_Club_Experience'] != null &&
-                        data['Previous_Club_Experience'].toString().isNotEmpty) ...[
+                        data['Previous_Club_Experience']
+                            .toString()
+                            .isNotEmpty) ...[
                       const SizedBox(height: 24),
                       _buildSectionTitle('Previous Club Experience'),
                       _buildTextCard(data['Previous_Club_Experience']),
@@ -6174,7 +6210,8 @@ class _SubExecApplicantDetailsSheet extends StatelessWidget {
                       _buildTextCard(data['Robotics_Projects']),
                     ],
                     Builder(builder: (context) {
-                      final imageLink = data['Image_Drive_Link'] ?? data['Image_Link'] ?? '';
+                      final imageLink =
+                          data['Image_Drive_Link'] ?? data['Image_Link'] ?? '';
                       if (imageLink.toString().isNotEmpty) {
                         return Column(
                           children: [
