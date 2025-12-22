@@ -938,7 +938,7 @@ class _ProjectCard extends StatelessWidget {
                         Text(
                           projectName,
                           style: TextStyle(
-                            fontSize: SizeConfig.screenWidth * 0.04,
+                            fontSize: SizeConfig.screenWidth * 0.032,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             height: 1.3,
