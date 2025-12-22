@@ -1769,7 +1769,7 @@ class _WelcomeCardState extends State<_WelcomeCard>
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
+                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                   decoration: BoxDecoration(
                     color: kGreenMain.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(14),
