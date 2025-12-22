@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'dart:math' as math;
 import 'Exclusive_Content_Page.dart';
 import 'size_config.dart';
+
 // Main Research Projects List Page
 class ResearchProjectsPage extends StatefulWidget {
   const ResearchProjectsPage({Key? key}) : super(key: key);
@@ -250,7 +251,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
               kToolbarHeight + MediaQuery.of(context).padding.top;
           final currentHeight = constraints.maxHeight;
           final collapseRatio = ((expandedHeight - currentHeight) /
-              (expandedHeight - collapsedHeight))
+                  (expandedHeight - collapsedHeight))
               .clamp(0.0, 1.0);
 
           return Container(
@@ -284,9 +285,9 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
 
                 // Content
                 Positioned(
-                  left: SizeConfig.screenWidth*0.05 + (48 * collapseRatio),
+                  left: SizeConfig.screenWidth * 0.05 + (48 * collapseRatio),
                   right: 24,
-                  bottom: SizeConfig.screenHeight*0.015,
+                  bottom: SizeConfig.screenHeight * 0.015,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -294,12 +295,13 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
                       if (collapseRatio < 0.5) ...[
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: SizeConfig.screenWidth*0.03,
-                            vertical: SizeConfig.screenHeight*0.007,
+                            horizontal: SizeConfig.screenWidth * 0.03,
+                            vertical: SizeConfig.screenHeight * 0.007,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth*0.04),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.screenWidth * 0.04),
                             border: Border.all(
                               color: Colors.white.withOpacity(0.4),
                               width: 1.5,
@@ -309,37 +311,39 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.science,
-                                  color: Colors.white, size: SizeConfig.screenWidth*0.025),
-                              SizedBox(width: SizeConfig.screenWidth*0.012),
+                                  color: Colors.white,
+                                  size: SizeConfig.screenWidth * 0.025),
+                              SizedBox(width: SizeConfig.screenWidth * 0.012),
                               Text(
                                 'Innovation Hub',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: SizeConfig.screenWidth*0.024,
+                                  fontSize: SizeConfig.screenWidth * 0.024,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        SizedBox(height: SizeConfig.screenHeight*0.008),
+                        SizedBox(height: SizeConfig.screenHeight * 0.008),
                       ],
                       Text(
                         'Research & Projects',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: SizeConfig.screenWidth*0.06 - (SizeConfig.screenWidth*0.01 * collapseRatio),
+                          fontSize: SizeConfig.screenWidth * 0.06 -
+                              (SizeConfig.screenWidth * 0.01 * collapseRatio),
                           fontWeight: FontWeight.bold,
                           height: 1.1,
                         ),
                       ),
                       if (collapseRatio < 0.5) ...[
-                        SizedBox(height: SizeConfig.screenHeight*0.006),
+                        SizedBox(height: SizeConfig.screenHeight * 0.006),
                         Text(
                           'Explore groundbreaking innovations',
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.9),
-                            fontSize: SizeConfig.screenWidth*0.03,
+                            fontSize: SizeConfig.screenWidth * 0.03,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -537,7 +541,7 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
           padding: EdgeInsets.all(SizeConfig.screenWidth * 0.034),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
-                  (context, index) {
+              (context, index) {
                 final project = regularProjects[index];
                 final projectName = project.id;
                 final data = project.data() as Map<String, dynamic>?;
@@ -556,7 +560,8 @@ class _ResearchProjectsPageState extends State<ResearchProjectsPage>
                     );
                   },
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.012),
+                    padding: EdgeInsets.only(
+                        bottom: SizeConfig.screenHeight * 0.012),
                     child: _ProjectCard(
                       projectName: projectName,
                       data: data,
@@ -668,8 +673,8 @@ class _FabOverlay extends StatelessWidget {
                     boxShadow: [
                       BoxShadow(
                         color: (fabController.value > 0.5
-                            ? const Color(0xFFD32F2F)
-                            : const Color(0xFF1B5E20))
+                                ? const Color(0xFFD32F2F)
+                                : const Color(0xFF1B5E20))
                             .withOpacity(0.4),
                         blurRadius: 15,
                         offset: const Offset(0, 6),
@@ -678,7 +683,7 @@ class _FabOverlay extends StatelessWidget {
                   ),
                   child: Transform.rotate(
                     angle: fabController.value * (math.pi / 4),
-                    child:  Icon(
+                    child: Icon(
                       Icons.add,
                       color: Colors.white,
                       size: SizeConfig.screenWidth * 0.05,
@@ -732,10 +737,13 @@ class _FabMenuItem extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.025, vertical: SizeConfig.screenWidth*0.015),
+                padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.screenWidth * 0.025,
+                    vertical: SizeConfig.screenWidth * 0.015),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth*0.04),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.15),
@@ -816,9 +824,9 @@ class _ProjectCard extends StatelessWidget {
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
                 ProjectDetailPage(
-                  projectName: projectName,
-                  projectData: data ?? {},
-                ),
+              projectName: projectName,
+              projectData: data ?? {},
+            ),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               var tween = Tween<double>(begin: 0.0, end: 1.0);
@@ -841,7 +849,7 @@ class _ProjectCard extends StatelessWidget {
       },
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        height:SizeConfig.screenHeight * 0.09,
+        height: SizeConfig.screenHeight * 0.09,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: gradient,
@@ -877,7 +885,7 @@ class _ProjectCard extends StatelessWidget {
                   // Cover image box
                   Container(
                     width: SizeConfig.screenWidth * 0.13,
-                    height:  SizeConfig.screenWidth * 0.15,
+                    height: SizeConfig.screenWidth * 0.15,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(18),
@@ -887,44 +895,45 @@ class _ProjectCard extends StatelessWidget {
                       ),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                       child: coverUrl.isNotEmpty
                           ? GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  FullScreenImagePage(imageUrl: coverUrl),
-                            ),
-                          );
-                        },
-                        child: CachedNetworkImage(
-                          imageUrl: coverUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        FullScreenImagePage(imageUrl: coverUrl),
+                                  ),
+                                );
+                              },
+                              child: CachedNetworkImage(
+                                imageUrl: coverUrl,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(
+                                  Icons.broken_image_outlined,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
                               ),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) =>
-                          const Icon(
-                            Icons.broken_image_outlined,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                      )
+                            )
                           : const Icon(
-                        Icons.photo_outlined,
-                        color: Colors.white,
-                        size: 28,
-                      ),
+                              Icons.photo_outlined,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -960,7 +969,8 @@ class _ProjectCard extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.arrow_forward,
-                                  color: Colors.white, size: SizeConfig.screenWidth * 0.025),
+                                  color: Colors.white,
+                                  size: SizeConfig.screenWidth * 0.025),
                               SizedBox(width: SizeConfig.screenWidth * 0.01),
                               Text(
                                 'View Details',
@@ -997,7 +1007,8 @@ class _ExclusiveContentBanner extends StatefulWidget {
   });
 
   @override
-  State<_ExclusiveContentBanner> createState() => _ExclusiveContentBannerState();
+  State<_ExclusiveContentBanner> createState() =>
+      _ExclusiveContentBannerState();
 }
 
 class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
@@ -1035,12 +1046,13 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
         );
       },
       child: Container(
-        margin: EdgeInsets.fromLTRB(SizeConfig.screenWidth*0.035, SizeConfig.screenHeight*0.015,SizeConfig.screenWidth*0.035 , 0),
+        margin: EdgeInsets.fromLTRB(SizeConfig.screenWidth * 0.035,
+            SizeConfig.screenHeight * 0.015, SizeConfig.screenWidth * 0.035, 0),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(SizeConfig.screenWidth*0.06),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
             child: AnimatedBuilder(
               animation: widget.pulseController,
               builder: (context, child) {
@@ -1056,11 +1068,13 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                     boxShadow: [
                       BoxShadow(
                         color: const Color(0xFF4A148C).withOpacity(
-                            (0.3 + (0.2 * widget.pulseController.value)).clamp(0.0, 1.0)),
+                            (0.3 + (0.2 * widget.pulseController.value))
+                                .clamp(0.0, 1.0)),
                         blurRadius: 20 + (10 * widget.pulseController.value),
                         offset: const Offset(0, 10),
                       ),
@@ -1071,7 +1085,8 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                       // Shimmer Effect
                       Positioned.fill(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.screenWidth * 0.04),
                           child: AnimatedBuilder(
                             animation: _shimmerController,
                             builder: (context, child) {
@@ -1088,7 +1103,8 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                       // Floating Particles
                       Positioned.fill(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.screenWidth * 0.04),
                           child: CustomPaint(
                             painter: _FloatingParticlesPainter(
                               animation: widget.pulseController.value,
@@ -1111,7 +1127,8 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                   Colors.orange.withOpacity(0.2),
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.screenWidth * 0.03),
                               border: Border.all(
                                 color: Colors.amber.withOpacity(0.5),
                                 width: 2,
@@ -1119,7 +1136,8 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.amber.withOpacity(
-                                      (0.3 * widget.pulseController.value).clamp(0.0, 1.0)),
+                                      (0.3 * widget.pulseController.value)
+                                          .clamp(0.0, 1.0)),
                                   blurRadius: 15,
                                   spreadRadius: 2,
                                 ),
@@ -1138,10 +1156,12 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                   top: 8,
                                   right: 8,
                                   child: Transform.scale(
-                                    scale: 0.5 + (0.5 * widget.pulseController.value),
+                                    scale: 0.5 +
+                                        (0.5 * widget.pulseController.value),
                                     child: Opacity(
-                                      opacity: widget.pulseController.value.clamp(0.0, 1.0),
-                                      child:  Icon(
+                                      opacity: widget.pulseController.value
+                                          .clamp(0.0, 1.0),
+                                      child: Icon(
                                         Icons.auto_awesome,
                                         color: Colors.white,
                                         size: SizeConfig.screenWidth * 0.03,
@@ -1163,12 +1183,15 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                   children: [
                                     Container(
                                       padding: EdgeInsets.symmetric(
-                                        horizontal: SizeConfig.screenWidth * 0.02,
-                                        vertical: SizeConfig.screenHeight * 0.002,
+                                        horizontal:
+                                            SizeConfig.screenWidth * 0.02,
+                                        vertical:
+                                            SizeConfig.screenHeight * 0.002,
                                       ),
                                       decoration: BoxDecoration(
                                         color: Colors.amber.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
+                                        borderRadius: BorderRadius.circular(
+                                            SizeConfig.screenWidth * 0.02),
                                         border: Border.all(
                                           color: Colors.amber.withOpacity(0.4),
                                         ),
@@ -1181,12 +1204,15 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                             color: Colors.amber[300],
                                             size: SizeConfig.screenWidth * 0.03,
                                           ),
-                                          SizedBox(width: SizeConfig.screenWidth * 0.01),
+                                          SizedBox(
+                                              width: SizeConfig.screenWidth *
+                                                  0.01),
                                           Text(
                                             'MEMBERS ONLY',
                                             style: TextStyle(
                                               color: Colors.amber[300],
-                                              fontSize: SizeConfig.screenWidth * 0.02,
+                                              fontSize:
+                                                  SizeConfig.screenWidth * 0.02,
                                               fontWeight: FontWeight.bold,
                                               letterSpacing: 1,
                                             ),
@@ -1196,7 +1222,8 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: SizeConfig.screenHeight * 0.006),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.006),
                                 Text(
                                   'Exclusive Research & Educational Content',
                                   style: TextStyle(
@@ -1206,7 +1233,8 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                                     height: 1.3,
                                   ),
                                 ),
-                                SizedBox(height: SizeConfig.screenHeight * 0.004),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.004),
                                 Text(
                                   'Access premium materials with your AUSTRC ID',
                                   style: TextStyle(
@@ -1227,7 +1255,7 @@ class _ExclusiveContentBannerState extends State<_ExclusiveContentBanner>
                               color: Colors.white.withOpacity(0.15),
                               shape: BoxShape.circle,
                             ),
-                            child:  Icon(
+                            child: Icon(
                               Icons.arrow_forward_rounded,
                               color: Colors.white,
                               size: SizeConfig.screenWidth * 0.04,
@@ -1379,8 +1407,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
               ExclusiveContentPage(
-                verifiedId: _verifiedId,
-              ),
+            verifiedId: _verifiedId,
+          ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             final curvedAnimation = CurvedAnimation(
               parent: animation,
@@ -1412,7 +1440,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
       child: AnimatedBuilder(
         animation: _shakeAnimation,
         builder: (context, child) {
-          final shakeOffset = math.sin(_shakeAnimation.value * math.pi * 4) * 10;
+          final shakeOffset =
+              math.sin(_shakeAnimation.value * math.pi * 4) * 10;
           return Transform.translate(
             offset: Offset(shakeOffset, 0),
             child: child,
@@ -1464,10 +1493,12 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
+                                padding: EdgeInsets.all(
+                                    SizeConfig.screenWidth * 0.03),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.screenWidth * 0.04),
                                 ),
                                 child: Icon(
                                   _isVerified
@@ -1480,7 +1511,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                               IconButton(
                                 onPressed: () => Navigator.pop(context),
                                 icon: Container(
-                                  padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
+                                  padding: EdgeInsets.all(
+                                      SizeConfig.screenWidth * 0.025),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.2),
                                     shape: BoxShape.circle,
@@ -1496,7 +1528,9 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                           ),
                           SizedBox(height: SizeConfig.screenHeight * 0.015),
                           Text(
-                            _isVerified ? 'Access Granted!' : 'Exclusive Access',
+                            _isVerified
+                                ? 'Access Granted!'
+                                : 'Exclusive Access',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: SizeConfig.screenWidth * 0.05,
@@ -1553,9 +1587,10 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                 padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                 decoration: BoxDecoration(
                   color: const Color(0xFF4A148C).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.screenWidth * 0.02),
                 ),
-                child:Icon(
+                child: Icon(
                   Icons.info_outline,
                   color: Color(0xFF4A148C),
                   size: SizeConfig.screenWidth * 0.05,
@@ -1574,7 +1609,7 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                         fontSize: SizeConfig.screenWidth * 0.03,
                       ),
                     ),
-                     SizedBox(height: SizeConfig.screenHeight * 0.007),
+                    SizedBox(height: SizeConfig.screenHeight * 0.007),
                     Text(
                       'Enter your AUSTRC ID to access exclusive research projects and educational materials.',
                       style: TextStyle(
@@ -1590,12 +1625,11 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
           ),
         ),
         SizedBox(height: SizeConfig.screenHeight * 0.02),
-
         Text(
           'AUSTRC Member ID',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize:SizeConfig.screenWidth * 0.035,
+            fontSize: SizeConfig.screenWidth * 0.035,
             color: Color(0xFF1A237E),
           ),
         ),
@@ -1624,10 +1658,11 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
               hintStyle: TextStyle(color: Colors.grey[400]),
               prefixIcon: Container(
                 margin: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
-                padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.02),
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
                 decoration: BoxDecoration(
                   color: Color(0xFF4A148C).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                 ),
                 child: Icon(
                   Icons.badge_outlined,
@@ -1638,7 +1673,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                 borderSide: BorderSide(
                   color: _errorMessage.isNotEmpty
                       ? Colors.red
@@ -1647,7 +1683,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                 ),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                 borderSide: BorderSide(
                   color: _errorMessage.isNotEmpty
                       ? Colors.red.withOpacity(0.5)
@@ -1656,7 +1693,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                 ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                 borderSide: BorderSide(
                   color: Color(0xFF4A148C),
                   width: 2,
@@ -1671,7 +1709,6 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
             onSubmitted: (_) => _verifyId(),
           ),
         ),
-
         if (_errorMessage.isNotEmpty) ...[
           const SizedBox(height: 12),
           TweenAnimationBuilder<double>(
@@ -1713,9 +1750,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
           ),
         ],
         const SizedBox(height: 24),
-
         SizedBox(
-          width: SizeConfig.screenWidth*0.7,
+          width: SizeConfig.screenWidth * 0.7,
           height: SizeConfig.screenHeight * 0.045,
           child: ElevatedButton(
             onPressed: _isVerifying ? null : _verifyId,
@@ -1730,31 +1766,31 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
             ),
             child: _isVerifying
                 ? SizedBox(
-              width: SizeConfig.screenWidth * 0.06,
-              height: SizeConfig.screenWidth * 0.06,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                color: Colors.white,
-              ),
-            )
+                    width: SizeConfig.screenWidth * 0.06,
+                    height: SizeConfig.screenWidth * 0.06,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  )
                 : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.verified_user_outlined, size: SizeConfig.screenWidth * 0.05),
-                SizedBox(width: SizeConfig.screenWidth * 0.02),
-                Text(
-                  'Verify ID',
-                  style: TextStyle(
-                    fontSize: SizeConfig.screenWidth * 0.03,
-                    fontWeight: FontWeight.bold,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.verified_user_outlined,
+                          size: SizeConfig.screenWidth * 0.05),
+                      SizedBox(width: SizeConfig.screenWidth * 0.02),
+                      Text(
+                        'Verify ID',
+                        style: TextStyle(
+                          fontSize: SizeConfig.screenWidth * 0.03,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
           ),
         ),
         SizedBox(height: SizeConfig.screenHeight * 0.02),
-
         Container(
           padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
           decoration: BoxDecoration(
@@ -1764,7 +1800,9 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
           ),
           child: Row(
             children: [
-              Icon(Icons.help_outline, color: Colors.grey[600], size: SizeConfig.screenWidth * 0.045),
+              Icon(Icons.help_outline,
+                  color: Colors.grey[600],
+                  size: SizeConfig.screenWidth * 0.045),
               SizedBox(width: SizeConfig.screenWidth * 0.03),
               Expanded(
                 child: RichText(
@@ -1785,7 +1823,7 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                       ),
                       TextSpan(
                           text:
-                          ' to get your exclusive ID and access premium content.'),
+                              ' to get your exclusive ID and access premium content.'),
                     ],
                   ),
                 ),
@@ -1808,8 +1846,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
             return Transform.scale(
               scale: value.clamp(0.0, 2.0),
               child: Container(
-                width: SizeConfig.screenWidth*0.2,
-                height: SizeConfig.screenWidth*0.2,
+                width: SizeConfig.screenWidth * 0.2,
+                height: SizeConfig.screenWidth * 0.2,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF43A047), Color(0xFF66BB6A)],
@@ -1826,21 +1864,22 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                 child: Icon(
                   Icons.check_rounded,
                   color: Colors.white,
-                  size: SizeConfig.screenWidth*0.1,
+                  size: SizeConfig.screenWidth * 0.1,
                 ),
               ),
             );
           },
         ),
         SizedBox(height: SizeConfig.screenHeight * 0.02),
-
         Container(
-          padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.01, vertical: SizeConfig.screenHeight*0.008),
+          padding: EdgeInsets.symmetric(
+              horizontal: SizeConfig.screenWidth * 0.01,
+              vertical: SizeConfig.screenHeight * 0.008),
           decoration: BoxDecoration(
             color: Color(0xFF43A047).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(SizeConfig.screenWidth*0.04),
+            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
             border: Border.all(
-              color:  Color(0xFF43A047).withOpacity(0.3),
+              color: Color(0xFF43A047).withOpacity(0.3),
             ),
           ),
           child: Row(
@@ -1849,14 +1888,14 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
               Icon(
                 Icons.verified,
                 color: Color(0xFF43A047),
-                size: SizeConfig.screenWidth*0.04,
+                size: SizeConfig.screenWidth * 0.04,
               ),
-              SizedBox(width: SizeConfig.screenWidth*0.02),
+              SizedBox(width: SizeConfig.screenWidth * 0.02),
               Text(
                 _verifiedId,
-                style:TextStyle(
+                style: TextStyle(
                   color: Color(0xFF43A047),
-                  fontSize: SizeConfig.screenWidth*0.03,
+                  fontSize: SizeConfig.screenWidth * 0.03,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1864,17 +1903,15 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
           ),
         ),
         SizedBox(height: SizeConfig.screenHeight * 0.015),
-
         Text(
           'Your membership has been verified!',
           style: TextStyle(
             color: Colors.grey[700],
-            fontSize: SizeConfig.screenWidth*0.033,
+            fontSize: SizeConfig.screenWidth * 0.033,
           ),
           textAlign: TextAlign.center,
         ),
         SizedBox(height: SizeConfig.screenHeight * 0.02),
-
         Container(
           padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
           decoration: BoxDecoration(
@@ -1898,7 +1935,6 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
           ),
         ),
         SizedBox(height: SizeConfig.screenHeight * 0.02),
-
         SizedBox(
           width: double.infinity,
           height: SizeConfig.screenHeight * 0.045,
@@ -1913,7 +1949,7 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
               elevation: 4,
               shadowColor: const Color(0xFF43A047).withOpacity(0.4),
             ),
-            child:  Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
@@ -1924,7 +1960,8 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
                   ),
                 ),
                 SizedBox(width: SizeConfig.screenWidth * 0.02),
-                Icon(Icons.arrow_forward_rounded, size: SizeConfig.screenWidth * 0.05),
+                Icon(Icons.arrow_forward_rounded,
+                    size: SizeConfig.screenWidth * 0.05),
               ],
             ),
           ),
@@ -1973,7 +2010,7 @@ class _ExclusiveAccessDialogState extends State<ExclusiveAccessDialog>
         ),
         Icon(
           Icons.check_circle,
-          color:  Color(0xFF43A047).withOpacity(0.7),
+          color: Color(0xFF43A047).withOpacity(0.7),
           size: SizeConfig.screenWidth * 0.045,
         ),
       ],
@@ -1994,7 +2031,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _institutionalMailController =
-  TextEditingController();
+      TextEditingController();
 
   bool _isVerified = false;
   bool _isVerifying = false;
@@ -2181,7 +2218,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
         ),
         child: SingleChildScrollView(
           child: Padding(
-            padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.05),
+            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.05),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2192,14 +2229,16 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     Row(
                       children: [
                         Container(
-                          padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.025),
+                          padding:
+                              EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                           decoration: BoxDecoration(
-                            gradient:  LinearGradient(
+                            gradient: LinearGradient(
                               colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
                             ),
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.screenWidth * 0.025),
                           ),
-                          child:  Icon(
+                          child: Icon(
                             Icons.add_circle_outline,
                             color: Colors.white,
                             size: SizeConfig.screenWidth * 0.05,
@@ -2223,20 +2262,21 @@ class _ProposalDialogState extends State<ProposalDialog> {
                           color: Colors.grey[100],
                           shape: BoxShape.circle,
                         ),
-                        child:  Icon(Icons.close, size: SizeConfig.screenWidth * 0.04),
+                        child: Icon(Icons.close,
+                            size: SizeConfig.screenWidth * 0.04),
                       ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
                 SizedBox(height: SizeConfig.screenHeight * 0.02),
-
                 if (!_isVerified) ...[
                   Container(
-                    padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.03),
+                    padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                     decoration: BoxDecoration(
                       color: Color(0xFFE8F5E9),
-                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2255,7 +2295,8 @@ class _ProposalDialogState extends State<ProposalDialog> {
                           decoration: InputDecoration(
                             hintText: 'Enter AUSTRC ID',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.screenWidth * 0.03),
                               borderSide: BorderSide.none,
                             ),
                             filled: true,
@@ -2280,28 +2321,28 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       ),
                       child: _isVerifying
                           ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
                           : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.verified_user, color: Colors.white),
-                          SizedBox(width: SizeConfig.screenWidth * 0.02),
-                          Text(
-                            'Verify ID',
-                            style: TextStyle(
-                              fontSize: SizeConfig.screenWidth * 0.035,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.verified_user, color: Colors.white),
+                                SizedBox(width: SizeConfig.screenWidth * 0.02),
+                                Text(
+                                  'Verify ID',
+                                  style: TextStyle(
+                                    fontSize: SizeConfig.screenWidth * 0.035,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ] else ...[
@@ -2315,7 +2356,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     child: Row(
                       children: [
                         const Icon(Icons.check_circle, color: Colors.green),
-                         SizedBox(width: SizeConfig.screenWidth * 0.02),
+                        SizedBox(width: SizeConfig.screenWidth * 0.02),
                         Text(
                           'Verified: $_verifiedId',
                           style: const TextStyle(
@@ -2326,8 +2367,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       ],
                     ),
                   ),
-                   SizedBox(height: 20),
-
+                  SizedBox(height: 20),
                   Text(
                     'Proposal Type',
                     style: TextStyle(
@@ -2335,7 +2375,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                   SizedBox(height: SizeConfig.screenHeight * 0.01),
+                  SizedBox(height: SizeConfig.screenHeight * 0.01),
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[50],
@@ -2345,8 +2385,9 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       children: [
                         Expanded(
                           child: RadioListTile<String>(
-                            title:  Text('Research',
-                                style: TextStyle(fontSize: SizeConfig.screenWidth * 0.03)),
+                            title: Text('Research',
+                                style: TextStyle(
+                                    fontSize: SizeConfig.screenWidth * 0.03)),
                             value: 'Research',
                             groupValue: _proposalType,
                             onChanged: (value) {
@@ -2359,7 +2400,8 @@ class _ProposalDialogState extends State<ProposalDialog> {
                         Expanded(
                           child: RadioListTile<String>(
                             title: Text('Project',
-                                style: TextStyle(fontSize: SizeConfig.screenWidth * 0.03)),
+                                style: TextStyle(
+                                    fontSize: SizeConfig.screenWidth * 0.03)),
                             value: 'Project',
                             groupValue: _proposalType,
                             onChanged: (value) {
@@ -2373,7 +2415,6 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     ),
                   ),
                   SizedBox(height: SizeConfig.screenHeight * 0.02),
-
                   _buildInputField(
                     label: 'Title',
                     controller: _titleController,
@@ -2381,7 +2422,6 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     icon: Icons.title,
                   ),
                   SizedBox(height: SizeConfig.screenHeight * 0.02),
-
                   _buildInputField(
                     label: 'Institutional Mail',
                     controller: _institutionalMailController,
@@ -2390,7 +2430,6 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     keyboardType: TextInputType.emailAddress,
                   ),
                   SizedBox(height: SizeConfig.screenHeight * 0.02),
-
                   Text(
                     'Short Description (Max 100 words)',
                     style: TextStyle(
@@ -2398,7 +2437,7 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                   SizedBox(height: SizeConfig.screenHeight * 0.01),
+                  SizedBox(height: SizeConfig.screenHeight * 0.01),
                   TextField(
                     controller: _descriptionController,
                     maxLines: 4,
@@ -2417,7 +2456,6 @@ class _ProposalDialogState extends State<ProposalDialog> {
                     ),
                   ),
                   SizedBox(height: SizeConfig.screenHeight * 0.03),
-
                   SizedBox(
                     width: double.infinity,
                     height: SizeConfig.screenHeight * 0.044,
@@ -2426,33 +2464,34 @@ class _ProposalDialogState extends State<ProposalDialog> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2E7D32),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.screenWidth * 0.035),
                         ),
                       ),
                       child: _isSubmitting
                           ? SizedBox(
-                        height: SizeConfig.screenWidth * 0.06,
-                        width: SizeConfig.screenWidth * 0.06,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                          :  Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.send, color: Colors.white),
-                          SizedBox(width: SizeConfig.screenWidth * 0.02),
-                          Text(
-                            'Submit Proposal',
-                            style: TextStyle(
-                              fontSize: SizeConfig.screenWidth * 0.035,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                              height: SizeConfig.screenWidth * 0.06,
+                              width: SizeConfig.screenWidth * 0.06,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.send, color: Colors.white),
+                                SizedBox(width: SizeConfig.screenWidth * 0.02),
+                                Text(
+                                  'Submit Proposal',
+                                  style: TextStyle(
+                                    fontSize: SizeConfig.screenWidth * 0.035,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ],
@@ -2487,12 +2526,14 @@ class _ProposalDialogState extends State<ProposalDialog> {
           keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hint,
-            prefixIcon: Icon(icon, color:  Color(0xFF2E7D32)),
+            prefixIcon: Icon(icon, color: Color(0xFF2E7D32)),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
+              borderRadius:
+                  BorderRadius.circular(SizeConfig.screenWidth * 0.02),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+              borderRadius:
+                  BorderRadius.circular(SizeConfig.screenWidth * 0.03),
               borderSide: const BorderSide(
                 color: Color(0xFF2E7D32),
                 width: 2,
@@ -2539,8 +2580,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
       vsync: this,
     )..forward();
 
-    _scrollController = ScrollController()
-      ..addListener(_onScroll);
+    _scrollController = ScrollController()..addListener(_onScroll);
   }
 
   void _onScroll() {
@@ -2597,7 +2637,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
           'designation': widget.projectData[designationKey] ?? 'N/A',
         });
         ownerIndex++;
-      }       else {
+      } else {
         break;
       }
     }
@@ -2663,11 +2703,12 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
             elevation: 0,
             backgroundColor: Color(0xFF1B5E20),
             leading: Padding(
-              padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.03),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
               child: Container(
                 child: IconButton(
-                  icon:  Icon(Icons.arrow_back_ios_new,
-                      color: Colors.white, size: SizeConfig.screenWidth * 0.045),
+                  icon: Icon(Icons.arrow_back_ios_new,
+                      color: Colors.white,
+                      size: SizeConfig.screenWidth * 0.045),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                 ),
@@ -2760,11 +2801,12 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                 children: [
                   // Title & Subtitle Card
                   Container(
-                    margin:  EdgeInsets.all(SizeConfig.screenWidth * 0.03),
-                    padding:  EdgeInsets.all(SizeConfig.screenWidth * 0.04),
+                    margin: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
+                    padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFF1B5E20).withOpacity(0.1),
@@ -2803,11 +2845,13 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                   // Owners Section
                   if (owners.isNotEmpty) ...[
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.04),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.screenWidth * 0.04),
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.all(SizeConfig.screenWidth * 0.023),
+                            padding:
+                                EdgeInsets.all(SizeConfig.screenWidth * 0.023),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
@@ -2853,10 +2897,12 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                             horizontal: SizeConfig.screenWidth * 0.04,
                             vertical: SizeConfig.screenHeight * 0.005,
                           ),
-                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
+                          padding:
+                              EdgeInsets.all(SizeConfig.screenWidth * 0.025),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.screenWidth * 0.03),
                             border: Border.all(
                               color: const Color(0xFF2E7D32).withOpacity(0.2),
                               width: 2,
@@ -2864,7 +2910,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                             boxShadow: [
                               BoxShadow(
                                 color:
-                                const Color(0xFF1B5E20).withOpacity(0.08),
+                                    const Color(0xFF1B5E20).withOpacity(0.08),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -2898,16 +2944,20 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                     Text(
                                       owner['name'],
                                       style: TextStyle(
-                                        fontSize: SizeConfig.screenWidth * 0.038,
+                                        fontSize:
+                                            SizeConfig.screenWidth * 0.038,
                                         fontWeight: FontWeight.bold,
                                         color: Color(0xFF1B5E20),
                                       ),
                                     ),
-                                    SizedBox(height: SizeConfig.screenHeight * 0.003),
+                                    SizedBox(
+                                        height:
+                                            SizeConfig.screenHeight * 0.003),
                                     Text(
                                       owner['designation'],
                                       style: TextStyle(
-                                        fontSize: SizeConfig.screenWidth * 0.0299,
+                                        fontSize:
+                                            SizeConfig.screenWidth * 0.0299,
                                         color: Colors.grey[800],
                                       ),
                                     ),
@@ -2932,7 +2982,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
 
                     return TweenAnimationBuilder<double>(
                       duration:
-                      Duration(milliseconds: 800 + (sectionIndex * 150)),
+                          Duration(milliseconds: 800 + (sectionIndex * 150)),
                       tween: Tween(begin: 0.0, end: 1.0),
                       builder: (context, value, child) {
                         return Transform.translate(
@@ -2953,7 +3003,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                           children: [
                             // Section Header
                             Container(
-                              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
+                              padding:
+                                  EdgeInsets.all(SizeConfig.screenWidth * 0.03),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
@@ -2961,7 +3012,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                     Color(0xFF2E7D32)
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.screenWidth * 0.03),
                                 boxShadow: [
                                   BoxShadow(
                                     color: const Color(0xFF1B5E20)
@@ -2974,7 +3026,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                               child: Row(
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
+                                    padding: EdgeInsets.all(
+                                        SizeConfig.screenWidth * 0.025),
                                     decoration: BoxDecoration(
                                       color: Colors.white.withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(10),
@@ -2988,13 +3041,15 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                       ),
                                     ),
                                   ),
-                                  SizedBox(width: SizeConfig.screenWidth * 0.03),
+                                  SizedBox(
+                                      width: SizeConfig.screenWidth * 0.03),
                                   Expanded(
                                     child: Text(
                                       section['name'],
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: SizeConfig.screenWidth * 0.035,
+                                        fontSize:
+                                            SizeConfig.screenWidth * 0.035,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -3011,7 +3066,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                   final currentIdx =
                                       _sectionImageIndices[sectionIndex] ?? 0;
                                   final currentUrl =
-                                  images[currentIdx].toString();
+                                      images[currentIdx].toString();
                                   _resolveImageAspect(currentUrl);
 
                                   final screenWidth =
@@ -3027,7 +3082,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                     height: targetHeight.clamp(200.0, 400.0),
                                     child: PageView.builder(
                                       controller:
-                                      PageController(viewportFraction: 1),
+                                          PageController(viewportFraction: 1),
                                       onPageChanged: (idx) {
                                         setState(() {
                                           _sectionImageIndices[sectionIndex] =
@@ -3037,15 +3092,17 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                       itemCount: images.length,
                                       itemBuilder: (context, imageIndex) {
                                         final url =
-                                        images[imageIndex].toString();
+                                            images[imageIndex].toString();
                                         _resolveImageAspect(url);
 
                                         return Container(
                                           margin: EdgeInsets.symmetric(
-                                              horizontal: SizeConfig.screenWidth * 0.01),
+                                              horizontal:
+                                                  SizeConfig.screenWidth *
+                                                      0.01),
                                           decoration: BoxDecoration(
                                             borderRadius:
-                                            BorderRadius.circular(20),
+                                                BorderRadius.circular(20),
                                             boxShadow: [
                                               BoxShadow(
                                                 color: const Color(0xFF1B5E20)
@@ -3057,7 +3114,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                           ),
                                           child: ClipRRect(
                                             borderRadius:
-                                            BorderRadius.circular(20),
+                                                BorderRadius.circular(20),
                                             child: Stack(
                                               fit: StackFit.expand,
                                               children: [
@@ -3077,32 +3134,34 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                                     fit: BoxFit.contain,
                                                     placeholder:
                                                         (context, url) =>
-                                                        Container(
-                                                          color: Colors.grey[200],
-                                                          child: Center(
-                                                            child:
+                                                            Container(
+                                                      color: Colors.grey[200],
+                                                      child: Center(
+                                                        child:
                                                             CircularProgressIndicator(
-                                                              color:
+                                                          color:
                                                               Color(0xFF2E7D32),
-                                                            ),
-                                                          ),
                                                         ),
-                                                    errorWidget: (context, url,
-                                                        error) =>
-                                                        Container(
-                                                          color: Colors.grey[200],
-                                                          child: const Icon(
-                                                            Icons.broken_image,
-                                                            size: 60,
-                                                            color: Colors.grey,
-                                                          ),
-                                                        ),
+                                                      ),
+                                                    ),
+                                                    errorWidget:
+                                                        (context, url, error) =>
+                                                            Container(
+                                                      color: Colors.grey[200],
+                                                      child: const Icon(
+                                                        Icons.broken_image,
+                                                        size: 60,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
 
                                                 // Image Counter
                                                 Positioned(
-                                                  bottom: SizeConfig.screenHeight * 0.015,
+                                                  bottom:
+                                                      SizeConfig.screenHeight *
+                                                          0.015,
                                                   right: 12,
                                                   child: Container(
                                                     padding: const EdgeInsets
@@ -3114,16 +3173,18 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                                       color: Colors.black
                                                           .withOpacity(0.6),
                                                       borderRadius:
-                                                      BorderRadius.circular(
-                                                          20),
+                                                          BorderRadius.circular(
+                                                              20),
                                                     ),
                                                     child: Text(
                                                       '${imageIndex + 1}/${images.length}',
                                                       style: TextStyle(
                                                         color: Colors.white,
-                                                        fontSize: SizeConfig.screenWidth * 0.025,
+                                                        fontSize: SizeConfig
+                                                                .screenWidth *
+                                                            0.025,
                                                         fontWeight:
-                                                        FontWeight.bold,
+                                                            FontWeight.bold,
                                                       ),
                                                     ),
                                                   ),
@@ -3145,31 +3206,31 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: List.generate(
                                     images.length,
-                                        (idx) {
+                                    (idx) {
                                       final currentIndex =
                                           _sectionImageIndices[sectionIndex] ??
                                               0;
                                       final active = currentIndex == idx;
                                       return AnimatedContainer(
                                         duration:
-                                        const Duration(milliseconds: 300),
+                                            const Duration(milliseconds: 300),
                                         width: active ? 30 : 8,
                                         height: 8,
                                         margin: const EdgeInsets.symmetric(
                                             horizontal: 4),
                                         decoration: BoxDecoration(
                                           borderRadius:
-                                          BorderRadius.circular(4),
+                                              BorderRadius.circular(4),
                                           gradient: active
                                               ? const LinearGradient(
-                                            colors: [
-                                              Color(0xFF1B5E20),
-                                              Color(0xFF2E7D32),
-                                            ],
-                                          )
+                                                  colors: [
+                                                    Color(0xFF1B5E20),
+                                                    Color(0xFF2E7D32),
+                                                  ],
+                                                )
                                               : null,
                                           color:
-                                          active ? null : Colors.grey[300],
+                                              active ? null : Colors.grey[300],
                                         ),
                                       );
                                     },
@@ -3184,7 +3245,10 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                 children: [
                                   Container(
                                     padding: EdgeInsets.fromLTRB(
-                                        SizeConfig.screenWidth*0.03, SizeConfig.screenWidth*0.03, SizeConfig.screenWidth*0.1, SizeConfig.screenWidth*0.03),
+                                        SizeConfig.screenWidth * 0.03,
+                                        SizeConfig.screenWidth * 0.03,
+                                        SizeConfig.screenWidth * 0.1,
+                                        SizeConfig.screenWidth * 0.03),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(16),
@@ -3197,7 +3261,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                     child: Text(
                                       description,
                                       style: TextStyle(
-                                        fontSize: SizeConfig.screenWidth * 0.033,
+                                        fontSize:
+                                            SizeConfig.screenWidth * 0.033,
                                         color: Colors.grey[1000],
                                         height: 1.7,
                                         letterSpacing: 0.3,
@@ -3215,8 +3280,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                       child: IconButton(
                                         tooltip: 'Copy description',
                                         icon: Icon(Icons.copy_rounded,
-                                            size: 20,
-                                            color: Color(0xFF2E7D32)),
+                                            size: 20, color: Color(0xFF2E7D32)),
                                         onPressed: () async {
                                           await Clipboard.setData(
                                             ClipboardData(text: description),
@@ -3235,15 +3299,15 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                                                 ],
                                               ),
                                               backgroundColor:
-                                              const Color(0xFF2E7D32),
+                                                  const Color(0xFF2E7D32),
                                               behavior:
-                                              SnackBarBehavior.floating,
+                                                  SnackBarBehavior.floating,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                BorderRadius.circular(12),
+                                                    BorderRadius.circular(12),
                                               ),
                                               duration:
-                                              const Duration(seconds: 2),
+                                                  const Duration(seconds: 2),
                                               margin: const EdgeInsets.all(16),
                                             ),
                                           );
@@ -3331,7 +3395,8 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
             children: [
               // Background
               Container(
-                color: Colors.black.withOpacity(_fadeAnimation.value.clamp(0.0, 1.0)),
+                color: Colors.black
+                    .withOpacity(_fadeAnimation.value.clamp(0.0, 1.0)),
               ),
 
               // Image
@@ -3554,10 +3619,10 @@ class _DNAHelixPainter extends CustomPainter {
       ..strokeWidth = 2;
 
     for (double x = 0; x < size.width; x += 10) {
-      final y1 = size.height * 0.5 +
-          math.sin((x / 30) + animation * 2 * math.pi) * 30;
-      final y2 = size.height * 0.5 -
-          math.sin((x / 30) + animation * 2 * math.pi) * 30;
+      final y1 =
+          size.height * 0.5 + math.sin((x / 30) + animation * 2 * math.pi) * 30;
+      final y2 =
+          size.height * 0.5 - math.sin((x / 30) + animation * 2 * math.pi) * 30;
 
       canvas.drawCircle(Offset(x, y1), 2, paint);
       canvas.drawCircle(Offset(x, y2), 2, paint);
