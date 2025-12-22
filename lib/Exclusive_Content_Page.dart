@@ -126,7 +126,6 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
 
               // Category Chips
 
-
               // Exclusive Projects List
               _buildExclusiveProjectsList(),
 
@@ -204,10 +203,13 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
               );
             },
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.03, vertical: SizeConfig.screenHeight * 0.005),
+              padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.screenWidth * 0.03,
+                  vertical: SizeConfig.screenHeight * 0.005),
               decoration: BoxDecoration(
                 color: Colors.amber.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                 border: Border.all(
                   color: Colors.amber.withOpacity(0.4),
                   width: 1.5,
@@ -245,7 +247,7 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
               kToolbarHeight + MediaQuery.of(context).padding.top;
           final currentHeight = constraints.maxHeight;
           final collapseRatio = ((expandedHeight - currentHeight) /
-              (expandedHeight - collapsedHeight))
+                  (expandedHeight - collapsedHeight))
               .clamp(0.0, 1.0);
 
           return Container(
@@ -321,7 +323,8 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                             ),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.screenWidth * 0.04),
                               border: Border.all(
                                 color: Colors.white.withOpacity(0.3),
                                 width: 1.5,
@@ -350,35 +353,40 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                         ),
                         SizedBox(height: SizeConfig.screenHeight * 0.012),
                       ],
-                      TweenAnimationBuilder<double>(
-                        duration: const Duration(milliseconds: 1000),
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        builder: (context, value, child) {
-                          return Transform.translate(
-                            offset: Offset(0, 20 * (1 - value)),
-                            child: Opacity(
-                              opacity: value.clamp(0.0, 1.0),
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'Exclusive Content',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: SizeConfig.screenWidth * 0.06 - (SizeConfig.screenWidth * 0.02 * collapseRatio),
-                            fontWeight: FontWeight.bold,
-                            height: 1.1,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
+                      if (collapseRatio < 0.7)
+                        TweenAnimationBuilder<double>(
+                          duration: const Duration(milliseconds: 1000),
+                          tween: Tween(begin: 0.0, end: 1.0),
+                          builder: (context, value, child) {
+                            return Transform.translate(
+                              offset: Offset(0, 20 * (1 - value)),
+                              child: Opacity(
+                                opacity: (value * (1 - collapseRatio))
+                                    .clamp(0.0, 1.0),
+                                child: child,
                               ),
-                            ],
+                            );
+                          },
+                          child: Text(
+                            'Exclusive Content',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: SizeConfig.screenWidth * 0.06 -
+                                  (SizeConfig.screenWidth *
+                                      0.02 *
+                                      collapseRatio),
+                              fontWeight: FontWeight.bold,
+                              height: 1.1,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                       if (collapseRatio < 0.5) ...[
                         SizedBox(height: SizeConfig.screenHeight * 0.008),
                         TweenAnimationBuilder<double>(
@@ -476,10 +484,11 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
         final projects = snapshot.data!.docs;
 
         return SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.045),
+          padding:
+              EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.045),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
-                  (context, index) {
+              (context, index) {
                 final project = projects[index];
                 final projectName = project.id;
                 final data = project.data() as Map<String, dynamic>?;
@@ -498,7 +507,8 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
                     );
                   },
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.02),
+                    padding:
+                        EdgeInsets.only(bottom: SizeConfig.screenHeight * 0.02),
                     child: _ExclusiveProjectCard(
                       projectName: projectName,
                       data: data,
@@ -612,7 +622,8 @@ class _ExclusiveContentPageState extends State<ExclusiveContentPage>
             ),
             SizedBox(height: SizeConfig.screenHeight * 0.01),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.1),
+              padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.screenWidth * 0.1),
               child: Text(
                 'Premium research and projects will appear here soon!',
                 style: TextStyle(
@@ -686,7 +697,8 @@ class _WelcomeBanner extends StatelessWidget {
             // Pattern
             Positioned.fill(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.screenWidth * 0.055),
                 child: CustomPaint(
                   painter: _WelcomePatternPainter(),
                 ),
@@ -709,7 +721,8 @@ class _WelcomeBanner extends StatelessWidget {
                             Colors.orange.withOpacity(0.2),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.045),
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.screenWidth * 0.045),
                         border: Border.all(
                           color: Colors.amber.withOpacity(0.5),
                           width: 2,
@@ -735,7 +748,8 @@ class _WelcomeBanner extends StatelessWidget {
                             bottom: SizeConfig.screenWidth * 0.01,
                             right: SizeConfig.screenWidth * 0.01,
                             child: Container(
-                              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.005),
+                              padding: EdgeInsets.all(
+                                  SizeConfig.screenWidth * 0.005),
                               decoration: const BoxDecoration(
                                 color: Color(0xFF43A047),
                                 shape: BoxShape.circle,
@@ -775,7 +789,8 @@ class _WelcomeBanner extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.screenWidth * 0.03),
                           border: Border.all(
                             color: Colors.white.withOpacity(0.2),
                           ),
@@ -819,8 +834,6 @@ class _WelcomeBanner extends StatelessWidget {
     );
   }
 }
-
-
 
 // ===================== Exclusive Project Card =====================
 class _ExclusiveProjectCard extends StatefulWidget {
@@ -885,9 +898,9 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
                 ExclusiveProjectDetailPage(
-                  projectName: widget.projectName,
-                  projectData: widget.data ?? {},
-                ),
+              projectName: widget.projectName,
+              projectData: widget.data ?? {},
+            ),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               return FadeTransition(
@@ -942,7 +955,8 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
               // Background Pattern
               Positioned.fill(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.screenWidth * 0.055),
                   child: CustomPaint(
                     painter: _CardPatternPainter(),
                   ),
@@ -960,7 +974,8 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                   ),
                   decoration: BoxDecoration(
                     color: Colors.amber.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                     border: Border.all(
                       color: Colors.amber.withOpacity(0.4),
                     ),
@@ -999,7 +1014,8 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                       height: SizeConfig.screenHeight * 0.13,
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.screenWidth * 0.04),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.3),
                           width: 2,
@@ -1013,36 +1029,36 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.screenWidth * 0.035),
                         child: coverUrl.isNotEmpty
                             ? CachedNetworkImage(
-                          imageUrl: coverUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: Colors.white.withOpacity(0.1),
-                            child: Center(
-                              child: SizedBox(
-                                width: SizeConfig.screenWidth * 0.055,
-                                height: SizeConfig.screenWidth * 0.055,
-                                child: const CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
+                                imageUrl: coverUrl,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color: Colors.white.withOpacity(0.1),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: SizeConfig.screenWidth * 0.055,
+                                      height: SizeConfig.screenWidth * 0.055,
+                                      child: const CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) =>
-                          Icon(
-                            Icons.broken_image_outlined,
-                            color: Colors.white,
-                            size: SizeConfig.screenWidth * 0.07,
-                          ),
-                        )
+                                errorWidget: (context, url, error) => Icon(
+                                  Icons.broken_image_outlined,
+                                  color: Colors.white,
+                                  size: SizeConfig.screenWidth * 0.07,
+                                ),
+                              )
                             : Icon(
-                          Icons.science_outlined,
-                          color: Colors.white,
-                          size: SizeConfig.screenWidth * 0.09,
-                        ),
+                                Icons.science_outlined,
+                                color: Colors.white,
+                                size: SizeConfig.screenWidth * 0.09,
+                              ),
                       ),
                     ),
                     SizedBox(width: SizeConfig.screenWidth * 0.04),
@@ -1087,7 +1103,8 @@ class _ExclusiveProjectCardState extends State<_ExclusiveProjectCard>
                             ),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.screenWidth * 0.03),
                               border: Border.all(
                                 color: Colors.white.withOpacity(0.3),
                               ),
@@ -1302,7 +1319,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                 child: Container(
                   child: IconButton(
                     icon: Icon(Icons.arrow_back_ios_new,
-                        color: Colors.white, size: SizeConfig.screenWidth * 0.05),
+                        color: Colors.white,
+                        size: SizeConfig.screenWidth * 0.05),
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                   ),
@@ -1331,11 +1349,13 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
               Padding(
                 padding: EdgeInsets.all(SizeConfig.screenWidth * 0.023),
                 child: Container(
-                  padding:
-                  EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.03, vertical: SizeConfig.screenHeight * 0.007),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.screenWidth * 0.03,
+                      vertical: SizeConfig.screenHeight * 0.007),
                   decoration: BoxDecoration(
                     color: Colors.amber.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                     border: Border.all(
                       color: Colors.amber.withOpacity(0.4),
                     ),
@@ -1452,7 +1472,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                       padding: EdgeInsets.all(SizeConfig.screenWidth * 0.055),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.screenWidth * 0.055),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFF4A148C).withOpacity(0.1),
@@ -1474,7 +1495,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                               gradient: const LinearGradient(
                                 colors: [Color(0xFF4A148C), Color(0xFF880E4F)],
                               ),
-                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.screenWidth * 0.03),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1561,7 +1583,7 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
 
                     return TweenAnimationBuilder<double>(
                       duration:
-                      Duration(milliseconds: 800 + (sectionIndex * 150)),
+                          Duration(milliseconds: 800 + (sectionIndex * 150)),
                       tween: Tween(begin: 0.0, end: 1.0),
                       builder: (context, value, child) {
                         return Transform.translate(
@@ -1609,7 +1631,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
         );
       },
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.045),
+        padding:
+            EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.045),
         child: Row(
           children: [
             Container(
@@ -1618,7 +1641,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                 gradient: const LinearGradient(
                   colors: [Color(0xFF4A148C), Color(0xFF880E4F)],
                 ),
-                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.screenWidth * 0.025),
               ),
               child: Icon(
                 icon,
@@ -1672,7 +1696,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
               gradient: const LinearGradient(
                 colors: [Color(0xFF4A148C), Color(0xFF880E4F)],
               ),
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+              borderRadius:
+                  BorderRadius.circular(SizeConfig.screenWidth * 0.03),
             ),
             child: Icon(
               Icons.person,
@@ -1730,7 +1755,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
               gradient: const LinearGradient(
                 colors: [Color(0xFF4A148C), Color(0xFF880E4F)],
               ),
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+              borderRadius:
+                  BorderRadius.circular(SizeConfig.screenWidth * 0.04),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF4A148C).withOpacity(0.3),
@@ -1745,7 +1771,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                   padding: EdgeInsets.all(SizeConfig.screenWidth * 0.02),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                   ),
                   child: Text(
                     '${sectionIndex + 1}',
@@ -1782,13 +1809,15 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
 
                 final screenWidth = MediaQuery.of(context).size.width;
                 final aspect = _imageAspect[currentUrl];
-                final targetHeight =
-                aspect != null ? (screenWidth / aspect) : SizeConfig.screenHeight * 0.3;
+                final targetHeight = aspect != null
+                    ? (screenWidth / aspect)
+                    : SizeConfig.screenHeight * 0.3;
 
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeInOut,
-                  height: targetHeight.clamp(SizeConfig.screenHeight * 0.22, SizeConfig.screenHeight * 0.45),
+                  height: targetHeight.clamp(SizeConfig.screenHeight * 0.22,
+                      SizeConfig.screenHeight * 0.45),
                   child: PageView.builder(
                     controller: PageController(viewportFraction: 1),
                     onPageChanged: (idx) {
@@ -1802,9 +1831,11 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                       _resolveImageAspect(url);
 
                       return Container(
-                        margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.02),
+                        margin: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.screenWidth * 0.02),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.045),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.screenWidth * 0.045),
                           boxShadow: [
                             BoxShadow(
                               color: const Color(0xFF4A148C).withOpacity(0.2),
@@ -1814,7 +1845,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.045),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.screenWidth * 0.045),
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
@@ -1823,8 +1855,9 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => _ExclusiveFullScreenImagePage(
-                                          imageUrl: url),
+                                      builder: (_) =>
+                                          _ExclusiveFullScreenImagePage(
+                                              imageUrl: url),
                                     ),
                                   );
                                 },
@@ -1841,13 +1874,13 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                                   ),
                                   errorWidget: (context, url, error) =>
                                       Container(
-                                        color: const Color(0xFFF3E5F5),
-                                        child: Icon(
-                                          Icons.broken_image,
-                                          size: SizeConfig.screenWidth * 0.14,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
+                                    color: const Color(0xFFF3E5F5),
+                                    child: Icon(
+                                      Icons.broken_image,
+                                      size: SizeConfig.screenWidth * 0.14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
                                 ),
                               ),
 
@@ -1867,7 +1900,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                                         Color(0xFF880E4F)
                                       ],
                                     ),
-                                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
+                                    borderRadius: BorderRadius.circular(
+                                        SizeConfig.screenWidth * 0.05),
                                   ),
                                   child: Text(
                                     '${imageIndex + 1}/${images.length}',
@@ -1896,24 +1930,28 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
                   images.length,
-                      (idx) {
+                  (idx) {
                     final currentIndex =
                         _sectionImageIndices[sectionIndex] ?? 0;
                     final active = currentIndex == idx;
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      width: active ? SizeConfig.screenWidth * 0.07 : SizeConfig.screenWidth * 0.02,
+                      width: active
+                          ? SizeConfig.screenWidth * 0.07
+                          : SizeConfig.screenWidth * 0.02,
                       height: SizeConfig.screenWidth * 0.02,
-                      margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.01),
+                      margin: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.screenWidth * 0.01),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.01),
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.screenWidth * 0.01),
                         gradient: active
                             ? const LinearGradient(
-                          colors: [
-                            Color(0xFF4A148C),
-                            Color(0xFF880E4F),
-                          ],
-                        )
+                                colors: [
+                                  Color(0xFF4A148C),
+                                  Color(0xFF880E4F),
+                                ],
+                              )
                             : null,
                         color: active ? null : Colors.grey[300],
                       ),
@@ -1937,7 +1975,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.screenWidth * 0.04),
                     border: Border.all(
                       color: const Color(0xFF4A148C).withOpacity(0.2),
                       width: 2,
@@ -1964,7 +2003,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                     child: IconButton(
                       tooltip: 'Copy description',
                       icon: Icon(Icons.copy_rounded,
-                          size: SizeConfig.screenWidth * 0.045, color: Color(0xFF4A148C)),
+                          size: SizeConfig.screenWidth * 0.045,
+                          color: Color(0xFF4A148C)),
                       onPressed: () async {
                         await Clipboard.setData(
                           ClipboardData(text: description),
@@ -1975,7 +2015,8 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                             content: Row(
                               children: [
                                 Icon(Icons.check_circle,
-                                    color: Colors.white, size: SizeConfig.screenWidth * 0.045),
+                                    color: Colors.white,
+                                    size: SizeConfig.screenWidth * 0.045),
                                 SizedBox(width: SizeConfig.screenWidth * 0.025),
                                 const Text('Description copied!'),
                               ],
@@ -1983,10 +2024,12 @@ class _ExclusiveProjectDetailPageState extends State<ExclusiveProjectDetailPage>
                             backgroundColor: const Color(0xFF4A148C),
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.screenWidth * 0.03),
                             ),
                             duration: const Duration(seconds: 2),
-                            margin: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
+                            margin:
+                                EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                           ),
                         );
                       },
@@ -2081,7 +2124,8 @@ class _ExclusiveFullScreenImagePageState
                           height: SizeConfig.screenWidth * 0.2,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.screenWidth * 0.04),
                           ),
                           child: const Center(
                             child: CircularProgressIndicator(
@@ -2091,10 +2135,12 @@ class _ExclusiveFullScreenImagePageState
                           ),
                         ),
                         errorWidget: (context, url, error) => Container(
-                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.07),
+                          padding:
+                              EdgeInsets.all(SizeConfig.screenWidth * 0.07),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.04),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.screenWidth * 0.04),
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -2123,7 +2169,8 @@ class _ExclusiveFullScreenImagePageState
 
               // Close Button
               Positioned(
-                top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.01,
+                top: MediaQuery.of(context).padding.top +
+                    SizeConfig.screenHeight * 0.01,
                 left: SizeConfig.screenWidth * 0.04,
                 child: FadeTransition(
                   opacity: _fadeAnimation,
@@ -2138,7 +2185,8 @@ class _ExclusiveFullScreenImagePageState
                             const Color(0xFF880E4F).withOpacity(0.8),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.screenWidth * 0.035),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.3),
                           width: 1.5,
@@ -2156,7 +2204,8 @@ class _ExclusiveFullScreenImagePageState
 
               // Copy Link Button
               Positioned(
-                top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.01,
+                top: MediaQuery.of(context).padding.top +
+                    SizeConfig.screenHeight * 0.01,
                 right: SizeConfig.screenWidth * 0.04,
                 child: FadeTransition(
                   opacity: _fadeAnimation,
@@ -2167,7 +2216,9 @@ class _ExclusiveFullScreenImagePageState
                         SnackBar(
                           content: Row(
                             children: [
-                              Icon(Icons.link, color: Colors.white, size: SizeConfig.screenWidth * 0.045),
+                              Icon(Icons.link,
+                                  color: Colors.white,
+                                  size: SizeConfig.screenWidth * 0.045),
                               SizedBox(width: SizeConfig.screenWidth * 0.025),
                               const Text('Image URL copied!'),
                             ],
@@ -2175,7 +2226,8 @@ class _ExclusiveFullScreenImagePageState
                           backgroundColor: const Color(0xFF4A148C),
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.screenWidth * 0.03),
                           ),
                           margin: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
                         ),
@@ -2190,7 +2242,8 @@ class _ExclusiveFullScreenImagePageState
                             const Color(0xFF880E4F).withOpacity(0.8),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.screenWidth * 0.035),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.3),
                           width: 1.5,
@@ -2208,7 +2261,8 @@ class _ExclusiveFullScreenImagePageState
 
               // Zoom Hint
               Positioned(
-                bottom: MediaQuery.of(context).padding.bottom + SizeConfig.screenHeight * 0.035,
+                bottom: MediaQuery.of(context).padding.bottom +
+                    SizeConfig.screenHeight * 0.035,
                 left: 0,
                 right: 0,
                 child: FadeTransition(
@@ -2226,7 +2280,8 @@ class _ExclusiveFullScreenImagePageState
                             const Color(0xFF880E4F).withOpacity(0.6),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.screenWidth * 0.06),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.2),
                         ),
@@ -2501,7 +2556,8 @@ class _StatisticsSection extends StatelessWidget {
         );
       },
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.045),
+        margin:
+            EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.045),
         padding: EdgeInsets.all(SizeConfig.screenWidth * 0.045),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -2661,7 +2717,8 @@ class _FeaturedContentCardState extends State<_FeaturedContentCard>
             width: SizeConfig.screenWidth * 0.65,
             margin: EdgeInsets.only(right: SizeConfig.screenWidth * 0.04),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
+              borderRadius:
+                  BorderRadius.circular(SizeConfig.screenWidth * 0.055),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF4A148C).withOpacity(0.2),
@@ -2671,48 +2728,49 @@ class _FeaturedContentCardState extends State<_FeaturedContentCard>
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.055),
+              borderRadius:
+                  BorderRadius.circular(SizeConfig.screenWidth * 0.055),
               child: Stack(
                 children: [
                   // Background Image
                   Positioned.fill(
                     child: widget.imageUrl.isNotEmpty
                         ? CachedNetworkImage(
-                      imageUrl: widget.imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFF4A148C),
-                              Color(0xFF880E4F)
-                            ],
-                          ),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFF4A148C),
-                              Color(0xFF880E4F)
-                            ],
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.science,
-                          color: Colors.white,
-                          size: SizeConfig.screenWidth * 0.12,
-                        ),
-                      ),
-                    )
+                            imageUrl: widget.imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xFF4A148C),
+                                    Color(0xFF880E4F)
+                                  ],
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xFF4A148C),
+                                    Color(0xFF880E4F)
+                                  ],
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.science,
+                                color: Colors.white,
+                                size: SizeConfig.screenWidth * 0.12,
+                              ),
+                            ),
+                          )
                         : Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF4A148C), Color(0xFF880E4F)],
-                        ),
-                      ),
-                    ),
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xFF4A148C), Color(0xFF880E4F)],
+                              ),
+                            ),
+                          ),
                   ),
 
                   // Gradient Overlay
@@ -2756,7 +2814,8 @@ class _FeaturedContentCardState extends State<_FeaturedContentCard>
                       ),
                       decoration: BoxDecoration(
                         color: Colors.amber.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.screenWidth * 0.03),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -2817,7 +2876,8 @@ class _FeaturedContentCardState extends State<_FeaturedContentCard>
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.screenWidth * 0.03),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -2941,7 +3001,8 @@ class _LockedContentOverlay extends StatelessWidget {
                   vertical: SizeConfig.screenHeight * 0.012,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.045),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.screenWidth * 0.045),
                 ),
               ),
               child: Row(
@@ -3017,7 +3078,8 @@ class _ContentProgressIndicator extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [color, color.withOpacity(0.7)],
                 ),
-                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.008),
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.screenWidth * 0.008),
               ),
             ),
           ),
@@ -3093,7 +3155,8 @@ class _BookmarkButtonState extends State<_BookmarkButton>
                 color: widget.isBookmarked
                     ? Colors.amber.withOpacity(0.2)
                     : Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                 border: Border.all(
                   color: widget.isBookmarked
                       ? Colors.amber.withOpacity(0.5)
@@ -3184,7 +3247,9 @@ class _ContentTypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.025, vertical: SizeConfig.screenHeight * 0.006),
+      padding: EdgeInsets.symmetric(
+          horizontal: SizeConfig.screenWidth * 0.025,
+          vertical: SizeConfig.screenHeight * 0.006),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
