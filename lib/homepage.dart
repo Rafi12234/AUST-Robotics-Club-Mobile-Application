@@ -1824,7 +1824,7 @@ class _WelcomeCardState extends State<_WelcomeCard>
                             Icon(
                               Icons.rocket_launch_rounded,
                               color: Colors.amber,
-                              size: 14,
+                              size: 13,
                             ),
                             const SizedBox(width: 6),
                             Text(
