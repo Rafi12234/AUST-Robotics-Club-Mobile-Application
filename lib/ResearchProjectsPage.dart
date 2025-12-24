@@ -955,7 +955,7 @@ class _ProjectCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: SizeConfig.screenHeight * 0.006),
+                        SizedBox(height: SizeConfig.screenHeight * 0.0065),
                         Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: SizeConfig.screenWidth * 0.025,
