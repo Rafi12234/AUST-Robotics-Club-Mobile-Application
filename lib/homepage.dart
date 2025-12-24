@@ -2605,7 +2605,7 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel>
   );
 
   Widget _errorBox(String message) => Container(
-    height: 160,
+    height: 161,
     alignment: Alignment.center,
     padding: const EdgeInsets.symmetric(horizontal: 12),
     decoration: BoxDecoration(
