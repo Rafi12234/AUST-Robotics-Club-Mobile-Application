@@ -2685,6 +2685,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
     final coverPhoto = widget.projectData['Cover_Picture'] ?? '';
     final title = widget.projectData['Title'] ?? widget.projectName;
     final subtitle = widget.projectData['Subtitle'] ?? '';
+    final introduction = widget.projectData['Introduction'] ?? '';
     final owners = _getOwners();
     final sections = _getSections();
 
@@ -2972,6 +2973,77 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                     SizedBox(height: SizeConfig.screenHeight * 0.005),
                   ],
 
+                  // Introduction Section
+                  if (introduction.isNotEmpty) ...[
+                    SizedBox(height: SizeConfig.screenHeight * 0.02),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.screenWidth * 0.04),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding:
+                                EdgeInsets.all(SizeConfig.screenWidth * 0.023),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.info_outline,
+                              color: Colors.white,
+                              size: SizeConfig.screenWidth * 0.04,
+                            ),
+                          ),
+                          SizedBox(width: SizeConfig.screenWidth * 0.03),
+                          Text(
+                            'Introduction',
+                            style: TextStyle(
+                              fontSize: SizeConfig.screenWidth * 0.04,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1B5E20),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: SizeConfig.screenHeight * 0.01),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.screenWidth * 0.04,
+                      ),
+                      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.screenWidth * 0.03),
+                        border: Border.all(
+                          color: const Color(0xFF2E7D32).withOpacity(0.2),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF1B5E20).withOpacity(0.08),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        introduction,
+                        style: TextStyle(
+                          fontSize: SizeConfig.screenWidth * 0.035,
+                          color: Colors.grey[800],
+                          height: 1.6,
+                          letterSpacing: 0.2,
+                        ),
+                        textAlign: TextAlign.justify,
+                      ),
+                    ),
+                    SizedBox(height: SizeConfig.screenHeight * 0.015),
+                  ],
+
                   // Sections
                   ...sections.asMap().entries.map((entry) {
                     final sectionIndex = entry.key;
@@ -3002,60 +3074,35 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Section Header
-                            Container(
-                              padding:
-                                  EdgeInsets.all(SizeConfig.screenWidth * 0.03),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF1B5E20),
-                                    Color(0xFF2E7D32)
-                                  ],
+                            Row(
+                              children: [
+                                Container(
+                                  padding:
+                                      EdgeInsets.all(SizeConfig.screenWidth * 0.023),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(
+                                    Icons.article_outlined,
+                                    color: Colors.white,
+                                    size: SizeConfig.screenWidth * 0.04,
+                                  ),
                                 ),
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.screenWidth * 0.03),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF1B5E20)
-                                        .withOpacity(0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(
-                                        SizeConfig.screenWidth * 0.025),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Text(
-                                      '${sectionIndex + 1}',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: SizeConfig.screenWidth * 0.03,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                SizedBox(width: SizeConfig.screenWidth * 0.03),
+                                Expanded(
+                                  child: Text(
+                                    section['name'],
+                                    style: TextStyle(
+                                      fontSize: SizeConfig.screenWidth * 0.04,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF1B5E20),
                                     ),
                                   ),
-                                  SizedBox(
-                                      width: SizeConfig.screenWidth * 0.03),
-                                  Expanded(
-                                    child: Text(
-                                      section['name'],
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize:
-                                            SizeConfig.screenWidth * 0.035,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
 
                             // Section Images
