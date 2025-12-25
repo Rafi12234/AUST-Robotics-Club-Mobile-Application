@@ -3077,11 +3077,14 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                             Row(
                               children: [
                                 Container(
-                                  padding:
-                                      EdgeInsets.all(SizeConfig.screenWidth * 0.023),
+                                  padding: EdgeInsets.all(
+                                      SizeConfig.screenWidth * 0.023),
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
-                                      colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+                                      colors: [
+                                        Color(0xFF1B5E20),
+                                        Color(0xFF43A047)
+                                      ],
                                     ),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
