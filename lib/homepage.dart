@@ -26,7 +26,8 @@ class EventItem {
   final String imageUrl;
   final String title;
 
-  EventItem({required this.number, required this.imageUrl, required this.title});
+  EventItem(
+      {required this.number, required this.imageUrl, required this.title});
 }
 
 class HomePage extends StatelessWidget {
@@ -231,7 +232,8 @@ class _InfoButtonState extends State<_InfoButton>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.1 + (0.1 * _pulseController.value)),
+                    color: Colors.white
+                        .withOpacity(0.1 + (0.1 * _pulseController.value)),
                     blurRadius: 8 + (4 * _pulseController.value),
                     spreadRadius: 2,
                   ),
@@ -299,8 +301,8 @@ class _AboutDialogState extends State<_AboutDialog>
     return Center(
       child: SingleChildScrollView(
         child: Container(
-          margin:  EdgeInsets.all(24),
-          constraints:  BoxConstraints(maxWidth: SizeConfig.screenHeight * 0.9),
+          margin: EdgeInsets.all(24),
+          constraints: BoxConstraints(maxWidth: SizeConfig.screenHeight * 0.9),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(28),
@@ -331,7 +333,7 @@ class _AboutDialogState extends State<_AboutDialog>
                       end: Alignment.bottomRight,
                     ),
                     borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(28)),
+                        BorderRadius.vertical(top: Radius.circular(28)),
                   ),
                   child: Column(
                     children: [
@@ -477,7 +479,8 @@ class _AboutDialogState extends State<_AboutDialog>
                                     Text(
                                       'About Us',
                                       style: TextStyle(
-                                        fontSize: SizeConfig.screenWidth * 0.035,
+                                        fontSize:
+                                            SizeConfig.screenWidth * 0.035,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF0F3D2E),
                                       ),
@@ -521,7 +524,8 @@ class _AboutDialogState extends State<_AboutDialog>
                                         child: Text(
                                           '"Robotics for Building a Safer Future"',
                                           style: TextStyle(
-                                            fontSize: SizeConfig.screenWidth * 0.028,
+                                            fontSize:
+                                                SizeConfig.screenWidth * 0.028,
                                             fontStyle: FontStyle.italic,
                                             fontWeight: FontWeight.w700,
                                             color: Color(0xFF0F3D2E),
@@ -555,7 +559,7 @@ class _AboutDialogState extends State<_AboutDialog>
                                 backgroundColor: const Color(0xFF0F3D2E),
                                 foregroundColor: Colors.white,
                                 padding:
-                                const EdgeInsets.symmetric(vertical: 16),
+                                    const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
@@ -565,8 +569,10 @@ class _AboutDialogState extends State<_AboutDialog>
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.check_circle_rounded, size: SizeConfig.screenWidth * 0.03),
-                                  SizedBox(width: SizeConfig.screenWidth * 0.02),
+                                  Icon(Icons.check_circle_rounded,
+                                      size: SizeConfig.screenWidth * 0.03),
+                                  SizedBox(
+                                      width: SizeConfig.screenWidth * 0.02),
                                   Text(
                                     'Got It!',
                                     style: TextStyle(
@@ -697,8 +703,73 @@ class _HighlightChip extends StatelessWidget {
 }
 
 /// ========================== BODY CONTENT ===================================
-class HomeBody extends StatelessWidget {
+class HomeBody extends StatefulWidget {
   const HomeBody({super.key});
+
+  @override
+  State<HomeBody> createState() => _HomeBodyState();
+}
+
+class _HomeBodyState extends State<HomeBody> {
+  @override
+  void initState() {
+    super.initState();
+    // Check and show popup after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowPopup();
+    });
+  }
+
+  Future<void> _checkAndShowPopup() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('Screen Pop Up')
+          .doc('popup')
+          .get();
+
+      if (doc.exists && mounted) {
+        final data = doc.data();
+        final bool popupHappen = data?['popup_happen'] ?? false;
+        final String? popupImage = data?['popup image'];
+
+        if (popupHappen && popupImage != null && popupImage.isNotEmpty) {
+          _showEventPopup(popupImage);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching popup data: $e');
+    }
+  }
+
+  void _showEventPopup(String imageUrl) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss Popup',
+      barrierColor: Colors.black.withOpacity(0.7),
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return _EventPopupDialog(
+          imageUrl: imageUrl,
+          animation: animation,
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack,
+          reverseCurve: Curves.easeInBack,
+        );
+        return FadeTransition(
+          opacity: curvedAnimation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.8, end: 1.0).animate(curvedAnimation),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -709,7 +780,11 @@ class HomeBody extends StatelessWidget {
       children: [
         // Main content with padding
         Padding(
-          padding:  EdgeInsets.fromLTRB(SizeConfig.screenWidth*0.03 , SizeConfig.screenHeight*0.014, SizeConfig.screenWidth*0.03, 0),
+          padding: EdgeInsets.fromLTRB(
+              SizeConfig.screenWidth * 0.03,
+              SizeConfig.screenHeight * 0.014,
+              SizeConfig.screenWidth * 0.03,
+              0),
           child: Column(
             children: [
               const _WelcomeCard(),
@@ -754,6 +829,303 @@ class HomeBody extends StatelessWidget {
 }
 
 // ============================================
+// EVENT POPUP DIALOG WIDGET
+// ============================================
+class _EventPopupDialog extends StatefulWidget {
+  final String imageUrl;
+  final Animation<double> animation;
+
+  const _EventPopupDialog({
+    required this.imageUrl,
+    required this.animation,
+  });
+
+  @override
+  State<_EventPopupDialog> createState() => _EventPopupDialogState();
+}
+
+class _EventPopupDialogState extends State<_EventPopupDialog>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerController;
+  Timer? _autoDismissTimer;
+  double _dismissProgress = 0.0;
+  Timer? _progressTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat();
+
+    // Start auto-dismiss timer (5 seconds)
+    _autoDismissTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    });
+
+    // Progress indicator timer
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+      if (mounted) {
+        setState(() {
+          _dismissProgress += 0.01; // 5 seconds = 100 updates at 50ms each
+          if (_dismissProgress >= 1.0) {
+            timer.cancel();
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    _autoDismissTimer?.cancel();
+    _progressTimer?.cancel();
+    super.dispose();
+  }
+
+  void _dismissPopup() {
+    _autoDismissTimer?.cancel();
+    _progressTimer?.cancel();
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: screenWidth * 0.9,
+            maxHeight: screenHeight * 0.75,
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Main popup container
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: kGreenMain.withOpacity(0.3),
+                      blurRadius: 30,
+                      spreadRadius: 5,
+                      offset: const Offset(0, 10),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Stack(
+                    children: [
+                      // Event Image
+                      CachedNetworkImage(
+                        imageUrl: widget.imageUrl,
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) => Container(
+                          width: screenWidth * 0.85,
+                          height: screenHeight * 0.5,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                kGreenDark.withOpacity(0.8),
+                                kGreenMain.withOpacity(0.6),
+                              ],
+                            ),
+                          ),
+                          child: Center(
+                            child: AnimatedBuilder(
+                              animation: _shimmerController,
+                              builder: (context, child) {
+                                return Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white.withOpacity(0.1),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.white.withOpacity(
+                                            0.2 * _shimmerController.value),
+                                        blurRadius: 20,
+                                        spreadRadius:
+                                            5 * _shimmerController.value,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const CircularProgressIndicator(
+                                    valueColor:
+                                        AlwaysStoppedAnimation(Colors.white),
+                                    strokeWidth: 3,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          width: screenWidth * 0.85,
+                          height: screenHeight * 0.5,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                kGreenDark,
+                                kGreenMain,
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.image_not_supported_outlined,
+                                size: 60,
+                                color: Colors.white.withOpacity(0.7),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Unable to load image',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.8),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Progress indicator at bottom
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.3),
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(24),
+                              bottomRight: Radius.circular(24),
+                            ),
+                          ),
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: _dismissProgress.clamp(0.0, 1.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    kGreenDark,
+                                    kGreenMain,
+                                  ],
+                                ),
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(24),
+                                  bottomRight: Radius.circular(24),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: kGreenDark.withOpacity(0.5),
+                                    blurRadius: 6,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Close button
+              Positioned(
+                top: -12,
+                right: -12,
+                child: GestureDetector(
+                  onTap: _dismissPopup,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF2D2D2D),
+                          Color(0xFF1A1A1A),
+                        ],
+                      ),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.2),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.4),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Decorative glow effect
+              Positioned(
+                top: -50,
+                left: -50,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        kGreenDark.withOpacity(0.3),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
 // CONTINUOUS MOVING CAROUSEL WIDGET
 // ============================================
 class ContinuousMovingCarousel extends StatefulWidget {
@@ -777,7 +1149,8 @@ class ContinuousMovingCarousel extends StatefulWidget {
   });
 
   @override
-  State<ContinuousMovingCarousel> createState() => _ContinuousMovingCarouselState();
+  State<ContinuousMovingCarousel> createState() =>
+      _ContinuousMovingCarouselState();
 }
 
 class _ContinuousMovingCarouselState extends State<ContinuousMovingCarousel>
@@ -967,9 +1340,8 @@ class _OurSponsorsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final docRef = FirebaseFirestore.instance
-        .collection('All_Data')
-        .doc('Sponsor_Images');
+    final docRef =
+        FirebaseFirestore.instance.collection('All_Data').doc('Sponsor_Images');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1545,7 +1917,7 @@ class _FooterTransitionSectionState extends State<_FooterTransitionSection>
                       children: List.generate(5, (index) {
                         final delay = index * 0.15;
                         final animValue =
-                        ((_waveController.value + delay) % 1.0);
+                            ((_waveController.value + delay) % 1.0);
                         return Container(
                           margin: const EdgeInsets.symmetric(horizontal: 4),
                           child: Transform.translate(
@@ -1554,11 +1926,13 @@ class _FooterTransitionSectionState extends State<_FooterTransitionSection>
                               width: 8,
                               height: 8,
                               decoration: BoxDecoration(
-                                color: kGreenMain.withOpacity(0.6 + (0.4 * animValue)),
+                                color: kGreenMain
+                                    .withOpacity(0.6 + (0.4 * animValue)),
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: kGreenMain.withOpacity(0.4 * animValue),
+                                    color:
+                                        kGreenMain.withOpacity(0.4 * animValue),
                                     blurRadius: 8 * animValue,
                                     spreadRadius: 2 * animValue,
                                   ),
@@ -1653,8 +2027,7 @@ class _TransitionPatternPainter extends CustomPainter {
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke;
 
-    final wavePath = Path()
-      ..moveTo(0, size.height * 0.5);
+    final wavePath = Path()..moveTo(0, size.height * 0.5);
 
     for (double x = 0; x <= size.width; x += 20) {
       final y = size.height * 0.5 + 15 * math.sin(x / 50);
@@ -1664,8 +2037,7 @@ class _TransitionPatternPainter extends CustomPainter {
     canvas.drawPath(wavePath, wavePaint);
 
     // Second wave
-    final wavePath2 = Path()
-      ..moveTo(0, size.height * 0.6);
+    final wavePath2 = Path()..moveTo(0, size.height * 0.6);
 
     for (double x = 0; x <= size.width; x += 20) {
       final y = size.height * 0.6 + 10 * math.sin((x / 40) + 1);
@@ -1810,7 +2182,8 @@ class _WelcomeCardState extends State<_WelcomeCard>
                       ),
                       SizedBox(height: SizeConfig.screenHeight * 0.008),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: kGreenMain.withOpacity(0.25),
                           borderRadius: BorderRadius.circular(20),
@@ -1961,7 +2334,8 @@ class _HighlightsOfAUSTRCState extends State<_HighlightsOfAUSTRC>
     if (itemCount <= 1) return;
 
     _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!mounted || _pageController == null || !_pageController!.hasClients) return;
+      if (!mounted || _pageController == null || !_pageController!.hasClients)
+        return;
       _pageController!.nextPage(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOutCubic,
@@ -2010,7 +2384,8 @@ class _HighlightsOfAUSTRCState extends State<_HighlightsOfAUSTRC>
           return _buildErrorWidget('Failed to load highlights');
         }
 
-        if (snapshot.connectionState == ConnectionState.waiting && _newsUrls.isEmpty) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            _newsUrls.isEmpty) {
           return _buildLoadingWidget();
         }
 
@@ -2020,7 +2395,8 @@ class _HighlightsOfAUSTRCState extends State<_HighlightsOfAUSTRC>
           return const SizedBox.shrink();
         }
 
-        if (_newsUrls.length != newUrls.length || !_listEquals(_newsUrls, newUrls)) {
+        if (_newsUrls.length != newUrls.length ||
+            !_listEquals(_newsUrls, newUrls)) {
           _newsUrls = newUrls;
           if (!_isInitialized) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -2063,7 +2439,8 @@ class _HighlightsOfAUSTRCState extends State<_HighlightsOfAUSTRC>
                   gradient: const LinearGradient(
                     colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
                   ),
-                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.screenWidth * 0.03),
                   boxShadow: [
                     BoxShadow(
                       color: kGreenDark.withOpacity(0.2),
@@ -2074,7 +2451,9 @@ class _HighlightsOfAUSTRCState extends State<_HighlightsOfAUSTRC>
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.campaign_rounded, color: Colors.white, size: SizeConfig.screenWidth * 0.07),
+                    Icon(Icons.campaign_rounded,
+                        color: Colors.white,
+                        size: SizeConfig.screenWidth * 0.07),
                     SizedBox(width: SizeConfig.screenWidth * 0.04),
                     Expanded(
                       child: Column(
@@ -2230,7 +2609,8 @@ class _HighlightsOfAUSTRCState extends State<_HighlightsOfAUSTRC>
               top: 12,
               right: 12,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: kGreenMain.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(12),
@@ -2389,7 +2769,8 @@ class _RecentEventsSectionHeader extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.event_rounded, color: Colors.white, size: SizeConfig.screenWidth * 0.07),
+            Icon(Icons.event_rounded,
+                color: Colors.white, size: SizeConfig.screenWidth * 0.07),
             SizedBox(width: SizeConfig.screenWidth * 0.04),
             Expanded(
               child: Column(
@@ -2577,48 +2958,48 @@ class _RecentEventsCarouselState extends State<_RecentEventsCarousel>
   }
 
   Widget _skeleton({double height = 200}) => Container(
-    height: height,
-    decoration: BoxDecoration(
-      color: const Color(0xFFF0F3F1),
-      borderRadius: BorderRadius.circular(16),
-    ),
-    alignment: Alignment.center,
-    child: const SizedBox(
-      height: 20,
-      width: 20,
-      child: CircularProgressIndicator(strokeWidth: 2),
-    ),
-  );
+        height: height,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0F3F1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.center,
+        child: const SizedBox(
+          height: 20,
+          width: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
 
   Widget _emptyBox(String message) => Container(
-    height: 160,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFE2E8F0)),
-    ),
-    child: Text(
-      message,
-      textAlign: TextAlign.center,
-      style: const TextStyle(color: Colors.black54),
-    ),
-  );
+        height: 160,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.black54),
+        ),
+      );
 
   Widget _errorBox(String message) => Container(
-    height: 161,
-    alignment: Alignment.center,
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    decoration: BoxDecoration(
-      color: const Color(0xFFFFF1F2),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFFFCDD2)),
-    ),
-    child: Text(
-      message,
-      textAlign: TextAlign.center,
-      style: const TextStyle(color: Color(0xFFB00020)),
-    ),
-  );
+        height: 161,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF1F2),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFFFCDD2)),
+        ),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Color(0xFFB00020)),
+        ),
+      );
 }
 
 class _PosterCard extends StatelessWidget {
@@ -2671,9 +3052,8 @@ class _PosterCard extends StatelessWidget {
                 child: Container(
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.screenWidth * 0.025,
-                    vertical: SizeConfig.screenHeight * 0.01
-                  ),
+                      horizontal: SizeConfig.screenWidth * 0.025,
+                      vertical: SizeConfig.screenHeight * 0.01),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.bottomCenter,
@@ -2778,7 +3158,7 @@ class _TypewriterTextState extends State<TypewriterText> {
   @override
   Widget build(BuildContext context) {
     final visible =
-    widget.text.substring(0, _index.clamp(0, widget.text.length));
+        widget.text.substring(0, _index.clamp(0, widget.text.length));
     return Text(
       visible,
       style: widget.style,
@@ -2912,7 +3292,8 @@ class _QuickActionsRow extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.smart_button_sharp, color: Colors.white, size: SizeConfig.screenWidth * 0.07),
+                Icon(Icons.smart_button_sharp,
+                    color: Colors.white, size: SizeConfig.screenWidth * 0.07),
                 SizedBox(width: SizeConfig.screenWidth * 0.04),
                 Expanded(
                   child: Column(
@@ -2984,7 +3365,8 @@ class _QuickActionsRow extends StatelessWidget {
                 delay: 200,
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => MemberRecruitmentSelectionPage()),
+                    MaterialPageRoute(
+                        builder: (_) => MemberRecruitmentSelectionPage()),
                   );
                 },
               ),
@@ -3145,8 +3527,8 @@ class _QuickActionCardState extends State<_QuickActionCard>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
-                              padding:
-                              EdgeInsets.all(SizeConfig.screenWidth * 0.022),
+                              padding: EdgeInsets.all(
+                                  SizeConfig.screenWidth * 0.022),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.2),
                                 shape: BoxShape.circle,
@@ -3251,8 +3633,8 @@ class _EducationalProgramItem {
   });
 
   factory _EducationalProgramItem.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc,
-      ) {
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
     final data = doc.data() ?? {};
 
     // Get Order field (handle both int and string)
@@ -3323,7 +3705,8 @@ class _EducationalMentorshipSection extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.support_agent_rounded, color: Colors.white, size: SizeConfig.screenWidth * 0.07),
+                Icon(Icons.support_agent_rounded,
+                    color: Colors.white, size: SizeConfig.screenWidth * 0.07),
                 SizedBox(width: SizeConfig.screenWidth * 0.04),
                 Expanded(
                   child: Column(
@@ -3374,9 +3757,9 @@ class _EducationalMentorshipSection extends StatelessWidget {
             final allItems = docs
                 .map((doc) => _EducationalProgramItem.fromFirestore(doc))
                 .where((item) =>
-            item.order >= 1 &&
-                item.order <= 3 &&
-                item.imageUrl.isNotEmpty)
+                    item.order >= 1 &&
+                    item.order <= 3 &&
+                    item.imageUrl.isNotEmpty)
                 .toList();
 
             // Sort by order
@@ -3393,7 +3776,7 @@ class _EducationalMentorshipSection extends StatelessWidget {
 
             return SizedBox(
               height: SizeConfig.screenHeight * 0.23,
-              width: SizeConfig.screenWidth ,
+              width: SizeConfig.screenWidth,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
@@ -3538,10 +3921,9 @@ class _EducationalProgramCardState extends State<_EducationalProgramCard> {
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
           margin: EdgeInsets.only(
-            right: SizeConfig.screenWidth * 0.04,
-            bottom: SizeConfig.screenHeight * 0.01,
-            top: SizeConfig.screenHeight * 0.01
-          ),
+              right: SizeConfig.screenWidth * 0.04,
+              bottom: SizeConfig.screenHeight * 0.01,
+              top: SizeConfig.screenHeight * 0.01),
           width: SizeConfig.screenWidth * 0.7,
           height: SizeConfig.screenWidth * 0.7,
           decoration: BoxDecoration(
@@ -3796,7 +4178,7 @@ class VoiceOfAUSTRC extends StatefulWidget {
 class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
     with AutomaticKeepAliveClientMixin {
   final _docRef =
-  FirebaseFirestore.instance.collection('All_Data').doc('Voice_of_AUSTRC');
+      FirebaseFirestore.instance.collection('All_Data').doc('Voice_of_AUSTRC');
 
   late final PageController _controller;
   Timer? _timer;
@@ -3882,7 +4264,8 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
           ),
           child: Row(
             children: [
-              Icon(Icons.record_voice_over, color: Colors.white, size: SizeConfig.screenWidth * 0.07),
+              Icon(Icons.record_voice_over,
+                  color: Colors.white, size: SizeConfig.screenWidth * 0.07),
               SizedBox(width: SizeConfig.screenWidth * 0.04),
               Expanded(
                 child: Column(
@@ -3948,48 +4331,48 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
   }
 
   Widget _skeleton() => Container(
-    height: 200,
-    decoration: BoxDecoration(
-      color: const Color(0xFFF0F3F1),
-      borderRadius: BorderRadius.circular(16),
-    ),
-    alignment: Alignment.center,
-    child: const SizedBox(
-      height: 22,
-      width: 22,
-      child: CircularProgressIndicator(strokeWidth: 2),
-    ),
-  );
+        height: 200,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0F3F1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.center,
+        child: const SizedBox(
+          height: 22,
+          width: 22,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
 
   Widget _emptyBox(String message) => Container(
-    height: 150,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFE2E8F0)),
-    ),
-    child: Text(
-      message,
-      textAlign: TextAlign.center,
-      style: const TextStyle(color: Colors.black54),
-    ),
-  );
+        height: 150,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.black54),
+        ),
+      );
 
   Widget _errorBox(String message) => Container(
-    height: 150,
-    alignment: Alignment.center,
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: const Color(0xFFFFF1F2),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFFFCDD2)),
-    ),
-    child: Text(
-      message,
-      textAlign: TextAlign.center,
-      style: const TextStyle(color: Color(0xFFB00020)),
-    ),
-  );
+        height: 150,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF1F2),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFFFCDD2)),
+        ),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Color(0xFFB00020)),
+        ),
+      );
 }
 
 /// Single poster card with rounded corners and shadow
