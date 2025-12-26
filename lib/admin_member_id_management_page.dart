@@ -253,7 +253,7 @@ class _AdminMemberIdManagementPageState
               memberDocs.sort((a, b) {
                 final numA = int.tryParse(a.id.replaceAll('Member_', '')) ?? 0;
                 final numB = int.tryParse(b.id.replaceAll('Member_', '')) ?? 0;
-                return numA.compareTo(numB);
+                return numB.compareTo(numA); // Descending order - latest member first
               });
 
               return SliverPadding(
@@ -261,14 +261,16 @@ class _AdminMemberIdManagementPageState
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      if (index == memberDocs.length) {
+                      // Add New Member button at the top (index 0)
+                      if (index == 0) {
                         return _AddNewMemberCard(
                           memberCount: memberDocs.length,
                           onAdded: () {},
                         );
                       }
 
-                      final memberDoc = memberDocs[index];
+                      // Member cards start from index 1, so use index - 1 for memberDocs
+                      final memberDoc = memberDocs[index - 1];
                       final memberNumber = int.tryParse(
                               memberDoc.id.replaceAll('Member_', '')) ??
                           0;
@@ -282,7 +284,7 @@ class _AdminMemberIdManagementPageState
                         name: memberData['Name'] ?? '',
                         department: memberData['Department'] ?? '',
                         memberDocId: memberDoc.id,
-                        index: index,
+                        index: index - 1, // Adjusted for Add New Member button at top
                       );
                     },
                     childCount: memberDocs.length + 1,
@@ -420,7 +422,7 @@ class _MemberCardState extends State<_MemberCard>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(milliseconds: 600 + (widget.index * 100)),
+      duration: Duration(milliseconds: 150 + (widget.index * 20).clamp(0, 100)), // Faster animation
       vsync: this,
     );
 
@@ -439,7 +441,7 @@ class _MemberCardState extends State<_MemberCard>
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
 
-    Future.delayed(Duration(milliseconds: 50 * widget.index), () {
+    Future.delayed(Duration(milliseconds: (10 * widget.index).clamp(0, 100)), () { // Faster staggered animation
       if (mounted) _controller.forward();
     });
   }
