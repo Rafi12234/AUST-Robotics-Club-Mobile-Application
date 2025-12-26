@@ -27,7 +27,15 @@ class CSVExportService {
       );
 
       List<List<dynamic>> csvData = [];
-      csvData.add(['S/N', 'Member Number', 'Name', 'Department', 'AUST ID', 'AUSTRC ID', 'Institutional Mail']);
+      csvData.add([
+        'S/N',
+        'Member Number',
+        'Name',
+        'Department',
+        'AUST ID',
+        'AUSTRC ID',
+        'Institutional Mail'
+      ]);
 
       int serialNumber = 1;
       for (var member in members) {
@@ -92,7 +100,12 @@ class ExportResult {
   final int? memberCount;
   final String? error;
 
-  ExportResult({required this.success, this.filePath, this.fileName, this.memberCount, this.error});
+  ExportResult(
+      {required this.success,
+      this.filePath,
+      this.fileName,
+      this.memberCount,
+      this.error});
 }
 
 class _ExportLoadingDialog extends StatelessWidget {
@@ -109,24 +122,38 @@ class _ExportLoadingDialog extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 30, offset: const Offset(0, 15))],
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 30,
+                  offset: const Offset(0, 15))
+            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: kGreenLight.withOpacity(0.15), shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                    color: kGreenLight.withOpacity(0.15),
+                    shape: BoxShape.circle),
                 child: const SizedBox(
                   width: 48,
                   height: 48,
-                  child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(kGreenMain), strokeWidth: 3),
+                  child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(kGreenMain),
+                      strokeWidth: 3),
                 ),
               ),
               const SizedBox(height: 24),
-              const Text('Exporting Members...', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: kGreenDark)),
+              const Text('Exporting Members...',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: kGreenDark)),
               const SizedBox(height: 8),
-              Text('Preparing CSV file', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+              Text('Preparing CSV file',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600])),
             ],
           ),
         ),
@@ -167,7 +194,8 @@ class _AdminMemberIdManagementPageState
     try {
       final members = memberDocs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        final memberNumber = int.tryParse(doc.id.replaceAll('Member_', '')) ?? 0;
+        final memberNumber =
+            int.tryParse(doc.id.replaceAll('Member_', '')) ?? 0;
         return {
           'Member_Number': memberNumber,
           'Name': data['Name'] ?? '',
@@ -178,21 +206,29 @@ class _AdminMemberIdManagementPageState
         };
       }).toList();
 
-      members.sort((a, b) => (a['Member_Number'] as int).compareTo(b['Member_Number'] as int));
+      members.sort((a, b) =>
+          (a['Member_Number'] as int).compareTo(b['Member_Number'] as int));
 
-      final result = await CSVExportService.exportMembersToCSV(members: members, context: context);
+      final result = await CSVExportService.exportMembersToCSV(
+          members: members, context: context);
 
       if (result.success && mounted) {
         _showExportSuccessDialog(result);
       } else if (!result.success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: ${result.error}'), backgroundColor: kAccentRed, behavior: SnackBarBehavior.floating),
+          SnackBar(
+              content: Text('Export failed: ${result.error}'),
+              backgroundColor: kAccentRed,
+              behavior: SnackBarBehavior.floating),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e'), backgroundColor: kAccentRed, behavior: SnackBarBehavior.floating),
+          SnackBar(
+              content: Text('Export failed: $e'),
+              backgroundColor: kAccentRed,
+              behavior: SnackBarBehavior.floating),
         );
       }
     }
@@ -253,7 +289,8 @@ class _AdminMemberIdManagementPageState
               memberDocs.sort((a, b) {
                 final numA = int.tryParse(a.id.replaceAll('Member_', '')) ?? 0;
                 final numB = int.tryParse(b.id.replaceAll('Member_', '')) ?? 0;
-                return numB.compareTo(numA); // Descending order - latest member first
+                return numB
+                    .compareTo(numA); // Descending order - latest member first
               });
 
               return SliverPadding(
@@ -274,7 +311,8 @@ class _AdminMemberIdManagementPageState
                       final memberNumber = int.tryParse(
                               memberDoc.id.replaceAll('Member_', '')) ??
                           0;
-                      final memberData = memberDoc.data() as Map<String, dynamic>;
+                      final memberData =
+                          memberDoc.data() as Map<String, dynamic>;
 
                       return _MemberCard(
                         memberNumber: memberNumber,
@@ -284,7 +322,8 @@ class _AdminMemberIdManagementPageState
                         name: memberData['Name'] ?? '',
                         department: memberData['Department'] ?? '',
                         memberDocId: memberDoc.id,
-                        index: index - 1, // Adjusted for Add New Member button at top
+                        index: index -
+                            1, // Adjusted for Add New Member button at top
                       );
                     },
                     childCount: memberDocs.length + 1,
@@ -323,13 +362,15 @@ class _AdminMemberIdManagementPageState
               .collection('Members')
               .snapshots(),
           builder: (context, snapshot) {
-            final hasMembers = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+            final hasMembers =
+                snapshot.hasData && snapshot.data!.docs.isNotEmpty;
             final memberCount = snapshot.data?.docs.length ?? 0;
 
             return Padding(
               padding: const EdgeInsets.only(right: 8, top: 6, bottom: 6),
               child: _EnhancedExportButton(
-                onPressed: hasMembers ? () => _exportToCSV(snapshot.data!.docs) : null,
+                onPressed:
+                    hasMembers ? () => _exportToCSV(snapshot.data!.docs) : null,
                 memberCount: memberCount,
               ),
             );
@@ -422,7 +463,9 @@ class _MemberCardState extends State<_MemberCard>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(milliseconds: 150 + (widget.index * 20).clamp(0, 100)), // Faster animation
+      duration: Duration(
+          milliseconds:
+              150 + (widget.index * 20).clamp(0, 100)), // Faster animation
       vsync: this,
     );
 
@@ -441,7 +484,9 @@ class _MemberCardState extends State<_MemberCard>
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
 
-    Future.delayed(Duration(milliseconds: (10 * widget.index).clamp(0, 100)), () { // Faster staggered animation
+    Future.delayed(Duration(milliseconds: (10 * widget.index).clamp(0, 100)),
+        () {
+      // Faster staggered animation
       if (mounted) _controller.forward();
     });
   }
@@ -468,8 +513,7 @@ class _MemberCardState extends State<_MemberCard>
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeOutCubic,
-                transform: Matrix4.identity()
-                  ..scale(_isHovered ? 1.02 : 1.0),
+                transform: Matrix4.identity()..scale(_isHovered ? 1.02 : 1.0),
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -542,7 +586,8 @@ class _MemberCardState extends State<_MemberCard>
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w600,
-                                              color: kGreenMain.withOpacity(0.8),
+                                              color:
+                                                  kGreenMain.withOpacity(0.8),
                                               letterSpacing: 0.3,
                                             ),
                                             maxLines: 1,
@@ -575,8 +620,7 @@ class _MemberCardState extends State<_MemberCard>
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,
-                                            color:
-                                                kGreenDark.withOpacity(0.8),
+                                            color: kGreenDark.withOpacity(0.8),
                                             letterSpacing: 0.3,
                                           ),
                                         ),
@@ -586,8 +630,7 @@ class _MemberCardState extends State<_MemberCard>
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600,
-                                            color:
-                                                kGreenDark.withOpacity(0.8),
+                                            color: kGreenDark.withOpacity(0.8),
                                             letterSpacing: 0.3,
                                           ),
                                         ),
@@ -783,12 +826,16 @@ class _MemberCardState extends State<_MemberCard>
                             final newAustrcId = austrcIdController.text.trim();
                             final newEduMail = eduMailController.text.trim();
                             final newName = nameController.text.trim();
-                            final newDepartment = departmentController.text.trim();
+                            final newDepartment =
+                                departmentController.text.trim();
 
-                            if (newAustId.isEmpty || newAustrcId.isEmpty || newEduMail.isEmpty) {
+                            if (newAustId.isEmpty ||
+                                newAustrcId.isEmpty ||
+                                newEduMail.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('AUST ID, AUSTRC ID, and Email are required'),
+                                  content: Text(
+                                      'AUST ID, AUSTRC ID, and Email are required'),
                                   backgroundColor: kAccentRed,
                                 ),
                               );
@@ -1048,7 +1095,8 @@ class _MemberCardState extends State<_MemberCard>
           ),
           child: TextField(
             controller: controller,
-            keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
+            keyboardType:
+                isEmail ? TextInputType.emailAddress : TextInputType.text,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -1409,12 +1457,16 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
                             final newAustrcId = austrcIdController.text.trim();
                             final newEduMail = eduMailController.text.trim();
                             final newName = nameController.text.trim();
-                            final newDepartment = departmentController.text.trim();
+                            final newDepartment =
+                                departmentController.text.trim();
 
-                            if (newAustId.isEmpty || newAustrcId.isEmpty || newEduMail.isEmpty) {
+                            if (newAustId.isEmpty ||
+                                newAustrcId.isEmpty ||
+                                newEduMail.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('AUST ID, AUSTRC ID, and Email are required'),
+                                  content: Text(
+                                      'AUST ID, AUSTRC ID, and Email are required'),
                                   backgroundColor: kAccentRed,
                                 ),
                               );
@@ -1526,7 +1578,8 @@ class _AddNewMemberCardState extends State<_AddNewMemberCard>
           child: TextField(
             controller: controller,
             autofocus: label == 'AUST ID',
-            keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
+            keyboardType:
+                isEmail ? TextInputType.emailAddress : TextInputType.text,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -1650,7 +1703,9 @@ class _EnhancedExportButtonState extends State<_EnhancedExportButton>
                           ]
                         : null,
                 border: Border.all(
-                  color: isEnabled ? Colors.white.withOpacity(0.3) : Colors.white.withOpacity(0.1),
+                  color: isEnabled
+                      ? Colors.white.withOpacity(0.3)
+                      : Colors.white.withOpacity(0.1),
                   width: 1.5,
                 ),
               ),
@@ -1674,7 +1729,8 @@ class _EnhancedExportButtonState extends State<_EnhancedExportButton>
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: Colors.white.withOpacity(_pulseAnimation.value * 0.3),
+                                    color: Colors.white.withOpacity(
+                                        _pulseAnimation.value * 0.3),
                                     width: 2,
                                   ),
                                 ),
@@ -1747,7 +1803,8 @@ class _ExportSuccessDialogState extends State<_ExportSuccessDialog> {
       if (mounted) {
         setState(() => _isSharing = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error sharing: $e'), backgroundColor: kAccentRed),
+          SnackBar(
+              content: Text('Error sharing: $e'), backgroundColor: kAccentRed),
         );
       }
     }
@@ -1763,7 +1820,12 @@ class _ExportSuccessDialogState extends State<_ExportSuccessDialog> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(28),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 30, offset: const Offset(0, 15))],
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 30,
+                offset: const Offset(0, 15))
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1778,22 +1840,35 @@ class _ExportSuccessDialogState extends State<_ExportSuccessDialog> {
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [kGreenMain.withOpacity(0.15), kGreenLight.withOpacity(0.15)]),
+                      gradient: LinearGradient(colors: [
+                        kGreenMain.withOpacity(0.15),
+                        kGreenLight.withOpacity(0.15)
+                      ]),
                       shape: BoxShape.circle,
                     ),
                     child: Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(gradient: LinearGradient(colors: [kGreenMain, kGreenLight]), shape: BoxShape.circle),
-                      child: const Icon(Icons.check_rounded, color: Colors.white, size: 40),
+                      decoration: const BoxDecoration(
+                          gradient:
+                              LinearGradient(colors: [kGreenMain, kGreenLight]),
+                          shape: BoxShape.circle),
+                      child: const Icon(Icons.check_rounded,
+                          color: Colors.white, size: 40),
                     ),
                   ),
                 );
               },
             ),
             const SizedBox(height: 24),
-            const Text('Export Successful!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: kGreenDark)),
+            const Text('Export Successful!',
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: kGreenDark)),
             const SizedBox(height: 8),
-            Text('${widget.memberCount} members exported', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+            Text('${widget.memberCount} members exported',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey[600])),
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(16),
@@ -1806,17 +1881,28 @@ class _ExportSuccessDialogState extends State<_ExportSuccessDialog> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: kGreenMain.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.description_rounded, color: kGreenMain, size: 24),
+                    decoration: BoxDecoration(
+                        color: kGreenMain.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: const Icon(Icons.description_rounded,
+                        color: kGreenMain, size: 24),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.fileName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: kGreenDark), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(widget.fileName,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: kGreenDark),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 4),
-                        Text('CSV File • Ready to share', style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                        Text('CSV File • Ready to share',
+                            style: TextStyle(
+                                fontSize: 11, color: Colors.grey[600])),
                       ],
                     ),
                   ),
@@ -1833,9 +1919,11 @@ class _ExportSuccessDialogState extends State<_ExportSuccessDialog> {
                     label: const Text('Close'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: kGreenDark,
-                      side: BorderSide(color: kGreenMain.withOpacity(0.3), width: 2),
+                      side: BorderSide(
+                          color: kGreenMain.withOpacity(0.3), width: 2),
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
                     ),
                   ),
                 ),
@@ -1845,14 +1933,21 @@ class _ExportSuccessDialogState extends State<_ExportSuccessDialog> {
                   child: ElevatedButton.icon(
                     onPressed: _isSharing ? null : _handleShare,
                     icon: _isSharing
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white)))
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation(Colors.white)))
                         : const Icon(Icons.share_rounded, size: 20),
                     label: Text(_isSharing ? 'Sharing...' : 'Share File'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kGreenMain,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
                       elevation: 0,
                     ),
                   ),
