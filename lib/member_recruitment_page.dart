@@ -156,7 +156,9 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025)),
+        shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(SizeConfig.screenWidth * 0.025)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -205,9 +207,11 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6B6B),
-                padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.016),
+                padding: EdgeInsets.symmetric(
+                    vertical: SizeConfig.screenHeight * 0.016),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                 ),
               ),
               child: Text(
@@ -242,6 +246,110 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
     }
   }
 
+  // Check if Transaction ID already exists in the selected semester
+  Future<bool> _isTransactionIdDuplicate(
+      String semester, String transactionId) async {
+    try {
+      // Query all members in the selected semester's Members collection
+      final membersSnapshot = await FirebaseFirestore.instance
+          .collection('New_Members_Informations')
+          .doc(semester)
+          .collection('Members')
+          .get();
+
+      // Check each member's Transaction_ID
+      for (var doc in membersSnapshot.docs) {
+        final data = doc.data();
+        final existingTransactionId =
+            data['Transaction_ID']?.toString().trim().toLowerCase();
+        if (existingTransactionId == transactionId.trim().toLowerCase()) {
+          return true; // Duplicate found
+        }
+      }
+      return false; // No duplicate found
+    } catch (e) {
+      print('Error checking Transaction ID: $e');
+      return false; // In case of error, allow submission (can be changed based on requirements)
+    }
+  }
+
+  void _showDuplicateTransactionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(SizeConfig.screenWidth * 0.025)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFFF6B6B), Color(0xFFEE5A6F)],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.warning_amber_rounded,
+                size: SizeConfig.screenWidth * 0.1,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: SizeConfig.screenHeight * 0.025),
+            Text(
+              'Duplicate Transaction ID!',
+              style: TextStyle(
+                fontSize: SizeConfig.screenWidth * 0.032,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFFF6B6B),
+              ),
+            ),
+            SizedBox(height: SizeConfig.screenHeight * 0.012),
+            Text(
+              'This Transaction ID has already been used. Please provide your actual and valid Transaction ID.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: SizeConfig.screenWidth * 0.025,
+                color: Colors.grey[700],
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6B6B),
+                padding: EdgeInsets.symmetric(
+                    vertical: SizeConfig.screenHeight * 0.016),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.screenWidth * 0.025),
+                ),
+              ),
+              child: Text(
+                'Try Again',
+                style: TextStyle(
+                  fontSize: SizeConfig.screenWidth * 0.034,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -257,12 +365,25 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
 
     setState(() => _isSubmitting = true);
 
+    // Check for duplicate Transaction ID
+    final transactionId = _transactionIdController.text.trim();
+    final isDuplicate = await _isTransactionIdDuplicate(
+        _selectedCurrentSemester!, transactionId);
+
+    if (isDuplicate) {
+      setState(() => _isSubmitting = false);
+      _showDuplicateTransactionDialog();
+      return;
+    }
+
     try {
       // Get the next member number
-      final memberNumber = await _getNextMemberNumber(_selectedCurrentSemester!);
+      final memberNumber =
+          await _getNextMemberNumber(_selectedCurrentSemester!);
       final memberDocName = 'Member_$memberNumber';
 
-      print('Creating member: $memberDocName in semester: $_selectedCurrentSemester');
+      print(
+          'Creating member: $memberDocName in semester: $_selectedCurrentSemester');
 
       // Create document reference in new structure
       // New_Members_Informations/{semester}/Members/{Member_X}
@@ -319,7 +440,9 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025)),
+        shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(SizeConfig.screenWidth * 0.025)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -346,7 +469,6 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                 color: const Color(0xFF1B5E20),
               ),
             ),
-
             SizedBox(height: SizeConfig.screenHeight * 0.016),
             Text(
               'Welcome to the club! Your application has been submitted successfully for $_selectedCurrentSemester.',
@@ -369,9 +491,11 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2E7D32),
-                padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.016),
+                padding: EdgeInsets.symmetric(
+                    vertical: SizeConfig.screenHeight * 0.016),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                 ),
               ),
               child: Text(
@@ -415,7 +539,9 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
             ),
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: false,
-              titlePadding: EdgeInsets.only(left: SizeConfig.screenWidth * 0.08, bottom: SizeConfig.screenHeight * 0.013),
+              titlePadding: EdgeInsets.only(
+                  left: SizeConfig.screenWidth * 0.08,
+                  bottom: SizeConfig.screenHeight * 0.013),
               title: Text(
                 'Join Our Club',
                 style: TextStyle(
@@ -470,481 +596,578 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
           SliverToBoxAdapter(
             child: _isLoading
                 ? Center(
-              child: Padding(
-                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.08),
-                child: const CircularProgressIndicator(
-                  color: Color(0xFF2E7D32),
-                ),
-              ),
-            )
+                    child: Padding(
+                      padding: EdgeInsets.all(SizeConfig.screenWidth * 0.08),
+                      child: const CircularProgressIndicator(
+                        color: Color(0xFF2E7D32),
+                      ),
+                    ),
+                  )
                 : !_isFormAccessible
-                ? const SizedBox.shrink()
-                : FadeTransition(
-              opacity: _fadeAnimation,
-              child: Padding(
-                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.034),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Personal Information Section
-                      _buildSectionTitle(
-                          'Personal Information', Icons.person_outline),
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
-                      _buildAnimatedTextField(
-                        controller: _nameController,
-                        label: 'Full Name',
-                        icon: Icons.person,
-                        delay: 100,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Name is required'
-                            : null,
-                      ),
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
-                      _buildAnimatedTextField(
-                        controller: _departmentController,
-                        label: 'Department',
-                        icon: Icons.school,
-                        delay: 150,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Department is required'
-                            : null,
-                      ),
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
-                      _buildAnimatedTextField(
-                        controller: _phoneController,
-                        label: 'Phone Number',
-                        icon: Icons.phone,
-                        keyboardType: TextInputType.phone,
-                        delay: 200,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Phone number is required'
-                            : null,
-                      ),
-
-                      // Academic Information Section
-                      SizedBox(height: SizeConfig.screenHeight * 0.034),
-                      _buildSectionTitle(
-                          'Academic Information', Icons.menu_book),
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
-
-                      // Semester Selection
-                      _buildAnimatedCard(
-                        delay: 250,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                    ? const SizedBox.shrink()
+                    : FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: Padding(
+                          padding:
+                              EdgeInsets.all(SizeConfig.screenWidth * 0.034),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.school_rounded,
-                                  color: const Color(0xFF2E7D32),
-                                  size: SizeConfig.screenWidth * 0.05,
+                                // Personal Information Section
+                                _buildSectionTitle('Personal Information',
+                                    Icons.person_outline),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
+                                _buildAnimatedTextField(
+                                  controller: _nameController,
+                                  label: 'Full Name',
+                                  icon: Icons.person,
+                                  delay: 100,
+                                  validator: (value) => value?.isEmpty ?? true
+                                      ? 'Name is required'
+                                      : null,
                                 ),
-                                SizedBox(width: SizeConfig.screenWidth * 0.02),
-                                Text(
-                                  'Select Your Semester',
-                                  style: TextStyle(
-                                    fontSize: SizeConfig.screenWidth * 0.038,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1B5E20),
-                                  ),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
+                                _buildAnimatedTextField(
+                                  controller: _departmentController,
+                                  label: 'Department',
+                                  icon: Icons.school,
+                                  delay: 150,
+                                  validator: (value) => value?.isEmpty ?? true
+                                      ? 'Department is required'
+                                      : null,
                                 ),
-                              ],
-                            ),
-                            SizedBox(height: SizeConfig.screenHeight * 0.015),
-                            DropdownButtonFormField<String>(
-                              value: _selectedSemester,
-                              decoration: InputDecoration(
-                                labelText: 'Choose Semester',
-                                prefixIcon: Icon(
-                                  Icons.format_list_numbered_rounded,
-                                  color: const Color(0xFF2E7D32),
-                                  size: SizeConfig.screenWidth * 0.05,
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
+                                _buildAnimatedTextField(
+                                  controller: _phoneController,
+                                  label: 'Phone Number',
+                                  icon: Icons.phone,
+                                  keyboardType: TextInputType.phone,
+                                  delay: 200,
+                                  validator: (value) => value?.isEmpty ?? true
+                                      ? 'Phone number is required'
+                                      : null,
                                 ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
-                                  borderSide: BorderSide(color: Colors.grey[300]!),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
-                                  borderSide: BorderSide(color: Colors.grey[300]!),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
-                                  borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 2),
-                                ),
-                                filled: true,
-                                fillColor: Colors.grey[50],
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: SizeConfig.screenWidth * 0.04,
-                                  vertical: SizeConfig.screenHeight * 0.018,
-                                ),
-                              ),
-                              dropdownColor: Colors.white,
-                              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
-                              icon: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: const Color(0xFF2E7D32),
-                                size: SizeConfig.screenWidth * 0.06,
-                              ),
-                              items: _semesterOptions.map((semester) {
-                                return DropdownMenuItem(
-                                  value: semester,
-                                  child: Text(
-                                    'Semester $semester',
-                                    style: TextStyle(
-                                      fontSize: SizeConfig.screenWidth * 0.038,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.grey[800],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() => _selectedSemester = value);
-                              },
-                              validator: (value) => value == null
-                                  ? 'Please select your semester'
-                                  : null,
-                            ),
-                          ],
-                        ),
-                      ),
 
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
+                                // Academic Information Section
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.034),
+                                _buildSectionTitle(
+                                    'Academic Information', Icons.menu_book),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
 
-                      // Current Semester Dropdown (Registration Semester)
-                      _buildAnimatedCard(
-                        delay: 300,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.calendar_today,
-                                  color: const Color(0xFF2E7D32),
-                                  size: SizeConfig.screenWidth * 0.025,
-                                ),
-                                SizedBox(width: SizeConfig.screenWidth * 0.016),
-                                Text(
-                                  'Registration Semester',
-                                  style: TextStyle(
-                                    fontSize: SizeConfig.screenWidth * 0.038,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1B5E20),
+                                // Semester Selection
+                                _buildAnimatedCard(
+                                  delay: 250,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.school_rounded,
+                                            color: const Color(0xFF2E7D32),
+                                            size: SizeConfig.screenWidth * 0.05,
+                                          ),
+                                          SizedBox(
+                                              width: SizeConfig.screenWidth *
+                                                  0.02),
+                                          Text(
+                                            'Select Your Semester',
+                                            style: TextStyle(
+                                              fontSize: SizeConfig.screenWidth *
+                                                  0.038,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFF1B5E20),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                          height:
+                                              SizeConfig.screenHeight * 0.015),
+                                      DropdownButtonFormField<String>(
+                                        value: _selectedSemester,
+                                        decoration: InputDecoration(
+                                          labelText: 'Choose Semester',
+                                          prefixIcon: Icon(
+                                            Icons.format_list_numbered_rounded,
+                                            color: const Color(0xFF2E7D32),
+                                            size: SizeConfig.screenWidth * 0.05,
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                SizeConfig.screenWidth * 0.03),
+                                            borderSide: BorderSide(
+                                                color: Colors.grey[300]!),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                SizeConfig.screenWidth * 0.03),
+                                            borderSide: BorderSide(
+                                                color: Colors.grey[300]!),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                SizeConfig.screenWidth * 0.03),
+                                            borderSide: const BorderSide(
+                                                color: Color(0xFF2E7D32),
+                                                width: 2),
+                                          ),
+                                          filled: true,
+                                          fillColor: Colors.grey[50],
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal:
+                                                SizeConfig.screenWidth * 0.04,
+                                            vertical:
+                                                SizeConfig.screenHeight * 0.018,
+                                          ),
+                                        ),
+                                        dropdownColor: Colors.white,
+                                        borderRadius: BorderRadius.circular(
+                                            SizeConfig.screenWidth * 0.03),
+                                        icon: Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: const Color(0xFF2E7D32),
+                                          size: SizeConfig.screenWidth * 0.06,
+                                        ),
+                                        items: _semesterOptions.map((semester) {
+                                          return DropdownMenuItem(
+                                            value: semester,
+                                            child: Text(
+                                              'Semester $semester',
+                                              style: TextStyle(
+                                                fontSize:
+                                                    SizeConfig.screenWidth *
+                                                        0.038,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.grey[800],
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          setState(
+                                              () => _selectedSemester = value);
+                                        },
+                                        validator: (value) => value == null
+                                            ? 'Please select your semester'
+                                            : null,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
-                            SizedBox(height: SizeConfig.screenHeight * 0.012),
-                            if (_availableSemesters.isEmpty)
-                              Container(
-                                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.034),
-                                decoration: BoxDecoration(
-                                  color: Colors.orange[50],
-                                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
-                                  border: Border.all(
-                                    color: Colors.orange,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.warning_rounded,
-                                      color: Colors.orange,
-                                      size: SizeConfig.screenWidth * 0.025,
-                                    ),
-                                    SizedBox(width: SizeConfig.screenWidth * 0.025),
-                                    Expanded(
-                                      child: Text(
-                                        'No semesters available. Please contact admin.',
+
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
+
+                                // Current Semester Dropdown (Registration Semester)
+                                _buildAnimatedCard(
+                                  delay: 300,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today,
+                                            color: const Color(0xFF2E7D32),
+                                            size:
+                                                SizeConfig.screenWidth * 0.025,
+                                          ),
+                                          SizedBox(
+                                              width: SizeConfig.screenWidth *
+                                                  0.016),
+                                          Text(
+                                            'Registration Semester',
+                                            style: TextStyle(
+                                              fontSize: SizeConfig.screenWidth *
+                                                  0.038,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFF1B5E20),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                          height:
+                                              SizeConfig.screenHeight * 0.012),
+                                      if (_availableSemesters.isEmpty)
+                                        Container(
+                                          padding: EdgeInsets.all(
+                                              SizeConfig.screenWidth * 0.034),
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange[50],
+                                            borderRadius: BorderRadius.circular(
+                                                SizeConfig.screenWidth * 0.025),
+                                            border: Border.all(
+                                              color: Colors.orange,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.warning_rounded,
+                                                color: Colors.orange,
+                                                size: SizeConfig.screenWidth *
+                                                    0.025,
+                                              ),
+                                              SizedBox(
+                                                  width:
+                                                      SizeConfig.screenWidth *
+                                                          0.025),
+                                              Expanded(
+                                                child: Text(
+                                                  'No semesters available. Please contact admin.',
+                                                  style: TextStyle(
+                                                    color: Colors.orange[900],
+                                                    fontSize:
+                                                        SizeConfig.screenWidth *
+                                                            0.025,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      else
+                                        DropdownButtonFormField<String>(
+                                          value: _selectedCurrentSemester,
+                                          decoration: InputDecoration(
+                                            labelText:
+                                                'Select Registration Semester',
+                                            prefixIcon: Icon(
+                                              Icons.event_available_rounded,
+                                              color: const Color(0xFF2E7D32),
+                                              size: SizeConfig.screenWidth *
+                                                  0.032,
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      SizeConfig.screenWidth *
+                                                          0.025),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.grey[50],
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                              horizontal:
+                                                  SizeConfig.screenWidth *
+                                                      0.034,
+                                              vertical:
+                                                  SizeConfig.screenHeight *
+                                                      0.016,
+                                            ),
+                                          ),
+                                          items: _availableSemesters
+                                              .map((semester) {
+                                            return DropdownMenuItem(
+                                              value: semester,
+                                              child: Text(
+                                                semester,
+                                                style: TextStyle(
+                                                  fontSize:
+                                                      SizeConfig.screenWidth *
+                                                          0.034,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                          onChanged: (value) {
+                                            setState(() =>
+                                                _selectedCurrentSemester =
+                                                    value);
+                                          },
+                                          validator: (value) => value == null
+                                              ? 'Please select registration semester'
+                                              : null,
+                                        ),
+                                      SizedBox(
+                                          height:
+                                              SizeConfig.screenHeight * 0.01),
+                                      Text(
+                                        'Select the semester you are registering for',
                                         style: TextStyle(
-                                          color: Colors.orange[900],
-                                          fontSize: SizeConfig.screenWidth * 0.025,
-                                          fontWeight: FontWeight.w500,
+                                          fontSize:
+                                              SizeConfig.screenWidth * 0.025,
+                                          color: Colors.grey[600],
+                                          fontStyle: FontStyle.italic,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            else
-                              DropdownButtonFormField<String>(
-                                value: _selectedCurrentSemester,
-                                decoration: InputDecoration(
-                                  labelText: 'Select Registration Semester',
-                                  prefixIcon: Icon(
-                                    Icons.event_available_rounded,
-                                    color: const Color(0xFF2E7D32),
-                                    size: SizeConfig.screenWidth * 0.032,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: SizeConfig.screenWidth * 0.034,
-                                    vertical: SizeConfig.screenHeight * 0.016,
+                                    ],
                                   ),
                                 ),
-                                items: _availableSemesters.map((semester) {
-                                  return DropdownMenuItem(
-                                    value: semester,
-                                    child: Text(
-                                      semester,
-                                      style: TextStyle(
-                                        fontSize: SizeConfig.screenWidth * 0.034,
-                                        fontWeight: FontWeight.w600,
+
+                                // Contact Information Section
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.034),
+                                _buildSectionTitle('Contact Information',
+                                    Icons.email_outlined),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
+                                _buildAnimatedTextField(
+                                  controller: _personalEmailController,
+                                  label: 'Personal Email',
+                                  icon: Icons.email,
+                                  keyboardType: TextInputType.emailAddress,
+                                  delay: 350,
+                                  validator: (value) {
+                                    if (value?.isEmpty ?? true)
+                                      return 'Email is required';
+                                    if (!value!.contains('@'))
+                                      return 'Invalid email format';
+                                    return null;
+                                  },
+                                ),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
+                                _buildAnimatedTextField(
+                                  controller: _eduMailController,
+                                  label: 'Educational Email',
+                                  icon: Icons.school,
+                                  keyboardType: TextInputType.emailAddress,
+                                  delay: 400,
+                                  validator: (value) {
+                                    if (value?.isEmpty ?? true)
+                                      return 'Educational email is required';
+                                    if (!value!.contains('@'))
+                                      return 'Invalid email format';
+                                    return null;
+                                  },
+                                ),
+
+                                // Payment Section
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.034),
+                                _buildSectionTitle(
+                                    'Payment Information', Icons.payment),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
+
+                                // Must Send Money Notice
+                                _buildAnimatedCard(
+                                  delay: 500,
+                                  child: Container(
+                                    padding: EdgeInsets.all(
+                                        SizeConfig.screenWidth * 0.034),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          const Color(0xFFFF6B6B)
+                                              .withOpacity(0.1),
+                                          const Color(0xFFEE5A6F)
+                                              .withOpacity(0.1),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                          SizeConfig.screenWidth * 0.025),
+                                      border: Border.all(
+                                        color: const Color(0xFFFF6B6B),
+                                        width: 2,
                                       ),
                                     ),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  setState(
-                                          () => _selectedCurrentSemester = value);
-                                },
-                                validator: (value) => value == null
-                                    ? 'Please select registration semester'
-                                    : null,
-                              ),
-                            SizedBox(height: SizeConfig.screenHeight * 0.01),
-                            Text(
-                              'Select the semester you are registering for',
-                              style: TextStyle(
-                                fontSize: SizeConfig.screenWidth * 0.025,
-                                color: Colors.grey[600],
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Contact Information Section
-                      SizedBox(height: SizeConfig.screenHeight * 0.034),
-                      _buildSectionTitle(
-                          'Contact Information', Icons.email_outlined),
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
-                      _buildAnimatedTextField(
-                        controller: _personalEmailController,
-                        label: 'Personal Email',
-                        icon: Icons.email,
-                        keyboardType: TextInputType.emailAddress,
-                        delay: 350,
-                        validator: (value) {
-                          if (value?.isEmpty ?? true)
-                            return 'Email is required';
-                          if (!value!.contains('@'))
-                            return 'Invalid email format';
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
-                      _buildAnimatedTextField(
-                        controller: _eduMailController,
-                        label: 'Educational Email',
-                        icon: Icons.school,
-                        keyboardType: TextInputType.emailAddress,
-                        delay: 400,
-                        validator: (value) {
-                          if (value?.isEmpty ?? true)
-                            return 'Educational email is required';
-                          if (!value!.contains('@'))
-                            return 'Invalid email format';
-                          return null;
-                        },
-                      ),
-
-                      // Payment Section
-                      SizedBox(height: SizeConfig.screenHeight * 0.034),
-                      _buildSectionTitle(
-                          'Payment Information', Icons.payment),
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
-
-                      // Must Send Money Notice
-                      _buildAnimatedCard(
-                        delay: 500,
-                        child: Container(
-                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.034),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                const Color(0xFFFF6B6B).withOpacity(0.1),
-                                const Color(0xFFEE5A6F).withOpacity(0.1),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
-                            border: Border.all(
-                              color: const Color(0xFFFF6B6B),
-                              width: 2,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.016),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFFF6B6B),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.warning_rounded,
-                                  color: Colors.white,
-                                  size: SizeConfig.screenWidth * 0.025,
-                                ),
-                              ),
-                              SizedBox(width: SizeConfig.screenWidth * 0.025),
-                              Expanded(
-                                child: Text(
-                                  'MUST SEND MONEY\nBefore submitting the form',
-                                  style: TextStyle(
-                                    fontSize: SizeConfig.screenWidth * 0.025,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFFFF6B6B),
-                                    height: 1.4,
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.all(
+                                              SizeConfig.screenWidth * 0.016),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFFF6B6B),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.warning_rounded,
+                                            color: Colors.white,
+                                            size:
+                                                SizeConfig.screenWidth * 0.025,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                            width:
+                                                SizeConfig.screenWidth * 0.025),
+                                        Expanded(
+                                          child: Text(
+                                            'MUST SEND MONEY\nBefore submitting the form',
+                                            style: TextStyle(
+                                              fontSize: SizeConfig.screenWidth *
+                                                  0.025,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFFFF6B6B),
+                                              height: 1.4,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
 
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
 
-                      // Payment Numbers
-                      if (_bkashNumber != null)
-                        _buildAnimatedCard(
-                          delay: 550,
-                          child: _buildPaymentNumberCard(
-                            'Bkash',
-                            _bkashNumber!,
-                            Colors.pink,
-                            Icons.account_balance_wallet,
-                          ),
-                        ),
-                      SizedBox(height: SizeConfig.screenHeight * 0.012),
-                      if (_nagadNumber != null)
-                        _buildAnimatedCard(
-                          delay: 600,
-                          child: _buildPaymentNumberCard(
-                            'Nagad',
-                            _nagadNumber!,
-                            Colors.orange,
-                            Icons.account_balance_wallet_outlined,
-                          ),
-                        ),
+                                // Payment Numbers
+                                if (_bkashNumber != null)
+                                  _buildAnimatedCard(
+                                    delay: 550,
+                                    child: _buildPaymentNumberCard(
+                                      'Bkash',
+                                      _bkashNumber!,
+                                      Colors.pink,
+                                      Icons.account_balance_wallet,
+                                    ),
+                                  ),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.012),
+                                if (_nagadNumber != null)
+                                  _buildAnimatedCard(
+                                    delay: 600,
+                                    child: _buildPaymentNumberCard(
+                                      'Nagad',
+                                      _nagadNumber!,
+                                      Colors.orange,
+                                      Icons.account_balance_wallet_outlined,
+                                    ),
+                                  ),
 
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
 
-                      // Payment Method Selection
-                      _buildAnimatedCard(
-                        delay: 650,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Payment Method Used',
-                              style: TextStyle(
-                                fontSize: SizeConfig.screenWidth * 0.034,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1B5E20),
-                              ),
-                            ),
-                            SizedBox(height: SizeConfig.screenHeight * 0.012),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildPaymentOption(
-                                      'Bkash', Colors.pink),
-                                ),
-                                SizedBox(width: SizeConfig.screenWidth * 0.025),
-                                Expanded(
-                                  child: _buildPaymentOption(
-                                      'Nagad', Colors.orange),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: SizeConfig.screenHeight * 0.016),
-                      _buildAnimatedTextField(
-                        controller: _transactionIdController,
-                        label: 'Transaction ID',
-                        icon: Icons.receipt_long,
-                        delay: 700,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Transaction ID is required'
-                            : null,
-                      ),
-
-                      // Submit Button
-                      SizedBox(height: SizeConfig.screenHeight * 0.034),
-                      TweenAnimationBuilder<double>(
-                        duration: const Duration(milliseconds: 800),
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        builder: (context, value, child) {
-                          return Transform.scale(
-                            scale: value,
-                            child: child,
-                          );
-                        },
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: SizeConfig.screenHeight * 0.06,
-                          child: ElevatedButton(
-                            onPressed: _isSubmitting ? null : _submitForm,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2E7D32),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.034),
-                              ),
-                              elevation: 4,
-                            ),
-                            child: _isSubmitting
-                                ? SizedBox(
-                              height: SizeConfig.screenWidth * 0.025,
-                              width: SizeConfig.screenWidth * 0.025,
-                              child: const CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            )
-                                : Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.send_rounded,
-                                    color: Colors.white,
-                                    size: SizeConfig.screenWidth * 0.025),
-                                SizedBox(width: SizeConfig.screenWidth * 0.016),
-                                Text(
-                                  'Submit Application',
-                                  style: TextStyle(
-                                    fontSize: SizeConfig.screenWidth * 0.032,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                // Payment Method Selection
+                                _buildAnimatedCard(
+                                  delay: 650,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Payment Method Used',
+                                        style: TextStyle(
+                                          fontSize:
+                                              SizeConfig.screenWidth * 0.034,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color(0xFF1B5E20),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height:
+                                              SizeConfig.screenHeight * 0.012),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _buildPaymentOption(
+                                                'Bkash', Colors.pink),
+                                          ),
+                                          SizedBox(
+                                              width: SizeConfig.screenWidth *
+                                                  0.025),
+                                          Expanded(
+                                            child: _buildPaymentOption(
+                                                'Nagad', Colors.orange),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                 ),
+
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
+                                _buildAnimatedTextField(
+                                  controller: _transactionIdController,
+                                  label: 'Transaction ID',
+                                  icon: Icons.receipt_long,
+                                  delay: 700,
+                                  validator: (value) => value?.isEmpty ?? true
+                                      ? 'Transaction ID is required'
+                                      : null,
+                                ),
+
+                                // Submit Button
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.034),
+                                TweenAnimationBuilder<double>(
+                                  duration: const Duration(milliseconds: 800),
+                                  tween: Tween(begin: 0.0, end: 1.0),
+                                  builder: (context, value, child) {
+                                    return Transform.scale(
+                                      scale: value,
+                                      child: child,
+                                    );
+                                  },
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    height: SizeConfig.screenHeight * 0.06,
+                                    child: ElevatedButton(
+                                      onPressed:
+                                          _isSubmitting ? null : _submitForm,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFF2E7D32),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              SizeConfig.screenWidth * 0.034),
+                                        ),
+                                        elevation: 4,
+                                      ),
+                                      child: _isSubmitting
+                                          ? SizedBox(
+                                              height: SizeConfig.screenWidth *
+                                                  0.025,
+                                              width: SizeConfig.screenWidth *
+                                                  0.025,
+                                              child:
+                                                  const CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2.5,
+                                              ),
+                                            )
+                                          : Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.send_rounded,
+                                                    color: Colors.white,
+                                                    size:
+                                                        SizeConfig.screenWidth *
+                                                            0.025),
+                                                SizedBox(
+                                                    width:
+                                                        SizeConfig.screenWidth *
+                                                            0.016),
+                                                Text(
+                                                  'Submit Application',
+                                                  style: TextStyle(
+                                                    fontSize:
+                                                        SizeConfig.screenWidth *
+                                                            0.032,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.025),
                               ],
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: SizeConfig.screenHeight * 0.025),
-                    ],
-                  ),
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -962,7 +1185,8 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
             ),
             borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
           ),
-          child: Icon(icon, color: Colors.white, size: SizeConfig.screenWidth * 0.045),
+          child: Icon(icon,
+              color: Colors.white, size: SizeConfig.screenWidth * 0.045),
         ),
         SizedBox(width: SizeConfig.screenWidth * 0.03),
         Text(
@@ -1017,9 +1241,12 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
           decoration: InputDecoration(
             labelText: label,
             labelStyle: TextStyle(fontSize: SizeConfig.screenWidth * 0.035),
-            prefixIcon: Icon(icon, color: const Color(0xFF2E7D32), size: SizeConfig.screenWidth * 0.05),
+            prefixIcon: Icon(icon,
+                color: const Color(0xFF2E7D32),
+                size: SizeConfig.screenWidth * 0.05),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
+              borderRadius:
+                  BorderRadius.circular(SizeConfig.screenWidth * 0.035),
               borderSide: BorderSide.none,
             ),
             filled: true,
@@ -1082,9 +1309,11 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
             padding: EdgeInsets.all(SizeConfig.screenWidth * 0.025),
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
+              borderRadius:
+                  BorderRadius.circular(SizeConfig.screenWidth * 0.025),
             ),
-            child: Icon(icon, color: Colors.white, size: SizeConfig.screenWidth * 0.025),
+            child: Icon(icon,
+                color: Colors.white, size: SizeConfig.screenWidth * 0.025),
           ),
           SizedBox(width: SizeConfig.screenWidth * 0.025),
           Expanded(
@@ -1114,7 +1343,8 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.copy, size: SizeConfig.screenWidth * 0.025),
+                      icon: Icon(Icons.copy,
+                          size: SizeConfig.screenWidth * 0.025),
                       color: color,
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: number));
@@ -1144,7 +1374,8 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
       onTap: () => setState(() => _selectedPaymentMethod = method),
       borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.012),
+        padding:
+            EdgeInsets.symmetric(vertical: SizeConfig.screenHeight * 0.012),
         decoration: BoxDecoration(
           color: isSelected ? color.withOpacity(0.1) : Colors.grey[100],
           borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
@@ -1176,4 +1407,3 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
     );
   }
 }
-
