@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math' as math;
+import 'homepage.dart';
 import 'admin_event_management_page.dart';
 import 'Admin_Educational_Programs_Management_Page.dart';
 import 'admin_research_projects_management_page.dart';
@@ -138,18 +141,19 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       accentColor: kGreenLight,
       destinationPage: const AdminBestPanelMembersPage(),
     ),
-  AdminCardConfig(
-  title: 'Sponsor & Collaborated Club',
-  subtitle: 'Manage sponsors & collaborators',
-  icon: Icons.stars_rounded,
-  gradientColors: const [
-  Color(0xFF0F766E), // deep teal (anchor for contrast with white text)
-  Color(0xFF0EA5E9), // bright cyan accent
-  Color(0xFF6EE7B7), // soft mint highlight
-  ],
-  accentColor: kGreenLight, // can stay as is, still harmonizes with last stop
-  destinationPage: const AdminSponsorsCollaboratorsPage(),
-  ),
+    AdminCardConfig(
+      title: 'Sponsor & Collaborated Club',
+      subtitle: 'Manage sponsors & collaborators',
+      icon: Icons.stars_rounded,
+      gradientColors: const [
+        Color(0xFF0F766E), // deep teal (anchor for contrast with white text)
+        Color(0xFF0EA5E9), // bright cyan accent
+        Color(0xFF6EE7B7), // soft mint highlight
+      ],
+      accentColor:
+          kGreenLight, // can stay as is, still harmonizes with last stop
+      destinationPage: const AdminSponsorsCollaboratorsPage(),
+    ),
     AdminCardConfig(
       title: 'Voice of AUSTRC',
       subtitle: 'Feedback & suggestions',
@@ -198,8 +202,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       accentColor: kAccentGold,
       destinationPage: const ImportMembersExactPage(),
     ),
-
-
   ];
 
   @override
@@ -250,30 +252,185 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          _buildSliverAppBar(),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: _WelcomeCard(
-                fadeAnimation: _headerFadeAnimation,
-                slideAnimation: _headerSlideAnimation,
-                pulseController: _pulseController,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _showSignOutRequiredSnackBar();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF0F4F8),
+        body: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            _buildSliverAppBar(),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: _WelcomeCard(
+                  fadeAnimation: _headerFadeAnimation,
+                  slideAnimation: _headerSlideAnimation,
+                  pulseController: _pulseController,
+                ),
               ),
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            sliver: SliverToBoxAdapter(
-              child: _buildDashboardContent(),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverToBoxAdapter(
+                child: _buildDashboardContent(),
+              ),
             ),
-          ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 40),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 40),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSignOutRequiredSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.info_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Please sign out to go back to user panel',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: kGreenMain,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Sign Out',
+          textColor: kAccentGold,
+          onPressed: _handleSignOut,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleSignOut() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [kGreenDark, kGreenMain],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: kGreenMain.withOpacity(0.3),
+                    blurRadius: 15,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                size: 40,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Sign Out',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: kGreenDark,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Are you sure you want to sign out from the admin panel?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+
+                    // Clear admin session
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('isAdminLoggedIn', false);
+                    await prefs.remove('adminEmail');
+
+                    // Sign out from Firebase
+                    await FirebaseAuth.instance.signOut();
+
+                    if (!mounted) return;
+
+                    // Navigate to HomePage and clear navigation stack
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const HomePage()),
+                      (route) => false,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kAccentRed,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Sign Out',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -287,10 +444,32 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       pinned: true,
       elevation: 0,
       backgroundColor: kGreenDark,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-        onPressed: () => Navigator.pop(context),
-      ),
+      automaticallyImplyLeading: false,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+            onPressed: _handleSignOut,
+            tooltip: 'Sign Out',
+          ),
+        ),
+      ],
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -300,7 +479,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
           ),
         ),
         child: FlexibleSpaceBar(
-          titlePadding: const EdgeInsets.only(left: 50, bottom: 16),
+          titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
           title: FadeTransition(
             opacity: _headerFadeAnimation,
             child: const Text(
@@ -389,7 +568,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: kGreenLight.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(20),
@@ -418,7 +598,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
         // Cards Grid - 2 per row
         ...List.generate(
           (_adminCards.length / 2).ceil(),
-              (rowIndex) {
+          (rowIndex) {
             final startIndex = rowIndex * 2;
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
@@ -434,9 +614,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                   Expanded(
                     child: startIndex + 1 < _adminCards.length
                         ? _AdminCard(
-                      config: _adminCards[startIndex + 1],
-                      index: startIndex + 1,
-                    )
+                            config: _adminCards[startIndex + 1],
+                            index: startIndex + 1,
+                          )
                         : const SizedBox(),
                   ),
                 ],
@@ -566,7 +746,8 @@ class _WelcomeCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: kAccentGold.withOpacity(0.5 * pulseController.value),
+                            color: kAccentGold
+                                .withOpacity(0.5 * pulseController.value),
                             width: 3,
                           ),
                         ),
@@ -578,7 +759,8 @@ class _WelcomeCard extends StatelessWidget {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: kAccentGold.withOpacity(0.6 * pulseController.value),
+                                color: kAccentGold
+                                    .withOpacity(0.6 * pulseController.value),
                                 blurRadius: 12 * pulseController.value,
                                 spreadRadius: 4 * pulseController.value,
                               ),
@@ -654,8 +836,7 @@ class _AdminCard extends StatefulWidget {
   State<_AdminCard> createState() => _AdminCardState();
 }
 
-class _AdminCardState extends State<_AdminCard>
-    with TickerProviderStateMixin {
+class _AdminCardState extends State<_AdminCard> with TickerProviderStateMixin {
   late AnimationController _entryController;
   late AnimationController _hoverController;
   late AnimationController _shimmerController;
@@ -700,7 +881,7 @@ class _AdminCardState extends State<_AdminCard>
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-        widget.config.destinationPage,
+            widget.config.destinationPage,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
@@ -726,7 +907,8 @@ class _AdminCardState extends State<_AdminCard>
     return AnimatedBuilder(
       animation: _entryController,
       builder: (context, child) {
-        final slideValue = Curves.easeOutCubic.transform(_entryController.value);
+        final slideValue =
+            Curves.easeOutCubic.transform(_entryController.value);
         final scaleValue = Curves.elasticOut.transform(
           (_entryController.value).clamp(0.0, 1.0),
         );
@@ -877,7 +1059,8 @@ class _AdminCardState extends State<_AdminCard>
                                 animation: _hoverController,
                                 builder: (context, child) {
                                   return Transform.translate(
-                                    offset: Offset(_hoverController.value * 4, 0),
+                                    offset:
+                                        Offset(_hoverController.value * 4, 0),
                                     child: Container(
                                       padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(

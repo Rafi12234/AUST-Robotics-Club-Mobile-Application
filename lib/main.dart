@@ -1,17 +1,25 @@
 // main.dart
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'homepage.dart';
+import 'admin_homepage.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // Initialize Firebase
 
-  runApp(MyApp());
+  // Check if admin is logged in
+  final prefs = await SharedPreferences.getInstance();
+  final isAdminLoggedIn = prefs.getBool('isAdminLoggedIn') ?? false;
+
+  runApp(MyApp(isAdminLoggedIn: isAdminLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isAdminLoggedIn;
+
+  const MyApp({super.key, required this.isAdminLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +28,10 @@ class MyApp extends StatelessWidget {
       title: 'AUST Robotics Club',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF16A34A)), // green theme
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF16A34A)), // green theme
       ),
-      home: const HomePage(),
+      home: isAdminLoggedIn ? const AdminDashboardPage() : const HomePage(),
     );
   }
 }

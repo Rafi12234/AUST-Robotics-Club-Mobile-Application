@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' as math;
 import 'size_config.dart';
 
@@ -136,7 +137,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
         isAuthorized = adminEmailField.toLowerCase() == email.toLowerCase();
       } else if (adminEmailField is List) {
         isAuthorized = adminEmailField.any(
-              (e) => e.toString().toLowerCase() == email.toLowerCase(),
+          (e) => e.toString().toLowerCase() == email.toLowerCase(),
         );
       }
 
@@ -151,6 +152,11 @@ class _AdminLoginPageState extends State<AdminLoginPage>
         password: password,
       );
 
+      // Save admin session
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isAdminLoggedIn', true);
+      await prefs.setString('adminEmail', email);
+
       // Success animation, then navigate
       _showSuccessAnimation('Login Successful!');
       await Future.delayed(const Duration(milliseconds: 2000));
@@ -159,7 +165,7 @@ class _AdminLoginPageState extends State<AdminLoginPage>
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const AdminDashboardPage(), // <- your dashboard
+          builder: (context) => const AdminDashboardPage(),
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -224,13 +230,17 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                       Color.lerp(
                         const Color(0xFF0D3B1F),
                         const Color(0xFF1B5E20),
-                        (math.sin(_backgroundController.value * 2 * math.pi) + 1) / 2,
+                        (math.sin(_backgroundController.value * 2 * math.pi) +
+                                1) /
+                            2,
                       )!,
                       const Color(0xFF1B5E20),
                       Color.lerp(
                         const Color(0xFF2E7D32),
                         const Color(0xFF43A047),
-                        (math.cos(_backgroundController.value * 2 * math.pi) + 1) / 2,
+                        (math.cos(_backgroundController.value * 2 * math.pi) +
+                                1) /
+                            2,
                       )!,
                     ],
                   ),
@@ -244,13 +254,17 @@ class _AdminLoginPageState extends State<AdminLoginPage>
             return AnimatedBuilder(
               animation: _backgroundController,
               builder: (context, child) {
-                final offset = (_backgroundController.value + index * 0.1) % 1.0;
+                final offset =
+                    (_backgroundController.value + index * 0.1) % 1.0;
                 return Positioned(
-                  left: (index * SizeConfig.screenWidth * 0.125) % SizeConfig.screenWidth,
+                  left: (index * SizeConfig.screenWidth * 0.125) %
+                      SizeConfig.screenWidth,
                   top: SizeConfig.screenHeight * offset,
                   child: Opacity(
                     opacity: 0.1,
-                    child: Icon(Icons.circle, size: SizeConfig.screenWidth * 0.025, color: Colors.white),
+                    child: Icon(Icons.circle,
+                        size: SizeConfig.screenWidth * 0.025,
+                        color: Colors.white),
                   ),
                 );
               },
@@ -260,7 +274,8 @@ class _AdminLoginPageState extends State<AdminLoginPage>
           // Content
           SafeArea(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.06),
+              padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.screenWidth * 0.06),
               child: Column(
                 children: [
                   SizedBox(height: SizeConfig.screenHeight * 0.06),
@@ -278,21 +293,36 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF43A047)
-                                    .withOpacity(0.3 + (_glowController.value * 0.4)),
-                                blurRadius: SizeConfig.screenWidth * 0.08 + (_glowController.value * SizeConfig.screenWidth * 0.04),
-                                spreadRadius: SizeConfig.screenWidth * 0.02 + (_glowController.value * SizeConfig.screenWidth * 0.01),
+                                color: const Color(0xFF43A047).withOpacity(
+                                    0.3 + (_glowController.value * 0.4)),
+                                blurRadius: SizeConfig.screenWidth * 0.08 +
+                                    (_glowController.value *
+                                        SizeConfig.screenWidth *
+                                        0.04),
+                                spreadRadius: SizeConfig.screenWidth * 0.02 +
+                                    (_glowController.value *
+                                        SizeConfig.screenWidth *
+                                        0.01),
                               ),
                               BoxShadow(
-                                color: const Color(0xFF2E7D32)
-                                    .withOpacity(0.4 + (_glowController.value * 0.3)),
-                                blurRadius: SizeConfig.screenWidth * 0.06 + (_glowController.value * SizeConfig.screenWidth * 0.03),
-                                spreadRadius: SizeConfig.screenWidth * 0.01 + (_glowController.value * SizeConfig.screenWidth * 0.005),
+                                color: const Color(0xFF2E7D32).withOpacity(
+                                    0.4 + (_glowController.value * 0.3)),
+                                blurRadius: SizeConfig.screenWidth * 0.06 +
+                                    (_glowController.value *
+                                        SizeConfig.screenWidth *
+                                        0.03),
+                                spreadRadius: SizeConfig.screenWidth * 0.01 +
+                                    (_glowController.value *
+                                        SizeConfig.screenWidth *
+                                        0.005),
                               ),
                               BoxShadow(
-                                color: const Color(0xFF1B5E20)
-                                    .withOpacity(0.5 + (_glowController.value * 0.2)),
-                                blurRadius: SizeConfig.screenWidth * 0.04 + (_glowController.value * SizeConfig.screenWidth * 0.02),
+                                color: const Color(0xFF1B5E20).withOpacity(
+                                    0.5 + (_glowController.value * 0.2)),
+                                blurRadius: SizeConfig.screenWidth * 0.04 +
+                                    (_glowController.value *
+                                        SizeConfig.screenWidth *
+                                        0.02),
                                 spreadRadius: SizeConfig.screenWidth * 0.004,
                               ),
                             ],
@@ -301,8 +331,8 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFF43A047)
-                                    .withOpacity(0.3 + (_glowController.value * 0.4)),
+                                color: const Color(0xFF43A047).withOpacity(
+                                    0.3 + (_glowController.value * 0.4)),
                                 width: SizeConfig.screenWidth * 0.006,
                               ),
                             ),
@@ -340,7 +370,8 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.screenWidth * 0.05),
                           ),
                           child: Text(
                             'AUSTRC Management',
@@ -366,12 +397,14 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                         padding: EdgeInsets.all(SizeConfig.screenWidth * 0.055),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.screenWidth * 0.06),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
                               blurRadius: SizeConfig.screenWidth * 0.06,
-                              offset: Offset(0, SizeConfig.screenHeight * 0.015),
+                              offset:
+                                  Offset(0, SizeConfig.screenHeight * 0.015),
                             ),
                           ],
                         ),
@@ -386,7 +419,10 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                   return Transform.translate(
                                     offset: Offset(
                                       _showError
-                                          ? math.sin(_errorController.value * math.pi * 6) * 10
+                                          ? math.sin(_errorController.value *
+                                                  math.pi *
+                                                  6) *
+                                              10
                                           : 0,
                                       0,
                                     ),
@@ -396,34 +432,45 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                 child: TextFormField(
                                   controller: _emailController,
                                   keyboardType: TextInputType.emailAddress,
-                                  style: TextStyle(fontSize: SizeConfig.screenWidth * 0.038),
+                                  style: TextStyle(
+                                      fontSize: SizeConfig.screenWidth * 0.038),
                                   decoration: InputDecoration(
                                     labelText: 'Admin Email',
-                                    labelStyle: TextStyle(fontSize: SizeConfig.screenWidth * 0.033),
+                                    labelStyle: TextStyle(
+                                        fontSize:
+                                            SizeConfig.screenWidth * 0.033),
                                     prefixIcon: Icon(Icons.admin_panel_settings,
-                                        color: Color(0xFF1B5E20), size: SizeConfig.screenWidth * 0.05),
+                                        color: Color(0xFF1B5E20),
+                                        size: SizeConfig.screenWidth * 0.05),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
+                                      borderRadius: BorderRadius.circular(
+                                          SizeConfig.screenWidth * 0.035),
                                     ),
                                     enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
-                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                      borderRadius: BorderRadius.circular(
+                                          SizeConfig.screenWidth * 0.035),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
                                     ),
                                     focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
+                                      borderRadius: BorderRadius.circular(
+                                          SizeConfig.screenWidth * 0.035),
                                       borderSide: BorderSide(
                                           color: Color(0xFF1B5E20), width: 2),
                                     ),
                                     filled: true,
                                     fillColor: Colors.grey[50],
                                     contentPadding: EdgeInsets.symmetric(
-                                      horizontal: SizeConfig.screenWidth * 0.035,
+                                      horizontal:
+                                          SizeConfig.screenWidth * 0.035,
                                       vertical: SizeConfig.screenHeight * 0.015,
                                     ),
                                   ),
                                   validator: (value) {
-                                    if (value?.isEmpty ?? true) return 'Email is required';
-                                    if (!(value!.contains('@') && value.contains('.'))) {
+                                    if (value?.isEmpty ?? true)
+                                      return 'Email is required';
+                                    if (!(value!.contains('@') &&
+                                        value.contains('.'))) {
                                       return 'Invalid email format';
                                     }
                                     return null;
@@ -440,7 +487,10 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                   return Transform.translate(
                                     offset: Offset(
                                       _showError
-                                          ? math.sin(_errorController.value * math.pi * 6) * 10
+                                          ? math.sin(_errorController.value *
+                                                  math.pi *
+                                                  6) *
+                                              10
                                           : 0,
                                       0,
                                     ),
@@ -450,12 +500,16 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                 child: TextFormField(
                                   controller: _passwordController,
                                   obscureText: _obscurePassword,
-                                  style: TextStyle(fontSize: SizeConfig.screenWidth * 0.038),
+                                  style: TextStyle(
+                                      fontSize: SizeConfig.screenWidth * 0.038),
                                   decoration: InputDecoration(
                                     labelText: 'Password',
-                                    labelStyle: TextStyle(fontSize: SizeConfig.screenWidth * 0.033),
-                                    prefixIcon:
-                                    Icon(Icons.lock, color: Color(0xFF1B5E20), size: SizeConfig.screenWidth * 0.05),
+                                    labelStyle: TextStyle(
+                                        fontSize:
+                                            SizeConfig.screenWidth * 0.033),
+                                    prefixIcon: Icon(Icons.lock,
+                                        color: Color(0xFF1B5E20),
+                                        size: SizeConfig.screenWidth * 0.05),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscurePassword
@@ -464,25 +518,30 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                         color: Colors.grey,
                                         size: SizeConfig.screenWidth * 0.05,
                                       ),
-                                      onPressed: () =>
-                                          setState(() => _obscurePassword = !_obscurePassword),
+                                      onPressed: () => setState(() =>
+                                          _obscurePassword = !_obscurePassword),
                                     ),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
+                                      borderRadius: BorderRadius.circular(
+                                          SizeConfig.screenWidth * 0.035),
                                     ),
                                     enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
-                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                      borderRadius: BorderRadius.circular(
+                                          SizeConfig.screenWidth * 0.035),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
                                     ),
                                     focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
+                                      borderRadius: BorderRadius.circular(
+                                          SizeConfig.screenWidth * 0.035),
                                       borderSide: BorderSide(
                                           color: Color(0xFF1B5E20), width: 2),
                                     ),
                                     filled: true,
                                     fillColor: Colors.grey[50],
                                     contentPadding: EdgeInsets.symmetric(
-                                      horizontal: SizeConfig.screenWidth * 0.035,
+                                      horizontal:
+                                          SizeConfig.screenWidth * 0.035,
                                       vertical: SizeConfig.screenHeight * 0.015,
                                     ),
                                   ),
@@ -509,63 +568,84 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF1B5E20),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.035),
+                                      borderRadius: BorderRadius.circular(
+                                          SizeConfig.screenWidth * 0.035),
                                     ),
                                     elevation: 5,
                                   ),
                                   child: _isLoading
                                       ? SizedBox(
-                                    height: SizeConfig.screenWidth * 0.055,
-                                    width: SizeConfig.screenWidth * 0.055,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: SizeConfig.screenWidth * 0.005,
-                                    ),
-                                  )
+                                          height:
+                                              SizeConfig.screenWidth * 0.055,
+                                          width: SizeConfig.screenWidth * 0.055,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth:
+                                                SizeConfig.screenWidth * 0.005,
+                                          ),
+                                        )
                                       : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.login, color: Colors.white, size: SizeConfig.screenWidth * 0.05),
-                                      SizedBox(width: SizeConfig.screenWidth * 0.02),
-                                      Text(
-                                        'Login',
-                                        style: TextStyle(
-                                          fontSize: SizeConfig.screenWidth * 0.042,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.login,
+                                                color: Colors.white,
+                                                size: SizeConfig.screenWidth *
+                                                    0.05),
+                                            SizedBox(
+                                                width: SizeConfig.screenWidth *
+                                                    0.02),
+                                            Text(
+                                              'Login',
+                                              style: TextStyle(
+                                                fontSize:
+                                                    SizeConfig.screenWidth *
+                                                        0.042,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                    ],
-                                  ),
                                 ),
                               ),
 
                               // Error message
                               if (_showError) ...[
-                                SizedBox(height: SizeConfig.screenHeight * 0.025),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.025),
                                 AnimatedBuilder(
                                   animation: _errorController,
                                   builder: (context, child) {
                                     return FadeTransition(
                                       opacity: _errorController,
                                       child: Container(
-                                        padding: EdgeInsets.all(SizeConfig.screenWidth * 0.03),
+                                        padding: EdgeInsets.all(
+                                            SizeConfig.screenWidth * 0.03),
                                         decoration: BoxDecoration(
                                           color: Colors.red[50],
-                                          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
-                                          border: Border.all(color: Colors.red, width: 1.5),
+                                          borderRadius: BorderRadius.circular(
+                                              SizeConfig.screenWidth * 0.025),
+                                          border: Border.all(
+                                              color: Colors.red, width: 1.5),
                                         ),
                                         child: Row(
                                           children: [
                                             Icon(Icons.error_outline,
-                                                color: Colors.red, size: SizeConfig.screenWidth * 0.05),
-                                            SizedBox(width: SizeConfig.screenWidth * 0.02),
+                                                color: Colors.red,
+                                                size: SizeConfig.screenWidth *
+                                                    0.05),
+                                            SizedBox(
+                                                width: SizeConfig.screenWidth *
+                                                    0.02),
                                             Expanded(
                                               child: Text(
                                                 _errorMessage,
                                                 style: TextStyle(
                                                   color: Colors.red,
-                                                  fontSize: SizeConfig.screenWidth * 0.032,
+                                                  fontSize:
+                                                      SizeConfig.screenWidth *
+                                                          0.032,
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),
@@ -612,7 +692,8 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                 return Opacity(
                   opacity: _successController.value,
                   child: Container(
-                    color: Colors.black.withOpacity(0.7 * _successController.value),
+                    color: Colors.black
+                        .withOpacity(0.7 * _successController.value),
                     child: Center(
                       child: ScaleTransition(
                         scale: Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -622,10 +703,12 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                           ),
                         ),
                         child: Container(
-                          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.08),
+                          padding:
+                              EdgeInsets.all(SizeConfig.screenWidth * 0.08),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.screenWidth * 0.06),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
@@ -641,12 +724,16 @@ class _AdminLoginPageState extends State<AdminLoginPage>
                                 height: SizeConfig.screenWidth * 0.18,
                                 decoration: const BoxDecoration(
                                   gradient: LinearGradient(
-                                    colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+                                    colors: [
+                                      Color(0xFF1B5E20),
+                                      Color(0xFF43A047)
+                                    ],
                                   ),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(Icons.check_rounded,
-                                    size: SizeConfig.screenWidth * 0.11, color: Colors.white),
+                                    size: SizeConfig.screenWidth * 0.11,
+                                    color: Colors.white),
                               ),
                               SizedBox(height: SizeConfig.screenHeight * 0.025),
                               Text(
