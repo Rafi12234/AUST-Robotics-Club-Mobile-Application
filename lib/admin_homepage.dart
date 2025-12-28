@@ -20,6 +20,7 @@ import 'Admin_AUSTRC_ID_Find_Page.dart';
 import 'Admin_ContactUs_Management_Page.dart';
 import 'Admin_Highlights_of_AUSTRC_Page.dart';
 import 'csv_import_members_page.dart';
+import 'Admin_Popup_Manager_Page.dart';
 
 // Theme colors
 const kGreenDark = Color(0xFF0F3D2E);
@@ -201,6 +202,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       gradientColors: [Color(0xFF78350F), Color(0xFFF59E0B), Color(0xFFFFD54F)],
       accentColor: kAccentGold,
       destinationPage: const ImportMembersExactPage(),
+    ),
+    AdminCardConfig(
+      title: 'Popup Manager',
+      subtitle: 'Manage pop-up notifications',
+      icon: Icons.notifications_active_rounded,
+      gradientColors: [Color(0xFF0D3B66), Color(0xFFFAF0CA), Color(0xFFF4D35E)],
+      accentColor: kAccentGold,
+      destinationPage: const AdminPopupManagerPage(),
     ),
   ];
 
