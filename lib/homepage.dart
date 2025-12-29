@@ -4248,7 +4248,7 @@ class _VoiceOfAUSTRCState extends State<VoiceOfAUSTRC>
       children: [
         // Section header
         Container(
-          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
+          padding: EdgeInsets.all(SizeConfig.screenWidth * 0.039),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFF0F3D2E), Color(0xFF1A5C43)],
