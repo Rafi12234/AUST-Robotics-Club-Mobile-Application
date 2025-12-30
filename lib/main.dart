@@ -1,13 +1,23 @@
 // main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'SplashScreen.dart';
 import 'homepage.dart';
 import 'admin_homepage.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Initialize Firebase
+
+  // Lock orientation to portrait
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Initialize Firebase
+  await Firebase.initializeApp();
 
   // Check if admin is logged in
   final prefs = await SharedPreferences.getInstance();
@@ -29,9 +39,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF16A34A)), // green theme
+          seedColor: const Color(0xFF16A34A),
+        ),
+        fontFamily: 'Poppins', // Optional: Add your preferred font
       ),
-      home: isAdminLoggedIn ? const AdminDashboardPage() : const HomePage(),
+      home: SplashScreen(isAdminLoggedIn: isAdminLoggedIn),
     );
   }
 }
