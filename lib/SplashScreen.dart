@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
   bool _isExiting = false;
 
   // Splash duration (adjust based on your GIF length)
-  static const Duration _splashDuration = Duration(milliseconds: 4400);
+  static const Duration _splashDuration = Duration(milliseconds: 3800);
 
   @override
   void initState() {
