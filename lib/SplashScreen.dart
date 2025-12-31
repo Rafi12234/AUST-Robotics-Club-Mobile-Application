@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen>
   bool _isExiting = false;
 
   // Splash duration (adjust based on your GIF length)
-  static const Duration _splashDuration = Duration(seconds: 4);
+  static const Duration _splashDuration = Duration(milliseconds: 4400);
 
   @override
   void initState() {
@@ -113,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _preloadGif() async {
     try {
       await precacheImage(
-        const AssetImage('assets/images/splash_screen.gif'),
+        const AssetImage('assets/images/SplashScreen.gif'),
         context,
       );
       if (mounted) {
@@ -263,8 +263,8 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Transform.scale(
                     scale: _pulseAnimation.value,
                     child: Container(
-                      width: 300,
-                      height: 300,
+                      width: 500,
+                      height: 500,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
@@ -412,8 +412,8 @@ class _SplashScreenState extends State<SplashScreen>
         );
       },
       child: Container(
-        width: 280,
-        height: 280,
+        width: 250,
+        height: 250,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
           boxShadow: [
@@ -448,62 +448,16 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
               padding: const EdgeInsets.all(3),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(29),
-                  color: const Color(0xFF0A2A1B),
-                ),
-                padding: const EdgeInsets.all(8),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: _gifLoaded
-                      ? Image.asset(
-                    'assets/images/splash_screen.gif',
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                  )
-                      : _buildLoadingPlaceholder(),
-                ),
-              ),
-            ),
-
-            // Shine effect
-            Positioned.fill(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: -1, end: 2),
-                  duration: const Duration(seconds: 3),
-                  curve: Curves.easeInOut,
-                  builder: (context, value, child) {
-                    return ShaderMask(
-                      shaderCallback: (bounds) {
-                        return LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.transparent,
-                            Colors.white.withOpacity(0.1),
-                            Colors.transparent,
-                          ],
-                          stops: [
-                            (value - 0.3).clamp(0.0, 1.0),
-                            value.clamp(0.0, 1.0),
-                            (value + 0.3).clamp(0.0, 1.0),
-                          ],
-                        ).createShader(bounds);
-                      },
-                      blendMode: BlendMode.srcOver,
-                      child: Container(
-                        color: Colors.white,
-                      ),
-                    );
-                  },
-                  onEnd: () {
-                    if (mounted && !_isExiting) setState(() {});
-                  },
-                ),
+                borderRadius: BorderRadius.circular(29),
+                child: _gifLoaded
+                    ? Image.asset(
+                        'assets/images/SplashScreen.gif',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      )
+                    : _buildLoadingPlaceholder(),
               ),
             ),
 
