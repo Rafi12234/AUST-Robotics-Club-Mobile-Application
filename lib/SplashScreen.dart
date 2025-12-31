@@ -828,51 +828,41 @@ class _SplashScreenState extends State<SplashScreen>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: SizeConfig.screenWidth * 0.06,
-                    height: SizeConfig.screenWidth * 0.06,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF52B788).withOpacity(0.8),
-                          const Color(0xFF2D6A4F).withOpacity(0.8),
-                        ],
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'A',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: SizeConfig.screenWidth * 0.03,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
+                    child: Image.asset(
+                      'assets/images/AUST.png',
+                      width: SizeConfig.screenWidth * 0.08,
+                      height: SizeConfig.screenWidth * 0.08,
+                      fit: BoxFit.contain,
                     ),
                   ),
                   SizedBox(width: SizeConfig.screenWidth * 0.025),
-                  Text(
-                    'AUST',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: SizeConfig.screenWidth * 0.035,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: SizeConfig.screenWidth * 0.007,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Ahsanullah University of Science & Technology',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: SizeConfig.screenWidth * 0.028,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: SizeConfig.screenWidth * 0.001,
+                        ),
+                      ),
+                      // Text(
+                      //   'Science & Technology',
+                      //   style: TextStyle(
+                      //     color: Colors.white.withOpacity(0.7),
+                      //     fontSize: SizeConfig.screenWidth * 0.028,
+                      //     fontWeight: FontWeight.w600,
+                      //     letterSpacing: SizeConfig.screenWidth * 0.001,
+                      //   ),
+                      // ),
+                    ],
                   ),
                 ],
-              ),
-            ),
-
-            SizedBox(height: SizeConfig.screenHeight * 0.01),
-
-            Text(
-              'Ahsanullah University of Science & Technology',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.4),
-                fontSize: SizeConfig.screenWidth * 0.025,
-                letterSpacing: SizeConfig.screenWidth * 0.001,
               ),
             ),
 
