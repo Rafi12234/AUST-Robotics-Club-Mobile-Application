@@ -224,7 +224,7 @@ class _SplashScreenState extends State<SplashScreen>
             _buildProgressIndicator(),
 
             // Skip button
-            _buildSkipButton(),
+            //_buildSkipButton(),
 
             // Bottom branding
             _buildBottomBranding(),
@@ -730,69 +730,69 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget _buildSkipButton() {
-    return Positioned(
-      top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.02,
-      right: SizeConfig.screenWidth * 0.05,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 1200),
-        curve: Curves.easeOut,
-        builder: (context, value, child) {
-          return Opacity(
-            opacity: value,
-            child: Transform.translate(
-              offset: Offset(SizeConfig.screenWidth * 0.05 * (1 - value), 0),
-              child: child,
-            ),
-          );
-        },
-        child: GestureDetector(
-          onTap: _navigateToHome,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: SizeConfig.screenWidth * 0.04,
-              vertical: SizeConfig.screenHeight * 0.012,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.15),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: SizeConfig.screenWidth * 0.02,
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Skip',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: SizeConfig.screenWidth * 0.03,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: SizeConfig.screenWidth * 0.001,
-                  ),
-                ),
-                SizedBox(width: SizeConfig.screenWidth * 0.015),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white.withOpacity(0.9),
-                  size: SizeConfig.screenWidth * 0.038,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildSkipButton() {
+  //   return Positioned(
+  //     top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.02,
+  //     right: SizeConfig.screenWidth * 0.05,
+  //     child: TweenAnimationBuilder<double>(
+  //       tween: Tween(begin: 0, end: 1),
+  //       duration: const Duration(milliseconds: 1200),
+  //       curve: Curves.easeOut,
+  //       builder: (context, value, child) {
+  //         return Opacity(
+  //           opacity: value,
+  //           child: Transform.translate(
+  //             offset: Offset(SizeConfig.screenWidth * 0.05 * (1 - value), 0),
+  //             child: child,
+  //           ),
+  //         );
+  //       },
+  //       child: GestureDetector(
+  //         onTap: _navigateToHome,
+  //         child: Container(
+  //           padding: EdgeInsets.symmetric(
+  //             horizontal: SizeConfig.screenWidth * 0.04,
+  //             vertical: SizeConfig.screenHeight * 0.012,
+  //           ),
+  //           decoration: BoxDecoration(
+  //             color: Colors.white.withOpacity(0.08),
+  //             borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
+  //             border: Border.all(
+  //               color: Colors.white.withOpacity(0.15),
+  //               width: 1,
+  //             ),
+  //             boxShadow: [
+  //               BoxShadow(
+  //                 color: Colors.black.withOpacity(0.2),
+  //                 blurRadius: SizeConfig.screenWidth * 0.02,
+  //               ),
+  //             ],
+  //           ),
+  //           child: Row(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Text(
+  //                 'Skip',
+  //                 style: TextStyle(
+  //                   color: Colors.white.withOpacity(0.9),
+  //                   fontSize: SizeConfig.screenWidth * 0.03,
+  //                   fontWeight: FontWeight.w600,
+  //                   letterSpacing: SizeConfig.screenWidth * 0.001,
+  //                 ),
+  //               ),
+  //               SizedBox(width: SizeConfig.screenWidth * 0.015),
+  //               Icon(
+  //                 Icons.arrow_forward_rounded,
+  //                 color: Colors.white.withOpacity(0.9),
+  //                 size: SizeConfig.screenWidth * 0.038,
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildBottomBranding() {
     return Positioned(
