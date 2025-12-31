@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'homepage.dart';
 import 'admin_homepage.dart';
+import 'size_config.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool isAdminLoggedIn;
@@ -197,6 +198,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     return Scaffold(
       backgroundColor: const Color(0xFF061A11),
       body: AnimatedBuilder(
@@ -258,13 +260,13 @@ class _SplashScreenState extends State<SplashScreen>
               children: [
                 // Top right glow
                 Positioned(
-                  top: -120,
-                  right: -80,
+                  top: SizeConfig.screenHeight * -0.15,
+                  right: SizeConfig.screenWidth * -0.2,
                   child: Transform.scale(
                     scale: _pulseAnimation.value,
                     child: Container(
-                      width: 500,
-                      height: 500,
+                      width: SizeConfig.screenWidth * 1.2,
+                      height: SizeConfig.screenWidth * 1.2,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
@@ -281,13 +283,13 @@ class _SplashScreenState extends State<SplashScreen>
 
                 // Bottom left glow
                 Positioned(
-                  bottom: -100,
-                  left: -60,
+                  bottom: SizeConfig.screenHeight * -0.12,
+                  left: SizeConfig.screenWidth * -0.15,
                   child: Transform.scale(
                     scale: 2 - _pulseAnimation.value,
                     child: Container(
-                      width: 250,
-                      height: 250,
+                      width: SizeConfig.screenWidth * 0.6,
+                      height: SizeConfig.screenWidth * 0.6,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
@@ -308,8 +310,8 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Transform.scale(
                       scale: _pulseAnimation.value,
                       child: Container(
-                        width: 350,
-                        height: 350,
+                        width: SizeConfig.screenWidth * 0.85,
+                        height: SizeConfig.screenWidth * 0.85,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
@@ -385,12 +387,12 @@ class _SplashScreenState extends State<SplashScreen>
             // GIF Container with decorative frame
             _buildGifContainer(),
 
-            const SizedBox(height: 40),
+            SizedBox(height: SizeConfig.screenHeight * 0.035),
 
             // App name
             _buildAppName(),
 
-            const SizedBox(height: 12),
+            SizedBox(height: SizeConfig.screenHeight * 0.01),
 
             // Tagline
             _buildTagline(),
@@ -412,22 +414,22 @@ class _SplashScreenState extends State<SplashScreen>
         );
       },
       child: Container(
-        width: 250,
-        height: 250,
+        width: SizeConfig.screenWidth * 0.55,
+        height: SizeConfig.screenWidth * 0.55,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.065),
           boxShadow: [
             // Outer glow
             BoxShadow(
               color: const Color(0xFF52B788).withOpacity(0.3),
-              blurRadius: 40,
-              spreadRadius: 5,
+              blurRadius: SizeConfig.screenWidth * 0.08,
+              spreadRadius: SizeConfig.screenWidth * 0.01,
             ),
             // Inner shadow
             BoxShadow(
               color: Colors.black.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+              blurRadius: SizeConfig.screenWidth * 0.04,
+              offset: Offset(0, SizeConfig.screenWidth * 0.02),
             ),
           ],
         ),
@@ -436,7 +438,7 @@ class _SplashScreenState extends State<SplashScreen>
             // Decorative border
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.065),
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -447,9 +449,9 @@ class _SplashScreenState extends State<SplashScreen>
                   ],
                 ),
               ),
-              padding: const EdgeInsets.all(3),
+              padding: EdgeInsets.all(SizeConfig.screenWidth * 0.006),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(29),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
                 child: _gifLoaded
                     ? Image.asset(
                         'assets/images/SplashScreen.gif',
@@ -470,11 +472,12 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   List<Widget> _buildCornerDecorations() {
+    final offset = SizeConfig.screenWidth * -0.01;
     return [
-      Positioned(top: -5, left: -5, child: _buildCornerDot()),
-      Positioned(top: -5, right: -5, child: _buildCornerDot()),
-      Positioned(bottom: -5, left: -5, child: _buildCornerDot()),
-      Positioned(bottom: -5, right: -5, child: _buildCornerDot()),
+      Positioned(top: offset, left: offset, child: _buildCornerDot()),
+      Positioned(top: offset, right: offset, child: _buildCornerDot()),
+      Positioned(bottom: offset, left: offset, child: _buildCornerDot()),
+      Positioned(bottom: offset, right: offset, child: _buildCornerDot()),
     ];
   }
 
@@ -485,8 +488,8 @@ class _SplashScreenState extends State<SplashScreen>
         return Transform.scale(
           scale: _pulseAnimation.value,
           child: Container(
-            width: 12,
-            height: 12,
+            width: SizeConfig.screenWidth * 0.025,
+            height: SizeConfig.screenWidth * 0.025,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: const LinearGradient(
@@ -495,7 +498,7 @@ class _SplashScreenState extends State<SplashScreen>
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF52B788).withOpacity(0.6),
-                  blurRadius: 8,
+                  blurRadius: SizeConfig.screenWidth * 0.015,
                 ),
               ],
             ),
@@ -513,21 +516,21 @@ class _SplashScreenState extends State<SplashScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              width: 50,
-              height: 50,
+              width: SizeConfig.screenWidth * 0.1,
+              height: SizeConfig.screenWidth * 0.1,
               child: CircularProgressIndicator(
-                strokeWidth: 3,
+                strokeWidth: SizeConfig.screenWidth * 0.006,
                 valueColor: AlwaysStoppedAnimation(
                   const Color(0xFF52B788).withOpacity(0.7),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: SizeConfig.screenHeight * 0.015),
             Text(
               'Loading...',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.5),
-                fontSize: 14,
+                fontSize: SizeConfig.screenWidth * 0.03,
               ),
             ),
           ],
@@ -560,13 +563,13 @@ class _SplashScreenState extends State<SplashScreen>
             ],
           ).createShader(bounds);
         },
-        child: const Text(
+        child: Text(
           'AUST ROBOTICS CLUB',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 24,
+            fontSize: SizeConfig.screenWidth * 0.05,
             fontWeight: FontWeight.w900,
-            letterSpacing: 3,
+            letterSpacing: SizeConfig.screenWidth * 0.005,
           ),
         ),
       ),
@@ -588,9 +591,12 @@ class _SplashScreenState extends State<SplashScreen>
         );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        padding: EdgeInsets.symmetric(
+          horizontal: SizeConfig.screenWidth * 0.05,
+          vertical: SizeConfig.screenHeight * 0.01,
+        ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
           border: Border.all(
             color: const Color(0xFF52B788).withOpacity(0.3),
             width: 1,
@@ -606,27 +612,27 @@ class _SplashScreenState extends State<SplashScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 8,
-              height: 8,
+              width: SizeConfig.screenWidth * 0.018,
+              height: SizeConfig.screenWidth * 0.018,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: const Color(0xFF52B788),
                 boxShadow: [
                   BoxShadow(
                     color: const Color(0xFF52B788).withOpacity(0.5),
-                    blurRadius: 6,
+                    blurRadius: SizeConfig.screenWidth * 0.012,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: SizeConfig.screenWidth * 0.02),
             Text(
               'Innovation • Technology • Excellence',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.7),
-                fontSize: 12,
+                fontSize: SizeConfig.screenWidth * 0.026,
                 fontWeight: FontWeight.w500,
-                letterSpacing: 1,
+                letterSpacing: SizeConfig.screenWidth * 0.002,
               ),
             ),
           ],
@@ -637,9 +643,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildProgressIndicator() {
     return Positioned(
-      bottom: 120,
-      left: 40,
-      right: 40,
+      bottom: SizeConfig.screenHeight * 0.14,
+      left: SizeConfig.screenWidth * 0.12,
+      right: SizeConfig.screenWidth * 0.12,
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
         duration: const Duration(milliseconds: 1000),
@@ -657,9 +663,9 @@ class _SplashScreenState extends State<SplashScreen>
               animation: _progressAnimation,
               builder: (context, child) {
                 return Container(
-                  height: 4,
+                  height: SizeConfig.screenHeight * 0.005,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.005),
                     color: Colors.white.withOpacity(0.1),
                   ),
                   child: Stack(
@@ -670,7 +676,7 @@ class _SplashScreenState extends State<SplashScreen>
                         widthFactor: _progressAnimation.value,
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.005),
                             gradient: const LinearGradient(
                               colors: [
                                 Color(0xFF2D6A4F),
@@ -680,7 +686,7 @@ class _SplashScreenState extends State<SplashScreen>
                             boxShadow: [
                               BoxShadow(
                                 color: const Color(0xFF52B788).withOpacity(0.5),
-                                blurRadius: 8,
+                                blurRadius: SizeConfig.screenWidth * 0.015,
                               ),
                             ],
                           ),
@@ -688,21 +694,21 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       // Glow effect at end
                       Positioned(
-                        left: (MediaQuery.of(context).size.width - 80) *
+                        left: (SizeConfig.screenWidth * 0.76) *
                             _progressAnimation.value -
-                            10,
-                        top: -4,
+                            SizeConfig.screenWidth * 0.02,
+                        top: SizeConfig.screenHeight * -0.004,
                         child: Container(
-                          width: 12,
-                          height: 12,
+                          width: SizeConfig.screenWidth * 0.025,
+                          height: SizeConfig.screenWidth * 0.025,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: const Color(0xFF52B788),
                             boxShadow: [
                               BoxShadow(
                                 color: const Color(0xFF52B788).withOpacity(0.8),
-                                blurRadius: 12,
-                                spreadRadius: 2,
+                                blurRadius: SizeConfig.screenWidth * 0.025,
+                                spreadRadius: SizeConfig.screenWidth * 0.004,
                               ),
                             ],
                           ),
@@ -714,7 +720,7 @@ class _SplashScreenState extends State<SplashScreen>
               },
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: SizeConfig.screenHeight * 0.015),
 
             // Loading text with animation
             _AnimatedLoadingText(isAdmin: widget.isAdminLoggedIn),
@@ -726,8 +732,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildSkipButton() {
     return Positioned(
-      top: MediaQuery.of(context).padding.top + 16,
-      right: 20,
+      top: MediaQuery.of(context).padding.top + SizeConfig.screenHeight * 0.02,
+      right: SizeConfig.screenWidth * 0.05,
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
         duration: const Duration(milliseconds: 1200),
@@ -736,7 +742,7 @@ class _SplashScreenState extends State<SplashScreen>
           return Opacity(
             opacity: value,
             child: Transform.translate(
-              offset: Offset(20 * (1 - value), 0),
+              offset: Offset(SizeConfig.screenWidth * 0.05 * (1 - value), 0),
               child: child,
             ),
           );
@@ -744,10 +750,13 @@ class _SplashScreenState extends State<SplashScreen>
         child: GestureDetector(
           onTap: _navigateToHome,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: SizeConfig.screenWidth * 0.04,
+              vertical: SizeConfig.screenHeight * 0.012,
+            ),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.06),
               border: Border.all(
                 color: Colors.white.withOpacity(0.15),
                 width: 1,
@@ -755,7 +764,7 @@ class _SplashScreenState extends State<SplashScreen>
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
+                  blurRadius: SizeConfig.screenWidth * 0.02,
                 ),
               ],
             ),
@@ -766,16 +775,16 @@ class _SplashScreenState extends State<SplashScreen>
                   'Skip',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
-                    fontSize: 14,
+                    fontSize: SizeConfig.screenWidth * 0.03,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+                    letterSpacing: SizeConfig.screenWidth * 0.001,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: SizeConfig.screenWidth * 0.015),
                 Icon(
                   Icons.arrow_forward_rounded,
                   color: Colors.white.withOpacity(0.9),
-                  size: 18,
+                  size: SizeConfig.screenWidth * 0.038,
                 ),
               ],
             ),
@@ -787,7 +796,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildBottomBranding() {
     return Positioned(
-      bottom: 40,
+      bottom: SizeConfig.screenHeight * 0.05,
       left: 0,
       right: 0,
       child: TweenAnimationBuilder<double>(
@@ -798,7 +807,7 @@ class _SplashScreenState extends State<SplashScreen>
           return Opacity(
             opacity: value,
             child: Transform.translate(
-              offset: Offset(0, 20 * (1 - value)),
+              offset: Offset(0, SizeConfig.screenHeight * 0.025 * (1 - value)),
               child: child,
             ),
           );
@@ -808,17 +817,20 @@ class _SplashScreenState extends State<SplashScreen>
           children: [
             // AUST Logo
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.screenWidth * 0.04,
+                vertical: SizeConfig.screenHeight * 0.01,
+              ),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                 color: Colors.white.withOpacity(0.05),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 24,
-                    height: 24,
+                    width: SizeConfig.screenWidth * 0.06,
+                    height: SizeConfig.screenWidth * 0.06,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
@@ -828,49 +840,52 @@ class _SplashScreenState extends State<SplashScreen>
                         ],
                       ),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
                         'A',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: SizeConfig.screenWidth * 0.03,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: SizeConfig.screenWidth * 0.025),
                   Text(
                     'AUST',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.7),
-                      fontSize: 14,
+                      fontSize: SizeConfig.screenWidth * 0.035,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 3,
+                      letterSpacing: SizeConfig.screenWidth * 0.007,
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: SizeConfig.screenHeight * 0.01),
 
             Text(
               'Ahsanullah University of Science & Technology',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.4),
-                fontSize: 10,
-                letterSpacing: 0.5,
+                fontSize: SizeConfig.screenWidth * 0.025,
+                letterSpacing: SizeConfig.screenWidth * 0.001,
               ),
             ),
 
             // Show admin indicator if admin is logged in
             if (widget.isAdminLoggedIn) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: SizeConfig.screenHeight * 0.015),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.screenWidth * 0.03,
+                  vertical: SizeConfig.screenHeight * 0.007,
+                ),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.05),
                   gradient: LinearGradient(
                     colors: [
                       const Color(0xFFFFB703).withOpacity(0.2),
@@ -887,16 +902,16 @@ class _SplashScreenState extends State<SplashScreen>
                     Icon(
                       Icons.admin_panel_settings_rounded,
                       color: const Color(0xFFFFB703).withOpacity(0.9),
-                      size: 14,
+                      size: SizeConfig.screenWidth * 0.035,
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: SizeConfig.screenWidth * 0.015),
                     Text(
                       'Admin Mode',
                       style: TextStyle(
                         color: const Color(0xFFFFB703).withOpacity(0.9),
-                        fontSize: 11,
+                        fontSize: SizeConfig.screenWidth * 0.028,
                         fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
+                        letterSpacing: SizeConfig.screenWidth * 0.001,
                       ),
                     ),
                   ],
@@ -983,9 +998,9 @@ class _AnimatedLoadingTextState extends State<_AnimatedLoadingText>
         key: ValueKey(_currentTextIndex),
         style: TextStyle(
           color: Colors.white.withOpacity(0.5),
-          fontSize: 12,
+          fontSize: SizeConfig.screenWidth * 0.03,
           fontWeight: FontWeight.w500,
-          letterSpacing: 1,
+          letterSpacing: SizeConfig.screenWidth * 0.0025,
         ),
       ),
     );
