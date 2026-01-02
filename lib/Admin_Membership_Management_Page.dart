@@ -50,6 +50,7 @@ class CSVExportService {
         'Phone Number',
         'Payment By',
         'Transaction ID',
+        'Referral Code',
       ]);
 
       // Add member data rows
@@ -66,6 +67,7 @@ class CSVExportService {
           member['Phone_Number'] ?? '',
           member['Payment_By'] ?? '',
           member['Transaction_ID'] ?? '',
+          member['Referral_Code'] ?? 'N/A',
         ]);
       }
 
@@ -4029,10 +4031,10 @@ class _SemesterTileState extends State<_SemesterTile>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(milliseconds: 400 + (widget.index * 80)),
+      duration: Duration(milliseconds: 200 + (widget.index * 5)),
       vsync: this,
     );
-    Future.delayed(Duration(milliseconds: widget.index * 80), () {
+    Future.delayed(Duration(milliseconds: widget.index * 5), () {
       if (mounted) _controller.forward();
     });
   }
@@ -4299,10 +4301,10 @@ class _MemberCardState extends State<_MemberCard>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(milliseconds: 400 + (widget.index * 50)),
+      duration: Duration(milliseconds: 200 + (widget.index * 20)),
       vsync: this,
     );
-    Future.delayed(Duration(milliseconds: widget.index * 50), () {
+    Future.delayed(Duration(milliseconds: widget.index * 20), () {
       if (mounted) _controller.forward();
     });
   }
@@ -4483,6 +4485,7 @@ class _MemberCardState extends State<_MemberCard>
     final paymentBy = widget.data['Payment_By'] ?? '';
     final transactionId = widget.data['Transaction_ID'] ?? '';
     final imageDriveLink = widget.data['Image_Drive_Link'] ?? '';
+    final referralCode = widget.data['Referral_Code'] ?? '';
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -4544,6 +4547,12 @@ class _MemberCardState extends State<_MemberCard>
               canCopy: true,
               isHighlighted: true,
             ),
+          _InfoItem(
+            icon: Icons.person_add_alt_1_rounded,
+            label: 'Referral Code',
+            value: referralCode.isNotEmpty ? referralCode : 'N/A',
+            color: kAccentPurple,
+          ),
           if (imageDriveLink.isNotEmpty) ...[
             const SizedBox(height: 12),
             _ImageLinkWidget(link: imageDriveLink),
