@@ -24,6 +24,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
   final _eduMailController = TextEditingController();
   final _imageLinkController = TextEditingController();
   final _transactionIdController = TextEditingController();
+  final _referralCodeController = TextEditingController();
 
   // Form Values
   String? _selectedSemester;
@@ -75,6 +76,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
     _eduMailController.dispose();
     _imageLinkController.dispose();
     _transactionIdController.dispose();
+    _referralCodeController.dispose();
     super.dispose();
   }
 
@@ -405,6 +407,7 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
         'Image_Drive_Link': _imageLinkController.text.trim(),
         'Payment_By': _selectedPaymentMethod,
         'Transaction_ID': _transactionIdController.text.trim(),
+        'Referral_Code': _referralCodeController.text.trim(),
         'Member_Number': memberNumber,
         'Submitted_At': FieldValue.serverTimestamp(),
       };
@@ -946,6 +949,67 @@ class _MemberRecruitmentPageState extends State<MemberRecruitmentPage>
                                       return 'Invalid email format';
                                     return null;
                                   },
+                                ),
+
+                                // Referral Code Section
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.034),
+                                _buildSectionTitle(
+                                    'Referral Information', Icons.people_outline),
+                                SizedBox(
+                                    height: SizeConfig.screenHeight * 0.016),
+                                _buildAnimatedCard(
+                                  delay: 450,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      TextFormField(
+                                        controller: _referralCodeController,
+                                        style: TextStyle(fontSize: SizeConfig.screenWidth * 0.038),
+                                        decoration: InputDecoration(
+                                          labelText: 'Referral Code (Optional)',
+                                          labelStyle: TextStyle(fontSize: SizeConfig.screenWidth * 0.035),
+                                          hintText: 'Enter referrer\'s name',
+                                          hintStyle: TextStyle(
+                                            fontSize: SizeConfig.screenWidth * 0.032,
+                                            color: Colors.grey[400],
+                                          ),
+                                          prefixIcon: Icon(
+                                            Icons.person_add_alt_1_rounded,
+                                            color: const Color(0xFF2E7D32),
+                                            size: SizeConfig.screenWidth * 0.05,
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                                            borderSide: BorderSide(color: Colors.grey[300]!),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                                            borderSide: BorderSide(color: Colors.grey[300]!),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.03),
+                                            borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 2),
+                                          ),
+                                          filled: true,
+                                          fillColor: Colors.grey[50],
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: SizeConfig.screenWidth * 0.04,
+                                            vertical: SizeConfig.screenHeight * 0.018,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: SizeConfig.screenHeight * 0.01),
+                                      Text(
+                                        'Enter the name of your AUSTRC Panel Member or Batch Representative, if applicable',
+                                        style: TextStyle(
+                                          fontSize: SizeConfig.screenWidth * 0.025,
+                                          color: Colors.grey[600],
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
 
                                 // Payment Section
