@@ -29,6 +29,9 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
 
   late AnimationController _headerController;
 
+  // Special value for custom position option
+  static const String _customPositionOption = '___CUSTOM_POSITION___';
+
   final List<String> positions = [
     'Advisor',
     'Treasurer',
@@ -72,6 +75,8 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
     final facebookController = TextEditingController();
     final linkedinController = TextEditingController();
     final orderController = TextEditingController();
+    final customPositionController = TextEditingController();
+    bool isCustomPosition = false;
     String? imageUrl;
     bool isUploading = false;
 
@@ -198,18 +203,62 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                                 borderSide: const BorderSide(color: kGreenMain, width: 2),
                               ),
                             ),
-                            items: positions.map((position) {
-                              return DropdownMenuItem(
-                                value: position,
-                                child: Text(position),
-                              );
-                            }).toList(),
+                            items: [
+                              ...positions.map((position) {
+                                return DropdownMenuItem(
+                                  value: position,
+                                  child: Text(position),
+                                );
+                              }),
+                              const DropdownMenuItem(
+                                value: _customPositionOption,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.add_circle_outline, size: 18, color: kGreenMain),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Other (Custom Position)',
+                                      style: TextStyle(
+                                        color: kGreenMain,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                             onChanged: (value) {
                               setDialogState(() {
                                 selectedPosition = value;
+                                isCustomPosition = value == _customPositionOption;
+                                if (!isCustomPosition) {
+                                  customPositionController.clear();
+                                }
                               });
                             },
                           ),
+                          
+                          // Custom Position TextField (shown only when "Other" is selected)
+                          if (isCustomPosition) ...[
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: customPositionController,
+                              decoration: InputDecoration(
+                                labelText: 'Custom Position Name*',
+                                hintText: 'Enter your custom position',
+                                prefixIcon: const Icon(Icons.badge_outlined, color: kGreenMain),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: kGreenMain, width: 2),
+                                ),
+                                filled: true,
+                                fillColor: kGreenMain.withValues(alpha: 0.05),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 16),
 
                           // Name
@@ -435,15 +484,23 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                       onPressed: isUploading
                           ? null
                           : () async {
+                        // Determine final position value
+                        final String? finalPosition = isCustomPosition
+                            ? customPositionController.text.trim()
+                            : selectedPosition;
+
                         if (selectedPosition == null ||
+                            (isCustomPosition && customPositionController.text.trim().isEmpty) ||
                             nameController.text.trim().isEmpty ||
                             departmentController.text.trim().isEmpty ||
                             designationController.text.trim().isEmpty ||
                             orderController.text.trim().isEmpty ||
                             imageUrl == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please fill all required fields!'),
+                            SnackBar(
+                              content: Text(isCustomPosition && customPositionController.text.trim().isEmpty
+                                  ? 'Please enter a custom position name!'
+                                  : 'Please fill all required fields!'),
                               backgroundColor: Colors.orange,
                             ),
                           );
@@ -452,7 +509,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
 
                         try {
                           // Check if position already exists and get count
-                          final docName = await _getDocumentName(selectedPosition!);
+                          final docName = await _getDocumentName(finalPosition!);
 
                           await FirebaseFirestore.instance
                               .collection('All_Data')
@@ -470,14 +527,14 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                             'LinkedIn': linkedinController.text.trim(),
                             'Image': imageUrl,
                             'Order': int.parse(orderController.text.trim()),
-                            'Position': selectedPosition,
+                            'Position': finalPosition,
                             'created_at': FieldValue.serverTimestamp(),
                           });
 
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('$selectedPosition added successfully!'),
+                              content: Text('$finalPosition added successfully!'),
                               backgroundColor: kGreenMain,
                             ),
                           );
@@ -542,7 +599,15 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
   }
 
   Future<void> _showEditMemberDialog(String docId, Map<String, dynamic> currentData) async {
-    String? selectedPosition = currentData['Position'] ?? docId;
+    // Check if current position is in the predefined list
+    String currentPosition = currentData['Position'] ?? docId;
+    bool isCustomPosition = !positions.contains(currentPosition);
+    
+    String? selectedPosition = isCustomPosition ? _customPositionOption : currentPosition;
+    final customPositionController = TextEditingController(
+      text: isCustomPosition ? currentPosition : '',
+    );
+    
     final nameController = TextEditingController(text: currentData['Name'] ?? '');
     final departmentController = TextEditingController(text: currentData['Department'] ?? '');
     final designationController = TextEditingController(text: currentData['Designation'] ?? '');
@@ -687,18 +752,62 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                                 borderSide: const BorderSide(color: kGreenMain, width: 2),
                               ),
                             ),
-                            items: positions.map((position) {
-                              return DropdownMenuItem(
-                                value: position,
-                                child: Text(position),
-                              );
-                            }).toList(),
+                            items: [
+                              ...positions.map((position) {
+                                return DropdownMenuItem(
+                                  value: position,
+                                  child: Text(position),
+                                );
+                              }),
+                              const DropdownMenuItem(
+                                value: _customPositionOption,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.add_circle_outline, size: 18, color: kGreenMain),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Other (Custom Position)',
+                                      style: TextStyle(
+                                        color: kGreenMain,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                             onChanged: (value) {
                               setDialogState(() {
                                 selectedPosition = value;
+                                isCustomPosition = value == _customPositionOption;
+                                if (!isCustomPosition) {
+                                  customPositionController.clear();
+                                }
                               });
                             },
                           ),
+                          
+                          // Custom Position TextField (shown only when "Other" is selected)
+                          if (isCustomPosition) ...[
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: customPositionController,
+                              decoration: InputDecoration(
+                                labelText: 'Custom Position Name*',
+                                hintText: 'Enter your custom position',
+                                prefixIcon: const Icon(Icons.badge_outlined, color: kGreenMain),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: kGreenMain, width: 2),
+                                ),
+                                filled: true,
+                                fillColor: kGreenMain.withValues(alpha: 0.05),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 16),
 
                           // Name
@@ -924,7 +1033,13 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                       onPressed: isUploading
                           ? null
                           : () async {
+                        // Determine final position value
+                        final String? finalPosition = isCustomPosition
+                            ? customPositionController.text.trim()
+                            : selectedPosition;
+
                         if (selectedPosition == null ||
+                            (isCustomPosition && customPositionController.text.trim().isEmpty) ||
                             nameController.text.trim().isEmpty ||
                             departmentController.text.trim().isEmpty ||
                             designationController.text.trim().isEmpty ||
@@ -932,8 +1047,10 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                             imageUrl == null ||
                             imageUrl!.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please fill all required fields!'),
+                            SnackBar(
+                              content: Text(isCustomPosition && customPositionController.text.trim().isEmpty
+                                  ? 'Please enter a custom position name!'
+                                  : 'Please fill all required fields!'),
                               backgroundColor: Colors.orange,
                             ),
                           );
@@ -957,7 +1074,7 @@ class _AdminPanelMembersPageState extends State<AdminPanelMembersPage>
                             'LinkedIn': linkedinController.text.trim(),
                             'Image': imageUrl,
                             'Order': int.parse(orderController.text.trim()),
-                            'Position': selectedPosition,
+                            'Position': finalPosition,
                             'updated_at': FieldValue.serverTimestamp(),
                           });
 
