@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:372646948771:android:1a6a961f69d9a5e17eb416",
+        "android_client_info": {
+          "package_name": "app.aust_robotics_club.mobile_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeDPtsx8bZZODx1OdeqWdBnZThgV3qAsQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:372646948771:android:60a7a0dd5f708b257eb416",
         "android_client_info": {
           "package_name": "com.example.aust_robotics_club_mobile_app"

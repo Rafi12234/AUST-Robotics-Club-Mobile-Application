@@ -1,4 +1,4 @@
-package com.example.aust_robotics_club_mobile_app
+package app.aust_robotics_club.mobile_app
 
 import io.flutter.embedding.android.FlutterActivity
 
