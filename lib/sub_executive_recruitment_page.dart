@@ -64,6 +64,17 @@ class _SubExecutiveRecruitmentPageState
     'Software Development',
   ];
 
+  // Map display names to Firebase collection names (if different)
+  final Map<String, String> _departmentFirebaseNames = {
+    'Administration': 'Administration',
+    'Graphics Design': 'Graphics Design',
+    'Event Management': 'Event Management',
+    'Content Writing & Social Media': 'Content Writing & Social Media',
+    'Research and Development': 'Research and Development',
+    'Public Relation': 'Public Relation',
+    'Software Development': 'Software Development ', // Firebase has trailing space
+  };
+
   // Department icons and colors
   final Map<String, IconData> _departmentIcons = {
     'Administration': Icons.admin_panel_settings_rounded,
@@ -259,11 +270,13 @@ class _SubExecutiveRecruitmentPageState
     if (_selectedRecruitmentSemester == null) return;
 
     try {
+      // Get the Firebase collection name (may differ from display name)
+      final firebaseDeptName = _departmentFirebaseNames[department] ?? department;
+      
       final questionsSnapshot = await FirebaseFirestore.instance
           .collection('Sub-Executive_Recruitment')
           .doc(_selectedRecruitmentSemester!)
-          .collection(department)
-          .orderBy(FieldPath.documentId)
+          .collection(firebaseDeptName)
           .get();
 
       List<DepartmentQuestion> questions = [];
@@ -276,6 +289,13 @@ class _SubExecutiveRecruitmentPageState
           ));
         }
       }
+      
+      // Sort questions locally by document ID number
+      questions.sort((a, b) {
+        final numA = int.tryParse(a.questionId.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        final numB = int.tryParse(b.questionId.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        return numA.compareTo(numB);
+      });
 
       if (mounted) {
         setState(() {
@@ -1069,10 +1089,10 @@ class _SubExecutiveRecruitmentPageState
                         child: _buildDropdownField(
                           label: 'Your Current Semester',
                           value: _selectedSemester,
-                          items: _semesterOptions.map((s) => 'Semester $s').toList(),
+                          items: _semesterOptions,
                           onChanged: (value) {
                             setState(() {
-                              _selectedSemester = value?.replaceAll('Semester ', '');
+                              _selectedSemester = value;
                             });
                           },
                           icon: Icons.school_rounded,
