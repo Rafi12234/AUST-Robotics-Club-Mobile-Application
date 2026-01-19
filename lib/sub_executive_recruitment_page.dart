@@ -256,105 +256,39 @@ class _SubExecutiveRecruitmentPageState
   }
 
   Future<void> _loadQuestionsForDepartment(String department) async {
-    if (_selectedRecruitmentSemester == null) {
-      print('ERROR: _selectedRecruitmentSemester is null!');
-      return;
-    }
+    if (_selectedRecruitmentSemester == null) return;
 
     try {
-      // Build the full path for debugging
-      final String collectionPath = 'Sub-Executive_Recruitment/${_selectedRecruitmentSemester!}/$department';
-      print('===========================================');
-      print('FETCHING QUESTIONS');
-      print('Full Path: $collectionPath');
-      print('Semester Document: $_selectedRecruitmentSemester');
-      print('Department Collection: $department');
-      print('===========================================');
-
-      // First, verify the semester document exists
-      final semesterDoc = await FirebaseFirestore.instance
-          .collection('Sub-Executive_Recruitment')
-          .doc(_selectedRecruitmentSemester!)
-          .get();
-      
-      print('Semester document exists: ${semesterDoc.exists}');
-
-      // Now fetch questions from the department collection
       final questionsSnapshot = await FirebaseFirestore.instance
           .collection('Sub-Executive_Recruitment')
           .doc(_selectedRecruitmentSemester!)
           .collection(department)
+          .orderBy(FieldPath.documentId)
           .get();
-
-      print('Documents found in $department: ${questionsSnapshot.docs.length}');
 
       List<DepartmentQuestion> questions = [];
       for (var doc in questionsSnapshot.docs) {
-        print('Document ID: "${doc.id}"');
-        print('Document Data: ${doc.data()}');
-        
         final questionText = doc.data()['Question'] as String? ?? '';
-        print('Question text: "$questionText"');
-        
         if (questionText.isNotEmpty) {
           questions.add(DepartmentQuestion(
             questionId: doc.id,
             question: questionText,
           ));
-          print('Added question: ${doc.id}');
-        } else {
-          print('Skipped empty question: ${doc.id}');
         }
       }
-
-      // Sort questions locally by document ID (e.g., "Question 1", "Question 2", etc.)
-      questions.sort((a, b) {
-        // Extract number from "Question X" format
-        final numA = int.tryParse(a.questionId.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-        final numB = int.tryParse(b.questionId.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-        return numA.compareTo(numB);
-      });
-
-      print('Total questions loaded for $department: ${questions.length}');
-      print('===========================================');
 
       if (mounted) {
         setState(() {
           _departmentQuestions[department] = questions;
         });
       }
-    } catch (e, stackTrace) {
-      print('ERROR loading questions for $department: $e');
-      print('Stack trace: $stackTrace');
-      // Show error to user for debugging
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading questions for $department: $e'),
-            backgroundColor: Colors.orange,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
+    } catch (e) {
+      print('Error loading questions for $department: $e');
     }
   }
 
   Future<void> _loadQuestionsForAllSelectedDepartments() async {
-    print('===========================================');
-    print('_loadQuestionsForAllSelectedDepartments CALLED');
-    print('Recruitment Semester: $_selectedRecruitmentSemester');
-    print('Selected Departments: $_selectedDepartments');
-    print('===========================================');
-
-    if (_selectedRecruitmentSemester == null) {
-      print('ERROR: Recruitment semester is null, cannot load questions');
-      return;
-    }
-    
-    if (_selectedDepartments.isEmpty) {
-      print('ERROR: No departments selected, cannot load questions');
-      return;
-    }
+    if (_selectedRecruitmentSemester == null || _selectedDepartments.isEmpty) return;
 
     setState(() => _isLoadingQuestions = true);
 
@@ -368,13 +302,7 @@ class _SubExecutiveRecruitmentPageState
 
     // Load questions for each selected department
     for (String dept in _selectedDepartments) {
-      print('Loading questions for: $dept');
       await _loadQuestionsForDepartment(dept);
-    }
-
-    print('All departments processed. Questions map: ${_departmentQuestions.keys.toList()}');
-    for (var entry in _departmentQuestions.entries) {
-      print('${entry.key}: ${entry.value.length} questions');
     }
 
     _currentDepartmentTabIndex = 0;
@@ -697,24 +625,13 @@ class _SubExecutiveRecruitmentPageState
                           onPressed: tempSelected.isEmpty
                               ? null
                               : () {
-                            print('Department selection confirmed: $tempSelected');
-                            print('Current recruitment semester: $_selectedRecruitmentSemester');
                             setState(() {
                               _selectedDepartments = tempSelected;
                             });
                             Navigator.pop(context);
                             // Load questions for selected departments
                             if (_selectedRecruitmentSemester != null) {
-                              print('Loading questions for departments...');
                               _loadQuestionsForAllSelectedDepartments();
-                            } else {
-                              print('WARNING: No recruitment semester selected yet!');
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please select a Recruitment Semester first to load questions'),
-                                  backgroundColor: Colors.orange,
-                                ),
-                              );
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -1180,15 +1097,13 @@ class _SubExecutiveRecruitmentPageState
                                 value: _selectedRecruitmentSemester,
                                 items: _availableSemesters,
                                 onChanged: (value) {
-                                  print('Recruitment Semester selected: $value');
                                   setState(() {
                                     _selectedRecruitmentSemester = value;
+                                    // Clear and reload questions when semester changes
+                                    if (_selectedDepartments.isNotEmpty) {
+                                      _loadQuestionsForAllSelectedDepartments();
+                                    }
                                   });
-                                  // Load questions after setState completes
-                                  if (_selectedDepartments.isNotEmpty && value != null) {
-                                    print('Departments already selected: $_selectedDepartments');
-                                    _loadQuestionsForAllSelectedDepartments();
-                                  }
                                 },
                                 icon: Icons.calendar_today_rounded,
                               ),
