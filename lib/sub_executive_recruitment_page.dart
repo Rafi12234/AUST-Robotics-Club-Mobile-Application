@@ -53,48 +53,9 @@ class _SubExecutiveRecruitmentPageState
   String? _selectedRecruitmentSemester;
   bool _isAustRcMember = false;
 
-  // Available Departments for Sub Executive
-  final List<String> _departmentOptions = [
-    'Administration',
-    'Graphics Design',
-    'Event Management',
-    'Content Writing & Social Media',
-    'Research and Development',
-    'Public Relation',
-    'Software Development',
-  ];
-
-  // Map display names to Firebase collection names (if different)
-  final Map<String, String> _departmentFirebaseNames = {
-    'Administration': 'Administration',
-    'Graphics Design': 'Graphics Design',
-    'Event Management': 'Event Management',
-    'Content Writing & Social Media': 'Content Writing & Social Media',
-    'Research and Development': 'Research and Development',
-    'Public Relation': 'Public Relation',
-    'Software Development': 'Software Development ', // Firebase has trailing space
-  };
-
-  // Department icons and colors
-  final Map<String, IconData> _departmentIcons = {
-    'Administration': Icons.admin_panel_settings_rounded,
-    'Graphics Design': Icons.palette_rounded,
-    'Event Management': Icons.event_rounded,
-    'Content Writing & Social Media': Icons.edit_note_rounded,
-    'Research and Development': Icons.science_rounded,
-    'Public Relation': Icons.people_rounded,
-    'Software Development': Icons.code_rounded,
-  };
-
-  final Map<String, List<Color>> _departmentGradients = {
-    'Administration': [const Color(0xFF6A1B9A), const Color(0xFF8E24AA)],
-    'Graphics Design': [const Color(0xFFE91E63), const Color(0xFFFF5722)],
-    'Event Management': [const Color(0xFF2196F3), const Color(0xFF00BCD4)],
-    'Content Writing & Social Media': [const Color(0xFF4CAF50), const Color(0xFF8BC34A)],
-    'Research and Development': [const Color(0xFF3F51B5), const Color(0xFF673AB7)],
-    'Public Relation': [const Color(0xFFFF9800), const Color(0xFFFFC107)],
-    'Software Development': [const Color(0xFF00BCD4), const Color(0xFF009688)],
-  };
+  // Available Departments for Sub Executive - loaded dynamically from Firebase
+  List<String> _departmentOptions = [];
+  bool _isLoadingDepartments = false;
 
   List<String> _selectedDepartments = [];
   List<String> _availableSemesters = [];
@@ -111,6 +72,42 @@ class _SubExecutiveRecruitmentPageState
   bool _isFormAccessible = false;
   bool _isLoadingQuestions = false;
   String _accessMessage = '';
+
+  // Default department icons and colors (for departments that might not have predefined styles)
+  IconData _getDepartmentIcon(String department) {
+    final Map<String, IconData> icons = {
+      'Administration': Icons.admin_panel_settings_rounded,
+      'Graphics Design': Icons.palette_rounded,
+      'Event Management': Icons.event_rounded,
+      'Content Writing & Social Media': Icons.edit_note_rounded,
+      'Research and Development': Icons.science_rounded,
+      'Public Relation': Icons.people_rounded,
+      'Software Development': Icons.code_rounded,
+    };
+    return icons[department] ?? Icons.work_rounded;
+  }
+
+  List<Color> _getDepartmentGradient(String department) {
+    final Map<String, List<Color>> gradients = {
+      'Administration': [const Color(0xFF6A1B9A), const Color(0xFF8E24AA)],
+      'Graphics Design': [const Color(0xFFE91E63), const Color(0xFFFF5722)],
+      'Event Management': [const Color(0xFF2196F3), const Color(0xFF00BCD4)],
+      'Content Writing & Social Media': [const Color(0xFF4CAF50), const Color(0xFF8BC34A)],
+      'Research and Development': [const Color(0xFF3F51B5), const Color(0xFF673AB7)],
+      'Public Relation': [const Color(0xFFFF9800), const Color(0xFFFFC107)],
+      'Software Development': [const Color(0xFF00BCD4), const Color(0xFF009688)],
+    };
+    // Generate a gradient based on department name hash if not predefined
+    if (!gradients.containsKey(department)) {
+      final hash = department.hashCode;
+      final hue = (hash % 360).abs().toDouble();
+      return [
+        HSLColor.fromAHSL(1, hue, 0.7, 0.4).toColor(),
+        HSLColor.fromAHSL(1, (hue + 30) % 360, 0.7, 0.5).toColor(),
+      ];
+    }
+    return gradients[department]!;
+  }
 
   final List<String> _semesterOptions = [
     '1.1', '1.2', '2.1', '2.2', '3.1', '3.2', '4.1', '4.2'
@@ -266,17 +263,79 @@ class _SubExecutiveRecruitmentPageState
     }
   }
 
+  Future<void> _loadDepartmentsForSemester(String semester) async {
+    setState(() {
+      _isLoadingDepartments = true;
+      _departmentOptions = [];
+      _selectedDepartments = [];
+      // Dispose old question controllers
+      for (var questions in _departmentQuestions.values) {
+        for (var q in questions) {
+          q.dispose();
+        }
+      }
+      _departmentQuestions.clear();
+    });
+
+    try {
+      // Get the semester document to read the departments array
+      final semesterDoc = await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(semester)
+          .get();
+
+      List<String> departments = [];
+
+      if (semesterDoc.exists) {
+        final data = semesterDoc.data();
+        if (data != null && data['departments'] != null) {
+          // Get departments from the stored array
+          departments = List<String>.from(data['departments']);
+        }
+      }
+
+      // Sort departments alphabetically
+      departments.sort();
+
+      setState(() {
+        _departmentOptions = departments;
+        _isLoadingDepartments = false;
+      });
+
+      if (departments.isEmpty && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('No departments available for this semester'),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoadingDepartments = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading departments: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _loadQuestionsForDepartment(String department) async {
     if (_selectedRecruitmentSemester == null) return;
 
     try {
-      // Get the Firebase collection name (may differ from display name)
-      final firebaseDeptName = _departmentFirebaseNames[department] ?? department;
-      
+      // Use department name directly as collection name
       final questionsSnapshot = await FirebaseFirestore.instance
           .collection('Sub-Executive_Recruitment')
           .doc(_selectedRecruitmentSemester!)
-          .collection(firebaseDeptName)
+          .collection(department)
           .get();
 
       List<DepartmentQuestion> questions = [];
@@ -518,7 +577,7 @@ class _SubExecutiveRecruitmentPageState
                       itemBuilder: (context, index) {
                         final dept = _departmentOptions[index];
                         final isSelected = tempSelected.contains(dept);
-                        final gradientColors = _departmentGradients[dept] ?? [_primaryColor, _secondaryColor];
+                        final gradientColors = _getDepartmentGradient(dept);
 
                         return TweenAnimationBuilder<double>(
                           duration: Duration(milliseconds: 200 + (index * 50)),
@@ -583,7 +642,7 @@ class _SubExecutiveRecruitmentPageState
                                           borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                                         ),
                                         child: Icon(
-                                          _departmentIcons[dept] ?? Icons.business,
+                                          _getDepartmentIcon(dept),
                                           color: isSelected ? Colors.white : gradientColors[0],
                                           size: SizeConfig.screenWidth * 0.06,
                                         ),
@@ -1119,11 +1178,11 @@ class _SubExecutiveRecruitmentPageState
                                 onChanged: (value) {
                                   setState(() {
                                     _selectedRecruitmentSemester = value;
-                                    // Clear and reload questions when semester changes
-                                    if (_selectedDepartments.isNotEmpty) {
-                                      _loadQuestionsForAllSelectedDepartments();
-                                    }
                                   });
+                                  // Load departments for the selected semester
+                                  if (value != null) {
+                                    _loadDepartmentsForSemester(value);
+                                  }
                                 },
                                 icon: Icons.calendar_today_rounded,
                               ),
@@ -1237,6 +1296,95 @@ class _SubExecutiveRecruitmentPageState
   }
 
   Widget _buildDepartmentSelectionCard() {
+    // Show message if no recruitment semester selected
+    if (_selectedRecruitmentSemester == null) {
+      return _buildAnimatedCard(
+        delay: 450,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Which departments are you interested in?',
+              style: TextStyle(
+                fontSize: SizeConfig.screenWidth * 0.038,
+                fontWeight: FontWeight.bold,
+                color: _primaryColor,
+              ),
+            ),
+            SizedBox(height: SizeConfig.screenHeight * 0.015),
+            _buildInfoBox(
+              'Please select a recruitment semester first to see available departments.',
+              Icons.info_outline_rounded,
+              Colors.orange,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Show loading state
+    if (_isLoadingDepartments) {
+      return _buildAnimatedCard(
+        delay: 450,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Which departments are you interested in?',
+              style: TextStyle(
+                fontSize: SizeConfig.screenWidth * 0.038,
+                fontWeight: FontWeight.bold,
+                color: _primaryColor,
+              ),
+            ),
+            SizedBox(height: SizeConfig.screenHeight * 0.02),
+            Center(
+              child: Padding(
+                padding: EdgeInsets.all(SizeConfig.screenWidth * 0.04),
+                child: Column(
+                  children: [
+                    CircularProgressIndicator(color: _primaryColor),
+                    SizedBox(height: SizeConfig.screenHeight * 0.015),
+                    Text(
+                      'Loading departments...',
+                      style: TextStyle(
+                        color: _primaryColor,
+                        fontSize: SizeConfig.screenWidth * 0.035,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Show message if no departments available
+    if (_departmentOptions.isEmpty) {
+      return _buildAnimatedCard(
+        delay: 450,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Which departments are you interested in?',
+              style: TextStyle(
+                fontSize: SizeConfig.screenWidth * 0.038,
+                fontWeight: FontWeight.bold,
+                color: _primaryColor,
+              ),
+            ),
+            SizedBox(height: SizeConfig.screenHeight * 0.015),
+            _buildWarningBox(
+              'No departments available for $_selectedRecruitmentSemester. Please contact the admin or select a different semester.',
+            ),
+          ],
+        ),
+      );
+    }
+
     return _buildAnimatedCard(
       delay: 450,
       child: Column(
@@ -1347,7 +1495,7 @@ class _SubExecutiveRecruitmentPageState
               spacing: SizeConfig.screenWidth * 0.02,
               runSpacing: SizeConfig.screenHeight * 0.01,
               children: _selectedDepartments.map((dept) {
-                final gradientColors = _departmentGradients[dept] ?? [_primaryColor, _secondaryColor];
+                final gradientColors = _getDepartmentGradient(dept);
                 return TweenAnimationBuilder<double>(
                   duration: const Duration(milliseconds: 300),
                   tween: Tween(begin: 0.0, end: 1.0),
@@ -1377,7 +1525,7 @@ class _SubExecutiveRecruitmentPageState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          _departmentIcons[dept] ?? Icons.business,
+                          _getDepartmentIcon(dept),
                           color: Colors.white,
                           size: SizeConfig.screenWidth * 0.04,
                         ),
@@ -1483,8 +1631,7 @@ class _SubExecutiveRecruitmentPageState
                 ),
                 indicator: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: _departmentGradients[_selectedDepartments[_currentDepartmentTabIndex]] ??
-                        [_primaryColor, _secondaryColor],
+                    colors: _getDepartmentGradient(_selectedDepartments[_currentDepartmentTabIndex]),
                   ),
                   borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.025),
                 ),
@@ -1498,7 +1645,7 @@ class _SubExecutiveRecruitmentPageState
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            _departmentIcons[dept] ?? Icons.business,
+                            _getDepartmentIcon(dept),
                             size: SizeConfig.screenWidth * 0.04,
                           ),
                           SizedBox(width: SizeConfig.screenWidth * 0.015),
@@ -1547,7 +1694,7 @@ class _SubExecutiveRecruitmentPageState
 
   Widget _buildQuestionsForDepartment(String department) {
     final questions = _departmentQuestions[department] ?? [];
-    final gradientColors = _departmentGradients[department] ?? [_primaryColor, _secondaryColor];
+    final gradientColors = _getDepartmentGradient(department);
 
     if (questions.isEmpty) {
       return _buildInfoBox(
@@ -1579,7 +1726,7 @@ class _SubExecutiveRecruitmentPageState
                   borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 0.02),
                 ),
                 child: Icon(
-                  _departmentIcons[department] ?? Icons.business,
+                  _getDepartmentIcon(department),
                   color: Colors.white,
                   size: SizeConfig.screenWidth * 0.05,
                 ),
