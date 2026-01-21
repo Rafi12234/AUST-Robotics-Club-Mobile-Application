@@ -6792,7 +6792,7 @@ class _SubExecExportButton extends StatelessWidget {
       final snapshot = await FirebaseFirestore.instance
           .collection('Sub-Executive_Recruitment')
           .doc(semesterName)
-          .collection('Applicants')
+          .collection('Members')
           .get();
 
       final applicants = snapshot.docs.map((doc) => doc.data()).toList();
