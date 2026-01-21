@@ -5258,6 +5258,17 @@ class _SubExecutiveApplicantsPageState extends State<SubExecutiveApplicantsPage>
 // SUB EXEC CSV EXPORT SERVICE
 // ============================================
 class SubExecCSVExportService {
+  // Firebase name mapping (same as in recruitment page)
+  static final Map<String, String> _departmentFirebaseNames = {
+    'Administration': 'Administration',
+    'Graphics Design': 'Graphics Design',
+    'Event Management': 'Event Management',
+    'Content Writing & Social Media': 'Content Writing & Social Media',
+    'Research and Development': 'Research and Development',
+    'Public Relation': 'Public Relation',
+    'Software Development': 'Software Development ', // Firebase has trailing space
+  };
+
   static Future<SubExecExportResult> exportApplicantsToCSV({
     required String semesterName,
     required List<Map<String, dynamic>> applicants,
@@ -5270,73 +5281,143 @@ class SubExecCSVExportService {
         builder: (context) => const _SubExecExportLoadingDialog(),
       );
 
-      List<List<dynamic>> csvData = [];
+      // First, collect all unique departments from applicants
+      Set<String> allDepartments = {};
+      for (var applicant in applicants) {
+        final depts = applicant['Interested_Departments'] ?? applicant['Selected_Departments'];
+        if (depts is List) {
+          allDepartments.addAll(depts.map((e) => e.toString()));
+        } else if (depts is String) {
+          allDepartments.add(depts);
+        }
+      }
 
-      csvData.add([
+      // Fetch all questions for each department
+      Map<String, Map<String, String>> departmentQuestions = {};
+      for (String dept in allDepartments) {
+        try {
+          final firebaseDeptName = _departmentFirebaseNames[dept] ?? dept;
+          final snapshot = await FirebaseFirestore.instance
+              .collection('Sub-Executive_Recruitment')
+              .doc(semesterName)
+              .collection(firebaseDeptName)
+              .get();
+
+          Map<String, String> questions = {};
+          for (var doc in snapshot.docs) {
+            final questionText = doc.data()['Question'] as String? ?? '';
+            if (questionText.isNotEmpty) {
+              questions[doc.id] = questionText;
+            }
+          }
+          departmentQuestions[dept] = questions;
+        } catch (e) {
+          debugPrint('Error loading questions for $dept: $e');
+          departmentQuestions[dept] = {};
+        }
+      }
+
+      // Build dynamic header based on departments and their questions
+      List<String> header = [
         'S/N',
         'Name',
         'Phone',
         'Edu Mail',
         'Student ID',
-        'Department',
-        'Semester',
+        'Academic Department',
+        'Current Semester',
         'AUSTRC ID',
         'Is AUSTRC Member',
-        'Selected Departments',
-        'Why Join Panel',
-        'Previous Club Experience',
-        'Event Experience',
-        'Robotics Projects',
+        'Applied Departments',
         'Image Link',
-      ]);
+      ];
+
+      // Add columns for each department's questions
+      // Sort departments for consistent column order
+      List<String> sortedDepts = allDepartments.toList()..sort();
+      
+      for (String dept in sortedDepts) {
+        final questions = departmentQuestions[dept] ?? {};
+        // Sort question IDs to ensure consistent order (Question 1, Question 2, etc.)
+        final sortedQuestionIds = questions.keys.toList()
+          ..sort((a, b) {
+            final numA = int.tryParse(a.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+            final numB = int.tryParse(b.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+            return numA.compareTo(numB);
+          });
+        
+        for (String qId in sortedQuestionIds) {
+          header.add('[$dept] ${questions[qId]}');
+        }
+      }
+
+      List<List<dynamic>> csvData = [header];
 
       int serialNumber = 1;
       for (var applicant in applicants) {
-        final departments = applicant['Selected_Departments'];
+        // Get departments this applicant selected
+        final selectedDepts = applicant['Interested_Departments'] ?? applicant['Selected_Departments'];
         String deptString = '';
-        if (departments is List) {
-          deptString = departments.join(', ');
-        } else if (departments is String) {
-          deptString = departments;
+        List<String> applicantDepts = [];
+        if (selectedDepts is List) {
+          applicantDepts = selectedDepts.map((e) => e.toString()).toList();
+          deptString = applicantDepts.join(', ');
+        } else if (selectedDepts is String) {
+          applicantDepts = [selectedDepts];
+          deptString = selectedDepts;
         }
 
-        // support multiple possible field names (keep compatible with submit form)
+        // Get basic info
         final phone = applicant['Phone_Number'] ?? applicant['Phone'] ?? '';
         final eduMail = applicant['Edu_Mail'] ?? applicant['EduMail'] ?? '';
-        final studentId =
-            applicant['Student_ID'] ?? applicant['StudentID'] ?? '';
-        final dept = applicant['Department'] ?? '';
-        final semesterField =
-            applicant['Semester'] ?? applicant['Recruitment_Semester'] ?? '';
-        final austId = applicant['AUST_RC_ID'] ??
-            applicant['AUSTRC_ID'] ??
-            applicant['AUSTRC_ID'] ??
-            '';
+        final studentId = applicant['Student_ID'] ?? applicant['StudentID'] ?? '';
+        final academicDept = applicant['Department'] ?? '';
+        final currentSemester = applicant['Semester'] ?? '';
+        final austId = applicant['AUST_RC_ID'] ?? applicant['AUSTRC_ID'] ?? '';
         final isMember = (applicant['Is_AUST_RC_Member'] == true) ||
-            (applicant['Is_AUSTRC_Member'] == true) ||
-            (applicant['Is_AUSTRC_Member'] == 'true');
-        final imageLink =
-            applicant['Image_Drive_Link'] ?? applicant['Image_Link'] ?? '';
+            (applicant['Is_AUSTRC_Member'] == true);
+        final imageLink = applicant['Image_Drive_Link'] ?? applicant['Image_Link'] ?? '';
 
-        csvData.add([
+        // Get department answers
+        final departmentAnswers = applicant['Department_Answers'] as Map<String, dynamic>? ?? {};
+
+        // Build row with basic info
+        List<dynamic> row = [
           serialNumber++,
           applicant['Name'] ?? '',
           phone,
           eduMail,
           studentId,
-          dept,
-          semesterField,
+          academicDept,
+          currentSemester,
           austId,
           isMember ? 'Yes' : 'No',
           deptString,
-          applicant['Why_Join_Panel'] ?? '',
-          applicant['Previous_Club_Experience'] ?? '',
-          applicant['Event_Management_Experience'] ??
-              applicant['Event_Experience'] ??
-              '',
-          applicant['Robotics_Projects'] ?? '',
           imageLink,
-        ]);
+        ];
+
+        // Add answers for each department's questions
+        for (String dept in sortedDepts) {
+          final questions = departmentQuestions[dept] ?? {};
+          final sortedQuestionIds = questions.keys.toList()
+            ..sort((a, b) {
+              final numA = int.tryParse(a.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+              final numB = int.tryParse(b.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+              return numA.compareTo(numB);
+            });
+          
+          for (String qId in sortedQuestionIds) {
+            // Check if applicant selected this department and has answer
+            if (applicantDepts.contains(dept)) {
+              final deptAnswers = departmentAnswers[dept] as Map<String, dynamic>? ?? {};
+              row.add(deptAnswers[qId]?.toString() ?? '');
+            } else {
+              row.add('N/A'); // Applicant didn't select this department
+            }
+          }
+        }
+
+        csvData.add(row);
       }
 
       String csv = const ListToCsvConverter().convert(csvData);
@@ -5890,7 +5971,7 @@ class _SubExecApplicantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final departments = data['Selected_Departments'];
+    final departments = data['Interested_Departments'] ?? data['Selected_Departments'];
     String deptString = '';
     if (departments is List) {
       deptString = departments.join(', ');
@@ -6057,7 +6138,10 @@ class _SubExecApplicantCard extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _SubExecApplicantDetailsSheet(data: data),
+      builder: (context) => _SubExecApplicantDetailsSheet(
+        data: data,
+        semesterName: semesterName,
+      ),
     );
   }
 }
@@ -6065,14 +6149,93 @@ class _SubExecApplicantCard extends StatelessWidget {
 // ============================================
 // SUB EXEC APPLICANT DETAILS SHEET
 // ============================================
-class _SubExecApplicantDetailsSheet extends StatelessWidget {
+class _SubExecApplicantDetailsSheet extends StatefulWidget {
   final Map<String, dynamic> data;
+  final String semesterName;
 
-  const _SubExecApplicantDetailsSheet({required this.data});
+  const _SubExecApplicantDetailsSheet({
+    required this.data,
+    required this.semesterName,
+  });
+
+  @override
+  State<_SubExecApplicantDetailsSheet> createState() =>
+      _SubExecApplicantDetailsSheetState();
+}
+
+class _SubExecApplicantDetailsSheetState
+    extends State<_SubExecApplicantDetailsSheet> {
+  // Map to store fetched questions: departmentName -> {questionId -> questionText}
+  Map<String, Map<String, String>> _departmentQuestions = {};
+  bool _isLoadingQuestions = true;
+
+  // Firebase name mapping (same as in recruitment page)
+  final Map<String, String> _departmentFirebaseNames = {
+    'Administration': 'Administration',
+    'Graphics Design': 'Graphics Design',
+    'Event Management': 'Event Management',
+    'Content Writing & Social Media': 'Content Writing & Social Media',
+    'Research and Development': 'Research and Development',
+    'Public Relation': 'Public Relation',
+    'Software Development': 'Software Development ', // Firebase has trailing space
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDepartmentQuestions();
+  }
+
+  Future<void> _loadDepartmentQuestions() async {
+    final departments = widget.data['Interested_Departments'] ?? widget.data['Selected_Departments'];
+    if (departments == null) {
+      setState(() => _isLoadingQuestions = false);
+      return;
+    }
+
+    List<String> deptList = [];
+    if (departments is List) {
+      deptList = departments.map((e) => e.toString()).toList();
+    } else if (departments is String) {
+      deptList = [departments];
+    }
+
+    Map<String, Map<String, String>> questionsMap = {};
+
+    for (String dept in deptList) {
+      try {
+        final firebaseDeptName = _departmentFirebaseNames[dept] ?? dept;
+        final snapshot = await FirebaseFirestore.instance
+            .collection('Sub-Executive_Recruitment')
+            .doc(widget.semesterName)
+            .collection(firebaseDeptName)
+            .get();
+
+        Map<String, String> questions = {};
+        for (var doc in snapshot.docs) {
+          final questionText = doc.data()['Question'] as String? ?? '';
+          if (questionText.isNotEmpty) {
+            questions[doc.id] = questionText;
+          }
+        }
+        questionsMap[dept] = questions;
+      } catch (e) {
+        debugPrint('Error loading questions for $dept: $e');
+        questionsMap[dept] = {};
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _departmentQuestions = questionsMap;
+        _isLoadingQuestions = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final departments = data['Selected_Departments'];
+    final departments = widget.data['Interested_Departments'] ?? widget.data['Selected_Departments'];
     String deptString = '';
     if (departments is List) {
       deptString = departments.join(', ');
@@ -6133,7 +6296,7 @@ class _SubExecApplicantDetailsSheet extends StatelessWidget {
                     const SizedBox(height: 16),
                     Center(
                       child: Text(
-                        data['Name'] ?? 'Unknown',
+                        widget.data['Name'] ?? 'Unknown',
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
@@ -6147,19 +6310,19 @@ class _SubExecApplicantDetailsSheet extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 6),
                         decoration: BoxDecoration(
-                          color: data['Is_AUSTRC_Member'] == true
+                          color: (widget.data['Is_AUST_RC_Member'] == true || widget.data['Is_AUSTRC_Member'] == true)
                               ? kGreenLight.withOpacity(0.15)
                               : Colors.grey.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          data['Is_AUSTRC_Member'] == true
+                          (widget.data['Is_AUST_RC_Member'] == true || widget.data['Is_AUSTRC_Member'] == true)
                               ? 'AUSTRC Member'
                               : 'Non-Member',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: data['Is_AUSTRC_Member'] == true
+                            color: (widget.data['Is_AUST_RC_Member'] == true || widget.data['Is_AUSTRC_Member'] == true)
                                 ? kGreenMain
                                 : Colors.grey[600],
                           ),
@@ -6170,21 +6333,21 @@ class _SubExecApplicantDetailsSheet extends StatelessWidget {
                     _buildSectionTitle('Personal Information'),
                     Builder(builder: (context) {
                       final austId =
-                          data['AUST_RC_ID'] ?? data['AUSTRC_ID'] ?? '';
+                          widget.data['AUST_RC_ID'] ?? widget.data['AUSTRC_ID'] ?? '';
                       final List<Widget> personalDetails = [
-                        _buildDetailRow('Phone', data['Phone'] ?? ''),
+                        _buildDetailRow('Phone', widget.data['Phone_Number'] ?? widget.data['Phone'] ?? ''),
                         _buildDetailRow('Edu Mail',
-                            data['Edu_Mail'] ?? data['EduMail'] ?? ''),
+                            widget.data['Edu_Mail'] ?? widget.data['EduMail'] ?? ''),
                         _buildDetailRow('Student ID',
-                            data['Student_ID'] ?? data['StudentID'] ?? ''),
-                        _buildDetailRow('Department', data['Department'] ?? ''),
+                            widget.data['Student_ID'] ?? widget.data['StudentID'] ?? ''),
+                        _buildDetailRow('Department', widget.data['Department'] ?? ''),
                         _buildDetailRow(
                             'Semester',
-                            data['Semester'] ??
-                                data['Recruitment_Semester'] ??
+                            widget.data['Semester'] ??
+                                widget.data['Recruitment_Semester'] ??
                                 ''),
                       ];
-                      if (austId.toString().isNotEmpty) {
+                      if (austId.toString().isNotEmpty && austId != 'N/A') {
                         personalDetails
                             .add(_buildDetailRow('AUSTRC ID', austId));
                       }
@@ -6195,32 +6358,42 @@ class _SubExecApplicantDetailsSheet extends StatelessWidget {
                     _buildDetailCard([
                       _buildDetailRow('Departments', deptString),
                     ]),
+                    
+                    // Dynamic Department Questions and Answers Section
                     const SizedBox(height: 24),
-                    _buildSectionTitle('Why Join Panel'),
-                    _buildTextCard(data['Why_Join_Panel'] ?? 'Not provided'),
-                    if (data['Previous_Club_Experience'] != null &&
-                        data['Previous_Club_Experience']
+                    _buildSectionTitle('Department Questions & Answers'),
+                    _buildDepartmentAnswersSection(),
+                    
+                    // Legacy fields (if any exist)
+                    if (widget.data['Why_Join_Panel'] != null &&
+                        widget.data['Why_Join_Panel'].toString().isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('Why Join Panel'),
+                      _buildTextCard(widget.data['Why_Join_Panel']),
+                    ],
+                    if (widget.data['Previous_Club_Experience'] != null &&
+                        widget.data['Previous_Club_Experience']
                             .toString()
                             .isNotEmpty) ...[
                       const SizedBox(height: 24),
                       _buildSectionTitle('Previous Club Experience'),
-                      _buildTextCard(data['Previous_Club_Experience']),
+                      _buildTextCard(widget.data['Previous_Club_Experience']),
                     ],
-                    if (data['Event_Experience'] != null &&
-                        data['Event_Experience'].toString().isNotEmpty) ...[
+                    if (widget.data['Event_Experience'] != null &&
+                        widget.data['Event_Experience'].toString().isNotEmpty) ...[
                       const SizedBox(height: 24),
                       _buildSectionTitle('Event Experience'),
-                      _buildTextCard(data['Event_Experience']),
+                      _buildTextCard(widget.data['Event_Experience']),
                     ],
-                    if (data['Robotics_Projects'] != null &&
-                        data['Robotics_Projects'].toString().isNotEmpty) ...[
+                    if (widget.data['Robotics_Projects'] != null &&
+                        widget.data['Robotics_Projects'].toString().isNotEmpty) ...[
                       const SizedBox(height: 24),
                       _buildSectionTitle('Robotics Projects'),
-                      _buildTextCard(data['Robotics_Projects']),
+                      _buildTextCard(widget.data['Robotics_Projects']),
                     ],
                     Builder(builder: (context) {
                       final imageLink =
-                          data['Image_Drive_Link'] ?? data['Image_Link'] ?? '';
+                          widget.data['Image_Drive_Link'] ?? widget.data['Image_Link'] ?? '';
                       if (imageLink.toString().isNotEmpty) {
                         return Column(
                           children: [
@@ -6269,6 +6442,200 @@ class _SubExecApplicantDetailsSheet extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDepartmentAnswersSection() {
+    if (_isLoadingQuestions) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        ),
+        child: const Center(
+          child: Column(
+            children: [
+              CircularProgressIndicator(color: kAccentPurple),
+              SizedBox(height: 12),
+              Text('Loading questions...', style: TextStyle(color: Colors.grey)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final departmentAnswers = widget.data['Department_Answers'] as Map<String, dynamic>?;
+    
+    if (departmentAnswers == null || departmentAnswers.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        ),
+        child: const Text(
+          'No department-specific answers available.',
+          style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+        ),
+      );
+    }
+
+    // Department colors for visual distinction
+    final Map<String, Color> departmentColors = {
+      'Administration': const Color(0xFF6A1B9A),
+      'Graphics Design': const Color(0xFFE91E63),
+      'Event Management': const Color(0xFF2196F3),
+      'Content Writing & Social Media': const Color(0xFF4CAF50),
+      'Research and Development': const Color(0xFF3F51B5),
+      'Public Relation': const Color(0xFFFF9800),
+      'Software Development': const Color(0xFF00BCD4),
+    };
+
+    return Column(
+      children: departmentAnswers.entries.map((deptEntry) {
+        final deptName = deptEntry.key;
+        final answers = deptEntry.value as Map<String, dynamic>?;
+        final questions = _departmentQuestions[deptName] ?? {};
+        final deptColor = departmentColors[deptName] ?? kAccentPurple;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: deptColor.withOpacity(0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: deptColor.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Department Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [deptColor.withOpacity(0.1), deptColor.withOpacity(0.05)],
+                  ),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: deptColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.category_rounded, color: Colors.white, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        deptName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: deptColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Questions and Answers
+              if (answers != null && answers.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: answers.entries.map((qaEntry) {
+                      final questionId = qaEntry.key;
+                      final answer = qaEntry.value?.toString() ?? '';
+                      final questionText = questions[questionId] ?? questionId;
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: deptColor.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    questionId,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: deptColor,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              questionText,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                              ),
+                              child: Text(
+                                answer.isNotEmpty ? answer : 'No answer provided',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: answer.isNotEmpty ? kGreenDark : Colors.grey,
+                                  fontStyle: answer.isEmpty ? FontStyle.italic : FontStyle.normal,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                )
+              else
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'No answers provided for this department.',
+                    style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                  ),
+                ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 
