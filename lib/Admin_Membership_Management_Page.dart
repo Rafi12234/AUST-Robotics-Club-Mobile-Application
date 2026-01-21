@@ -4890,14 +4890,17 @@ class _SubExecutiveApplicantsPageState extends State<SubExecutiveApplicantsPage>
           ],
         ),
       ),
-      floatingActionButton: _selectedSemester != null
-          ? _SubExecBackToSemestersFAB(
+      floatingActionButton: _selectedSemester == null
+          ? _SubExecAddSemesterFAB(
+              controller: _fabController,
+              onSemesterCreated: () => _loadAvailableSemesters(),
+            )
+          : _SubExecBackToSemestersFAB(
               controller: _fabController,
               onTap: () {
                 setState(() => _selectedSemester = null);
               },
-            )
-          : null,
+            ),
     );
   }
 
@@ -5116,10 +5119,21 @@ class _SubExecutiveApplicantsPageState extends State<SubExecutiveApplicantsPage>
             index: index,
             onTap: () => setState(() => _selectedSemester = semester),
             onExport: () => _exportSemesterData(semester),
+            onManageDepartments: () => _showManageDepartmentsDialog(semester),
           );
         }),
         const SizedBox(height: 100),
       ],
+    );
+  }
+
+  void _showManageDepartmentsDialog(String semester) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _SubExecManageDepartmentsDialog(
+        semesterName: semester,
+      ),
     );
   }
 
@@ -5831,12 +5845,14 @@ class _SubExecSemesterTile extends StatelessWidget {
   final int index;
   final VoidCallback onTap;
   final VoidCallback onExport;
+  final VoidCallback? onManageDepartments;
 
   const _SubExecSemesterTile({
     required this.semester,
     required this.index,
     required this.onTap,
     required this.onExport,
+    this.onManageDepartments,
   });
 
   @override
@@ -5930,6 +5946,13 @@ class _SubExecSemesterTile extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (onManageDepartments != null)
+                        IconButton(
+                          onPressed: onManageDepartments,
+                          icon: const Icon(Icons.settings_rounded),
+                          color: Colors.grey[600],
+                          tooltip: 'Manage Departments',
+                        ),
                       IconButton(
                         onPressed: onExport,
                         icon: const Icon(Icons.download_rounded),
@@ -6877,3 +6900,1451 @@ class _SubExecBackToSemestersFAB extends StatelessWidget {
     );
   }
 }
+
+// ============================================
+// SUB EXEC ADD SEMESTER FAB
+// ============================================
+class _SubExecAddSemesterFAB extends StatelessWidget {
+  final AnimationController controller;
+  final VoidCallback onSemesterCreated;
+
+  const _SubExecAddSemesterFAB({
+    required this.controller,
+    required this.onSemesterCreated,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: CurvedAnimation(
+        parent: controller,
+        curve: Curves.elasticOut,
+      ),
+      child: FloatingActionButton.extended(
+        onPressed: () => _showCreateSemesterDialog(context),
+        backgroundColor: kAccentPurple,
+        icon: const Icon(Icons.add_rounded, color: Colors.white),
+        label: const Text(
+          'Add Semester',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCreateSemesterDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _SubExecCreateSemesterDialog(
+        onSemesterCreated: onSemesterCreated,
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXEC CREATE SEMESTER DIALOG
+// ============================================
+class _SubExecCreateSemesterDialog extends StatefulWidget {
+  final VoidCallback onSemesterCreated;
+
+  const _SubExecCreateSemesterDialog({required this.onSemesterCreated});
+
+  @override
+  State<_SubExecCreateSemesterDialog> createState() =>
+      _SubExecCreateSemesterDialogState();
+}
+
+class _SubExecCreateSemesterDialogState
+    extends State<_SubExecCreateSemesterDialog> {
+  final _semesterController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isCreating = false;
+
+  @override
+  void dispose() {
+    _semesterController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createSemester() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isCreating = true);
+
+    try {
+      final semesterName = _semesterController.text.trim();
+
+      // Check if semester already exists
+      final existingDoc = await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(semesterName)
+          .get();
+
+      if (existingDoc.exists) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Semester "$semesterName" already exists!'),
+              backgroundColor: kAccentRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+          setState(() => _isCreating = false);
+        }
+        return;
+      }
+
+      // Create semester document with initial data
+      await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(semesterName)
+          .set({
+        'createdAt': FieldValue.serverTimestamp(),
+        'semesterName': semesterName,
+      });
+
+      // Create empty Members collection by adding a placeholder doc (then delete it)
+      // This ensures the collection path exists
+      final placeholderRef = FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(semesterName)
+          .collection('Members')
+          .doc('_placeholder');
+      await placeholderRef.set({'_placeholder': true});
+      await placeholderRef.delete();
+
+      if (mounted) {
+        Navigator.pop(context);
+        widget.onSemesterCreated();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Semester "$semesterName" created successfully!'),
+            backgroundColor: kGreenDark,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+
+        // Show the department management dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => _SubExecManageDepartmentsDialog(
+            semesterName: semesterName,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error creating semester: $e'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+        setState(() => _isCreating = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          kAccentPurple.withOpacity(0.2),
+                          const Color(0xFF8B5CF6).withOpacity(0.2),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.calendar_month_rounded,
+                      color: kAccentPurple,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Create New Semester',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: kGreenDark,
+                          ),
+                        ),
+                        Text(
+                          'Add a recruitment semester',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              TextFormField(
+                controller: _semesterController,
+                decoration: InputDecoration(
+                  labelText: 'Semester Name',
+                  hintText: 'e.g., Spring 2026',
+                  prefixIcon:
+                      const Icon(Icons.edit_calendar, color: kAccentPurple),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide:
+                        const BorderSide(color: kAccentPurple, width: 2),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: kAccentRed, width: 2),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter semester name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isCreating ? null : () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: const BorderSide(color: kAccentPurple),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: kAccentPurple,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isCreating ? null : _createSemester,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kAccentPurple,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: _isCreating
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Create',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXEC MANAGE DEPARTMENTS DIALOG
+// ============================================
+class _SubExecManageDepartmentsDialog extends StatefulWidget {
+  final String semesterName;
+
+  const _SubExecManageDepartmentsDialog({required this.semesterName});
+
+  @override
+  State<_SubExecManageDepartmentsDialog> createState() =>
+      _SubExecManageDepartmentsDialogState();
+}
+
+class _SubExecManageDepartmentsDialogState
+    extends State<_SubExecManageDepartmentsDialog> {
+  List<Map<String, dynamic>> _departments = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDepartments();
+  }
+
+  Future<void> _loadDepartments() async {
+    try {
+      final semesterDoc = await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(widget.semesterName)
+          .get();
+
+      if (!semesterDoc.exists) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // Get all collections under this semester (except Members)
+      // We'll query for each potential department
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(widget.semesterName)
+          .get();
+
+      // Load departments from a stored list or scan collections
+      List<Map<String, dynamic>> departments = [];
+
+      // Try to get departments list from the semester document
+      final data = snapshot.data();
+      if (data != null && data['departments'] != null) {
+        final deptList = List<String>.from(data['departments']);
+        for (final dept in deptList) {
+          // Count questions in this department
+          final questionsSnapshot = await FirebaseFirestore.instance
+              .collection('Sub-Executive_Recruitment')
+              .doc(widget.semesterName)
+              .collection(dept)
+              .get();
+
+          departments.add({
+            'name': dept,
+            'questionCount': questionsSnapshot.docs.length,
+          });
+        }
+      }
+
+      setState(() {
+        _departments = departments;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading departments: $e'),
+            backgroundColor: kAccentRed,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showAddDepartmentDialog() {
+    final controller = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: kAccentPurple.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.category_rounded,
+                          color: kAccentPurple, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Add Department',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: kGreenDark,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    labelText: 'Department Name',
+                    hintText: 'e.g., Software Development',
+                    prefixIcon: const Icon(Icons.work_outline, color: kAccentPurple),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: kAccentPurple, width: 2),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter department name';
+                    }
+                    if (_departments.any((d) => d['name'] == value.trim())) {
+                      return 'Department already exists';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: const BorderSide(color: kAccentPurple),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancel',
+                            style: TextStyle(color: kAccentPurple, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            await _addDepartment(controller.text.trim());
+                            if (mounted) Navigator.pop(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kAccentPurple,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Add',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addDepartment(String departmentName) async {
+    try {
+      // Update the departments list in the semester document
+      await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(widget.semesterName)
+          .update({
+        'departments': FieldValue.arrayUnion([departmentName]),
+      });
+
+      // Create a placeholder in the department collection
+      final placeholderRef = FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(widget.semesterName)
+          .collection(departmentName)
+          .doc('_placeholder');
+      await placeholderRef.set({'_placeholder': true});
+      await placeholderRef.delete();
+
+      await _loadDepartments();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Department "$departmentName" added!'),
+            backgroundColor: kGreenDark,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error adding department: $e'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteDepartment(String departmentName) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete Department?'),
+        content: Text(
+            'Are you sure you want to delete "$departmentName"? This will also delete all questions in this department.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: kAccentRed),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      // Delete all questions in the department
+      final questionsSnapshot = await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(widget.semesterName)
+          .collection(departmentName)
+          .get();
+
+      for (final doc in questionsSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // Remove from departments list
+      await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(widget.semesterName)
+          .update({
+        'departments': FieldValue.arrayRemove([departmentName]),
+      });
+
+      await _loadDepartments();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Department "$departmentName" deleted!'),
+            backgroundColor: kGreenDark,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting department: $e'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showManageQuestionsDialog(String departmentName) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _SubExecManageQuestionsDialog(
+        semesterName: widget.semesterName,
+        departmentName: departmentName,
+        onQuestionsUpdated: _loadDepartments,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.7,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        kAccentPurple.withOpacity(0.2),
+                        const Color(0xFF8B5CF6).withOpacity(0.2),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.category_rounded,
+                      color: kAccentPurple, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Manage Departments',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: kGreenDark,
+                        ),
+                      ),
+                      Text(
+                        widget.semesterName,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: kAccentPurple),
+                    )
+                  : _departments.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.category_outlined,
+                                  size: 64, color: Colors.grey[300]),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No Departments Yet',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Add departments for applicants to select',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _departments.length,
+                          itemBuilder: (context, index) {
+                            final dept = _departments[index];
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                leading: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: kAccentPurple.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(Icons.work_rounded,
+                                      color: kAccentPurple, size: 22),
+                                ),
+                                title: Text(
+                                  dept['name'],
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                    color: kGreenDark,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  '${dept['questionCount']} question${dept['questionCount'] != 1 ? 's' : ''}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () =>
+                                          _showManageQuestionsDialog(dept['name']),
+                                      icon: const Icon(Icons.question_answer_rounded,
+                                          color: kAccentPurple, size: 22),
+                                      tooltip: 'Manage Questions',
+                                    ),
+                                    IconButton(
+                                      onPressed: () => _deleteDepartment(dept['name']),
+                                      icon: const Icon(Icons.delete_outline_rounded,
+                                          color: kAccentRed, size: 22),
+                                      tooltip: 'Delete Department',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _showAddDepartmentDialog,
+                icon: const Icon(Icons.add_rounded, color: Colors.white),
+                label: const Text(
+                  'Add Department',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kAccentPurple,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================
+// SUB EXEC MANAGE QUESTIONS DIALOG
+// ============================================
+class _SubExecManageQuestionsDialog extends StatefulWidget {
+  final String semesterName;
+  final String departmentName;
+  final VoidCallback onQuestionsUpdated;
+
+  const _SubExecManageQuestionsDialog({
+    required this.semesterName,
+    required this.departmentName,
+    required this.onQuestionsUpdated,
+  });
+
+  @override
+  State<_SubExecManageQuestionsDialog> createState() =>
+      _SubExecManageQuestionsDialogState();
+}
+
+class _SubExecManageQuestionsDialogState
+    extends State<_SubExecManageQuestionsDialog> {
+  List<Map<String, dynamic>> _questions = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuestions();
+  }
+
+  Future<void> _loadQuestions() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(widget.semesterName)
+          .collection(widget.departmentName)
+          .get();
+
+      final questions = snapshot.docs
+          .where((doc) => doc.id != '_placeholder')
+          .map((doc) => {
+                'id': doc.id,
+                'question': doc.data()['Question'] ?? '',
+              })
+          .toList();
+
+      // Sort by question number
+      questions.sort((a, b) {
+        final aNum = int.tryParse(a['id'].replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        final bNum = int.tryParse(b['id'].replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        return aNum.compareTo(bNum);
+      });
+
+      setState(() {
+        _questions = questions;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading questions: $e'),
+            backgroundColor: kAccentRed,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showAddQuestionDialog() {
+    final controller = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: kAccentPurple.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.help_outline_rounded,
+                          color: kAccentPurple, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Add Question',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: kGreenDark,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Question ${_questions.length + 1} for ${widget.departmentName}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: controller,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Question',
+                    hintText: 'Enter your question here...',
+                    alignLabelWithHint: true,
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.only(bottom: 50),
+                      child: Icon(Icons.question_mark_rounded, color: kAccentPurple),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: kAccentPurple, width: 2),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a question';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: const BorderSide(color: kAccentPurple),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancel',
+                            style: TextStyle(color: kAccentPurple, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            await _addQuestion(controller.text.trim());
+                            if (mounted) Navigator.pop(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kAccentPurple,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Add',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addQuestion(String question) async {
+    try {
+      final questionNumber = _questions.length + 1;
+      final questionId = 'Question $questionNumber';
+
+      await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(widget.semesterName)
+          .collection(widget.departmentName)
+          .doc(questionId)
+          .set({'Question': question});
+
+      await _loadQuestions();
+      widget.onQuestionsUpdated();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Question $questionNumber added!'),
+            backgroundColor: kGreenDark,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error adding question: $e'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showEditQuestionDialog(Map<String, dynamic> questionData) {
+    final controller = TextEditingController(text: questionData['question']);
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: kAccentPurple.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.edit_rounded,
+                          color: kAccentPurple, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Edit ${questionData['id']}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: kGreenDark,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: controller,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Question',
+                    alignLabelWithHint: true,
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.only(bottom: 50),
+                      child: Icon(Icons.question_mark_rounded, color: kAccentPurple),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: kAccentPurple, width: 2),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a question';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: const BorderSide(color: kAccentPurple),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancel',
+                            style: TextStyle(color: kAccentPurple, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            await _updateQuestion(
+                                questionData['id'], controller.text.trim());
+                            if (mounted) Navigator.pop(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kAccentPurple,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Update',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateQuestion(String questionId, String question) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(widget.semesterName)
+          .collection(widget.departmentName)
+          .doc(questionId)
+          .update({'Question': question});
+
+      await _loadQuestions();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$questionId updated!'),
+            backgroundColor: kGreenDark,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating question: $e'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteQuestion(String questionId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete Question?'),
+        content: Text('Are you sure you want to delete "$questionId"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: kAccentRed),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('Sub-Executive_Recruitment')
+          .doc(widget.semesterName)
+          .collection(widget.departmentName)
+          .doc(questionId)
+          .delete();
+
+      await _loadQuestions();
+      widget.onQuestionsUpdated();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$questionId deleted!'),
+            backgroundColor: kGreenDark,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting question: $e'),
+            backgroundColor: kAccentRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.7,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        kAccentPurple.withOpacity(0.2),
+                        const Color(0xFF8B5CF6).withOpacity(0.2),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.question_answer_rounded,
+                      color: kAccentPurple, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.departmentName,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: kGreenDark,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Manage Questions • ${widget.semesterName}',
+                        style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: kAccentPurple),
+                    )
+                  : _questions.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.help_outline_rounded,
+                                  size: 64, color: Colors.grey[300]),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No Questions Yet',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Add questions for applicants to answer',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _questions.length,
+                          itemBuilder: (context, index) {
+                            final question = _questions[index];
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                leading: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: kAccentPurple.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Q${index + 1}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        color: kAccentPurple,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                title: Text(
+                                  question['question'],
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    color: kGreenDark,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  question['id'],
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () =>
+                                          _showEditQuestionDialog(question),
+                                      icon: const Icon(Icons.edit_rounded,
+                                          color: kAccentPurple, size: 20),
+                                      tooltip: 'Edit Question',
+                                    ),
+                                    IconButton(
+                                      onPressed: () =>
+                                          _deleteQuestion(question['id']),
+                                      icon: const Icon(Icons.delete_outline_rounded,
+                                          color: kAccentRed, size: 20),
+                                      tooltip: 'Delete Question',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _showAddQuestionDialog,
+                icon: const Icon(Icons.add_rounded, color: Colors.white),
+                label: const Text(
+                  'Add Question',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kAccentPurple,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
