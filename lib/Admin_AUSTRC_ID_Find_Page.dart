@@ -138,7 +138,7 @@ If you did not request this information, please contact us immediately.
 
 Best Regards,
 AUST Robotics Club
-Administration Team
+Web and App Development Team
 ''');
 
     final Uri emailUri = Uri.parse('mailto:$eduMail?subject=$subject&body=$body');

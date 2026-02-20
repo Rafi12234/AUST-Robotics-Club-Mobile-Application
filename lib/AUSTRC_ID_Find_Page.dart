@@ -1056,24 +1056,24 @@ class _FormCard extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Edu Mail Field
+              // Email Field
               _CustomTextField(
                 controller: eduMailController,
                 focusNode: eduMailFocusNode,
-                label: 'Edu Mail',
-                hint: 'example@aust.edu',
+                label: 'Email',
+                hint: 'example@email.com',
                 icon: Icons.email_rounded,
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter your Edu Mail';
+                    return 'Please enter your Email';
                   }
                   final emailRegex = RegExp(
-                    r'^[a-zA-Z0-9._%+-]+@aust\.edu$',
+                    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
                     caseSensitive: false,
                   );
                   if (!emailRegex.hasMatch(value.trim())) {
-                    return 'Please enter a valid @aust.edu email';
+                    return 'Please enter a valid email';
                   }
                   return null;
                 },
